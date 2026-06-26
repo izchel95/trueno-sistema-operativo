@@ -177,6 +177,73 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
 .qty-row { display: flex; align-items: center; gap: 10px; }
 .qty-input { flex: 1; background: #141414; border: 1px solid #333; border-radius: 10px; color: #f5c842; font-size: 24px; font-weight: 800; padding: 10px 14px; outline: none; font-family: inherit; text-align: center; }
 .qty-input:focus { border-color: #f5c842; }
+
+/* ── Period pills ── */
+.period-pills { display:flex; gap:6px; margin-bottom:12px; }
+.period-pill { flex:1; padding:8px 4px; border:1px solid #2a2a2a; border-radius:10px; background:#141414; color:#666; font-size:13px; font-weight:600; cursor:pointer; text-align:center; transition:all 0.15s; }
+.period-pill.active { background:#f5c842; color:#0e0e0e; border-color:#f5c842; }
+
+/* ── Hour range ── */
+.hour-row { display:flex; align-items:center; gap:8px; margin-bottom:14px; font-size:13px; color:#555; }
+.hour-sel { background:#141414; border:1px solid #222; border-radius:8px; color:#f0ede8; font-size:13px; padding:7px 10px; outline:none; font-family:inherit; }
+
+/* ── Stats cards ── */
+.stat-row { display:flex; gap:8px; margin-bottom:10px; }
+.stat-card { flex:1; background:#141414; border:1px solid #1e1e1e; border-radius:12px; padding:12px; text-align:center; }
+.stat-icon { font-size:20px; }
+.stat-label { font-size:10px; color:#555; text-transform:uppercase; letter-spacing:0.6px; margin-top:4px; }
+.stat-val { font-size:16px; font-weight:800; color:#f5c842; margin-top:2px; }
+.stat-sub { font-size:10px; color:#444; margin-top:2px; }
+
+/* ── Top productos table ── */
+.top-table { width:100%; border-collapse:collapse; font-size:12px; }
+.top-table th { color:#555; font-size:10px; text-transform:uppercase; letter-spacing:0.6px; padding:6px 4px; text-align:left; border-bottom:1px solid #1a1a1a; }
+.top-table td { padding:8px 4px; border-bottom:1px solid #111; }
+.top-table tr:last-child td { border-bottom:none; }
+.top-rank { font-size:14px; width:24px; }
+.top-name { color:#f0ede8; font-weight:600; }
+.top-sub { color:#444; font-size:11px; }
+.top-cnt { color:#6fa6cf; font-weight:700; text-align:right; }
+.top-rev { color:#f5c842; font-weight:700; text-align:right; }
+
+/* ── Comparativa ── */
+.comp-card { background:#141414; border:1px solid #1e1e1e; border-radius:12px; padding:12px 14px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; }
+.comp-label { font-size:12px; color:#555; }
+.comp-val { font-size:15px; font-weight:700; }
+.comp-delta { font-size:13px; font-weight:700; }
+.up { color:#6fcf6f; } .down { color:#cf6f6f; } .flat { color:#555; }
+
+/* ── Stock bajo ── */
+.stock-bajo-banner { background:#1a0e00; border:1px solid #3a2200; border-radius:12px; padding:12px 14px; margin-bottom:14px; }
+.stock-bajo-title { font-size:13px; font-weight:700; color:#f5a842; margin-bottom:8px; }
+.stock-bajo-item { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid #1e1400; font-size:12px; }
+.stock-bajo-item:last-child { border-bottom:none; }
+.sbz { color:#cf6f6f; font-weight:700; }
+.sbl { color:#f5c842; }
+
+/* ── Historial ── */
+.hist-filters { background:#141414; border:1px solid #1e1e1e; border-radius:12px; padding:12px; margin-bottom:12px; }
+.hist-label { font-size:10px; color:#555; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px; }
+.hist-date-row { display:flex; gap:8px; align-items:center; margin-bottom:10px; font-size:12px; color:#555; }
+.hist-date-row input[type=date], .hist-date-row select { flex:1; background:#0e0e0e; border:1px solid #222; border-radius:8px; color:#f0ede8; font-size:12px; padding:8px 10px; outline:none; font-family:inherit; }
+.hist-search-row { display:flex; gap:8px; align-items:center; }
+.hist-search-row input { flex:1; background:#0e0e0e; border:1px solid #222; border-radius:8px; color:#f0ede8; font-size:13px; padding:9px 12px; outline:none; font-family:inherit; }
+.hist-search-row select { background:#0e0e0e; border:1px solid #222; border-radius:8px; color:#f0ede8; font-size:12px; padding:9px 10px; outline:none; font-family:inherit; }
+.hist-count { font-size:12px; color:#555; margin-bottom:8px; }
+
+/* ── Registros ── */
+.reg-tabs { display:flex; gap:6px; margin-bottom:12px; }
+.reg-tab { flex:1; padding:8px 4px; border:1px solid #2a2a2a; border-radius:10px; background:#141414; color:#666; font-size:12px; cursor:pointer; text-align:center; transition:all 0.15s; }
+.reg-tab.active { background:#1a1600; border-color:#f5c842; color:#f5c842; font-weight:700; }
+.reg-card { background:#141414; border:1px solid #1e1e1e; border-radius:12px; padding:12px; margin-bottom:8px; cursor:pointer; }
+.reg-card:active { background:#1a1a1a; }
+.reg-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.reg-fecha { font-size:13px; font-weight:700; }
+.reg-enc { font-size:12px; color:#555; }
+.reg-estado { font-size:12px; }
+.reg-detail { display:none; background:#0e0e0e; border-radius:8px; padding:10px; margin-top:8px; font-size:12px; line-height:1.8; color:#888; }
+.reg-detail.open { display:block; }
+.reg-detail b { color:#f0ede8; }
 </style>
 </head>
 <body>
@@ -283,38 +350,113 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
       <button class="logout-btn" onclick="cerrarAdmin()">Salir 🔓</button>
     </div>
     <div class="admin-tabs">
-      <div class="admin-tab active" onclick="setAdminTab('reporte')">📊 Reporte</div>
-      <div class="admin-tab" onclick="setAdminTab('inventario')">📦 Inventario</div>
-      <div class="admin-tab" onclick="setAdminTab('productos')">➕ Productos</div>
+      <div class="admin-tab active" onclick="setAdminTab('reporte')">📊 Rep.</div>
+      <div class="admin-tab" onclick="setAdminTab('historial')">🔍 Hist.</div>
+      <div class="admin-tab" onclick="setAdminTab('registros')">📋 Reg.</div>
+      <div class="admin-tab" onclick="setAdminTab('inventario')">📦 Inv.</div>
+      <div class="admin-tab" onclick="setAdminTab('productos')">➕ Prod.</div>
     </div>
   </div>
 
   <!-- Reporte -->
   <div class="admin-panel-inner" id="apanel-reporte">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 12px">
-      <div>
-        <div style="font-size:11px;color:#555" id="rep-semana-label">Semana actual</div>
-        <div style="font-size:18px;font-weight:700" id="rep-rango"></div>
-      </div>
+    <!-- Period selector -->
+    <div class="period-pills">
+      <button class="period-pill" id="pill-dia" onclick="setPeriod('dia')">Día</button>
+      <button class="period-pill active" id="pill-semana" onclick="setPeriod('semana')">Semana</button>
+      <button class="period-pill" id="pill-mes" onclick="setPeriod('mes')">Mes</button>
     </div>
-    <!-- Category filter in report -->
+    <!-- Hour range -->
+    <div class="hour-row">
+      <span>De</span>
+      <select class="hour-sel" id="rep-h-from" onchange="renderReporte()"></select>
+      <span>a</span>
+      <select class="hour-sel" id="rep-h-to" onchange="renderReporte()"></select>
+    </div>
+    <!-- Period nav -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <button class="btn-outline" style="width:auto;padding:6px 14px;margin:0;font-size:20px" onclick="navPeriod(-1)">‹</button>
+      <div style="text-align:center">
+        <div style="font-size:11px;color:#555" id="rep-period-label"></div>
+        <div style="font-size:15px;font-weight:700" id="rep-rango"></div>
+      </div>
+      <button class="btn-outline" id="btn-period-next" style="width:auto;padding:6px 14px;margin:0;font-size:20px" onclick="navPeriod(1)">›</button>
+    </div>
+    <!-- Category filter -->
     <div class="filter-row" id="rep-cat-filters" style="margin-bottom:14px"></div>
-
+    <!-- KPIs -->
     <div class="kpi-grid">
       <div class="kpi-card"><div class="kpi-label">Total vendido</div><div class="kpi-val c-gold" id="rep-total">$0</div><div class="kpi-sub" id="rep-count">0 piezas</div></div>
       <div class="kpi-card"><div class="kpi-label">De Trueno</div><div class="kpi-val c-green" id="rep-trueno">$0</div><div class="kpi-sub">Comisión</div></div>
       <div class="kpi-card" style="grid-column:1/-1"><div class="kpi-label">Del proveedor (CLIP)</div><div class="kpi-val c-blue" id="rep-proveedor">$0</div><div class="kpi-sub">A liquidar</div></div>
     </div>
-    <div class="section-label">Ventas de la semana</div>
-    <div id="rep-ventas-list"><div class="empty">Sin ventas esta semana</div></div>
+    <!-- Comparativa -->
+    <div class="section-label">Comparativa vs período anterior</div>
+    <div id="rep-comparativa"></div>
+    <!-- Top productos -->
+    <div class="section-label">🏆 Top productos</div>
+    <div id="rep-top-prods"></div>
+    <!-- Mejor vendedor -->
+    <div class="section-label">👤 Mejor vendedor</div>
+    <div id="rep-mejor-vendedor"></div>
+    <!-- Ventas list -->
+    <div class="section-label">Ventas del período</div>
+    <div id="rep-ventas-list"><div class="empty">Sin ventas</div></div>
     <button class="btn-blue" onclick="exportExcel()">📥 Exportar a Excel</button>
     <button class="btn-green" id="btn-sheets" onclick="enviarSheets()">📊 Enviar a Google Sheets</button>
-    <button class="btn-outline" onclick="semanaOffset--;renderReporte()">← Semana anterior</button>
-    <button class="btn-outline" onclick="if(semanaOffset<0){semanaOffset++;renderReporte()}">Semana siguiente →</button>
+  </div>
+
+  <!-- Historial -->
+  <div class="admin-panel-inner" id="apanel-historial" style="display:none">
+    <div class="hist-filters">
+      <div class="hist-label">Rango de fechas</div>
+      <div class="hist-date-row">
+        <input type="date" id="hist-f-from">
+        <span>—</span>
+        <input type="date" id="hist-f-to">
+      </div>
+      <div class="hist-label">Rango de horas</div>
+      <div class="hist-date-row">
+        <select id="hist-h-from"></select>
+        <span>—</span>
+        <select id="hist-h-to"></select>
+      </div>
+      <div class="hist-search-row" style="margin-top:8px">
+        <input type="text" id="hist-texto" placeholder="Buscar producto..." oninput="renderHistorial()">
+        <select id="hist-vendedor" onchange="renderHistorial()">
+          <option value="">Todos</option>
+          <option>Melanie</option><option>Daniela</option><option>Daniel</option><option>Izchel</option>
+        </select>
+        <select id="hist-cat" onchange="renderHistorial()"><option value="">Todas</option></select>
+      </div>
+      <button class="btn-submit-form" style="margin-top:10px" onclick="renderHistorial()">Buscar</button>
+    </div>
+    <div class="hist-count" id="hist-count"></div>
+    <div id="hist-list"></div>
+  </div>
+
+  <!-- Registros -->
+  <div class="admin-panel-inner" id="apanel-registros" style="display:none">
+    <div class="reg-tabs">
+      <button class="reg-tab active" onclick="setRegTab('apertura',this)">🌅 Aperturas</button>
+      <button class="reg-tab" onclick="setRegTab('cierre',this)">🌙 Cierres</button>
+      <button class="reg-tab" onclick="setRegTab('corte',this)">💰 Cortes</button>
+    </div>
+    <div class="hist-date-row" style="margin-bottom:12px">
+      <input type="date" id="reg-f-from">
+      <span>—</span>
+      <input type="date" id="reg-f-to">
+      <button class="btn-outline" style="width:auto;padding:8px 14px;margin:0;font-size:13px" onclick="renderRegistros()">Filtrar</button>
+    </div>
+    <div id="reg-list"><div class="empty">Cargando...</div></div>
   </div>
 
   <!-- Inventario -->
   <div class="admin-panel-inner" id="apanel-inventario" style="display:none">
+    <div id="stock-bajo-banner" style="display:none" class="stock-bajo-banner">
+      <div class="stock-bajo-title">⚠️ Stock bajo o agotado</div>
+      <div id="stock-bajo-list"></div>
+    </div>
     <div class="filter-row" id="inv-cat-filters" style="margin-bottom:10px"></div>
     <div class="search-wrap" style="margin-top:4px">
       <span style="color:#444;font-size:16px">🔍</span>
@@ -952,7 +1094,9 @@ async function registrarVenta() {
   ventas.push(v)
   stock[selectedProd.id] = Math.max(0, getStock(selectedProd.id)-1)
   saveLocal(); pushVenta(v); pushStock(selectedProd.id, stock[selectedProd.id])
-  tg(`💸 <b>Venta registrada</b>\n🎵 ${v.nombre}${v.sub?' — '+v.sub:''}\n💰 $${v.precio_venta.toLocaleString('es-MX')}\n👤 ${v.vendedor}\n📅 ${new Date().toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
+  const newStock = stock[selectedProd.id]
+  const stockAlert = newStock===0 ? `\n⚠️ <b>STOCK AGOTADO</b> — quedan 0 piezas` : newStock<=2 ? `\n⚡ Stock bajo: ${newStock} pza restante${newStock!==1?'s':''}` : ''
+  tg(`💸 <b>Venta registrada</b>\n🎵 ${v.nombre}${v.sub?' — '+v.sub:''}\n💰 $${v.precio_venta.toLocaleString('es-MX')}\n👤 ${v.vendedor}\n📅 ${new Date().toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}${stockAlert}`)
   selectedProd=null; vendedor=''
   document.getElementById('sel-card').classList.remove('visible')
   document.querySelectorAll('#panel-vender .enc-btn').forEach(b=>b.classList.remove('active'))
@@ -979,13 +1123,14 @@ function openAdmin() {
 }
 function cerrarAdmin() { document.getElementById('admin-panel').classList.remove('open') }
 
+const ADMIN_TABS = ['reporte','historial','registros','inventario','productos']
 function setAdminTab(t) {
-  document.querySelectorAll('.admin-tab').forEach((el,i)=>el.classList.toggle('active',['reporte','inventario','productos'][i]===t))
-  document.getElementById('apanel-reporte').style.display = t==='reporte'?'block':'none'
-  document.getElementById('apanel-inventario').style.display = t==='inventario'?'block':'none'
-  document.getElementById('apanel-productos').style.display = t==='productos'?'block':'none'
+  document.querySelectorAll('.admin-tab').forEach((el,i)=>el.classList.toggle('active',ADMIN_TABS[i]===t))
+  ADMIN_TABS.forEach(name=>{ const el=document.getElementById('apanel-'+name); if(el) el.style.display=name===t?'block':'none' })
   if (t==='reporte') renderReporte()
-  if (t==='inventario') renderInventarioCatFilters()
+  if (t==='historial') initHistorial()
+  if (t==='registros') initRegistros()
+  if (t==='inventario') { renderStockBajo(); renderInventarioCatFilters() }
   if (t==='productos') { renderCustomProds(); renderCatManage(); updateCatSelects() }
 }
 
@@ -1058,25 +1203,98 @@ function cerrarStockModal() { document.getElementById('stock-overlay').classList
 function closeStockModal(e) { if (e.target===document.getElementById('stock-overlay')) cerrarStockModal() }
 
 // ─── Reporte ──────────────────────────────────────────────────────────────────
-function getLunes(off=0) { const d=new Date(),day=d.getDay()||7; d.setDate(d.getDate()-day+1+off*7); d.setHours(0,0,0,0); return d }
-function getDomingo(l) { const d=new Date(l); d.setDate(d.getDate()+6); d.setHours(23,59,59,999); return d }
+let repPeriod = 'semana'  // 'dia' | 'semana' | 'mes'
+let repOffset = 0
+
 function fmtF(d) { return d.toLocaleDateString('es-MX',{day:'numeric',month:'short'}) }
+function fmtHH(h) { return h===0?'12am':h<12?`${h}am`:h===12?'12pm':`${h-12}pm` }
+
+function buildHourSelects(fromId, toId, defaultFrom=0, defaultTo=23) {
+  const opts = Array.from({length:24},(_,h)=>`<option value="${h}">${fmtHH(h)}</option>`).join('')
+  const f=document.getElementById(fromId), t=document.getElementById(toId)
+  if(f && !f.options.length){ f.innerHTML=opts; f.value=defaultFrom }
+  if(t && !t.options.length){ t.innerHTML=opts; t.value=defaultTo }
+}
+
+function getPeriodRange(period=repPeriod, offset=repOffset) {
+  const now=new Date()
+  let from, to
+  if(period==='dia'){
+    from=new Date(now); from.setDate(from.getDate()+offset); from.setHours(0,0,0,0)
+    to=new Date(from); to.setHours(23,59,59,999)
+  } else if(period==='semana'){
+    const day=now.getDay()||7
+    from=new Date(now); from.setDate(from.getDate()-day+1+offset*7); from.setHours(0,0,0,0)
+    to=new Date(from); to.setDate(to.getDate()+6); to.setHours(23,59,59,999)
+  } else {
+    from=new Date(now.getFullYear(), now.getMonth()+offset, 1)
+    to=new Date(now.getFullYear(), now.getMonth()+offset+1, 0, 23,59,59,999)
+  }
+  return {from,to}
+}
+
+function getLunes(off=0) { const {from}=getPeriodRange('semana',off); return from }
+function getDomingo(l) { const d=new Date(l); d.setDate(d.getDate()+6); d.setHours(23,59,59,999); return d }
+
+function setPeriod(p) {
+  repPeriod=p; repOffset=0
+  document.querySelectorAll('.period-pill').forEach(el=>el.classList.remove('active'))
+  document.getElementById('pill-'+p).classList.add('active')
+  renderReporte()
+}
+function navPeriod(dir) {
+  const now=new Date(), {to}=getPeriodRange()
+  if(dir>0 && to>=now) return
+  repOffset+=dir; renderReporte()
+}
+
+function getPeriodLabel() {
+  const {from,to}=getPeriodRange()
+  const now=new Date()
+  if(repPeriod==='dia'){
+    if(repOffset===0) return {label:'Hoy',rango:fmtF(from)}
+    if(repOffset===-1) return {label:'Ayer',rango:fmtF(from)}
+    return {label:fmtF(from),rango:from.toLocaleDateString('es-MX',{weekday:'long'})}
+  }
+  if(repPeriod==='semana'){
+    const label=repOffset===0?'Semana actual':repOffset===-1?'Semana pasada':`Semana del ${fmtF(from)}`
+    return {label,rango:`${fmtF(from)} — ${fmtF(to)}`}
+  }
+  const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+  const label=repOffset===0?'Este mes':repOffset===-1?'Mes pasado':meses[from.getMonth()]+' '+from.getFullYear()
+  return {label,rango:`${meses[from.getMonth()]} ${from.getFullYear()}`}
+}
+
+function filterByPeriodAndHour(vsAll, period=repPeriod, offset=repOffset, hFrom=null, hTo=null) {
+  const {from,to}=getPeriodRange(period,offset)
+  const h0=hFrom!==null?parseInt(hFrom):0
+  const h1=hTo!==null?parseInt(hTo):23
+  return vsAll.filter(v=>{
+    const t=new Date(v.ts)
+    return t>=from && t<=to && t.getHours()>=h0 && t.getHours()<=h1
+  })
+}
 
 function renderRepCatFilters() {
   const el = document.getElementById('rep-cat-filters')
   el.innerHTML = `<button class="filter-btn${repCat==='TODOS'?' active':''}" onclick="setRepCat('TODOS',this)">Todas</button>`
     + cats.map(c=>`<button class="filter-btn${repCat===c.name?' active':''}" onclick="setRepCat('${c.name}',this)">${c.icon} ${c.name}</button>`).join('')
 }
-
 function setRepCat(name,btn) { repCat=name; document.querySelectorAll('#rep-cat-filters .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderReporte() }
 
 function renderReporte() {
+  buildHourSelects('rep-h-from','rep-h-to',0,23)
   renderRepCatFilters()
-  const lun=getLunes(semanaOffset), dom=getDomingo(lun)
-  document.getElementById('rep-semana-label').textContent = semanaOffset===0?'Semana actual':`Semana del ${fmtF(lun)}`
-  document.getElementById('rep-rango').textContent = `${fmtF(lun)} — ${fmtF(dom)}`
-  let vs = ventas.filter(v=>{ const t=new Date(v.ts); return t>=lun&&t<=dom })
-  if (repCat!=='TODOS') vs = vs.filter(v=>v.cat===repCat)
+  const hFrom=document.getElementById('rep-h-from')?.value??0
+  const hTo=document.getElementById('rep-h-to')?.value??23
+  const {label,rango}=getPeriodLabel()
+  document.getElementById('rep-period-label').textContent=label
+  document.getElementById('rep-rango').textContent=rango
+  document.getElementById('btn-period-next').disabled = repOffset>=0
+
+  let vs=filterByPeriodAndHour(ventas,repPeriod,repOffset,hFrom,hTo)
+  if(repCat!=='TODOS') vs=vs.filter(v=>v.cat===repCat)
+
   const tot=vs.reduce((s,v)=>s+v.precio_venta,0)
   const prov=vs.reduce((s,v)=>s+(v.precio_proveedor||0),0)
   const tru=vs.reduce((s,v)=>s+(v.utilidad||0),0)
@@ -1084,10 +1302,54 @@ function renderReporte() {
   document.getElementById('rep-proveedor').textContent=`$${prov.toLocaleString('es-MX')}`
   document.getElementById('rep-trueno').textContent=`$${tru.toLocaleString('es-MX')}`
   document.getElementById('rep-count').textContent=`${vs.length} pieza${vs.length!==1?'s':''}`
-  const el=document.getElementById('rep-ventas-list')
-  if (!vs.length) { el.innerHTML='<div class="empty">Sin ventas esta semana</div>'; return }
-  const catOf = v => { const c=cats.find(x=>x.name===v.cat); return c?c.icon:'📦' }
-  el.innerHTML=[...vs].reverse().map(v=>`
+
+  // Comparativa
+  let vsPrev=filterByPeriodAndHour(ventas,repPeriod,repOffset-1,hFrom,hTo)
+  if(repCat!=='TODOS') vsPrev=vsPrev.filter(v=>v.cat===repCat)
+  const prevTot=vsPrev.reduce((s,v)=>s+v.precio_venta,0)
+  const prevTru=vsPrev.reduce((s,v)=>s+(v.utilidad||0),0)
+  function delta(cur,prev) {
+    if(!prev) return cur>0?`<span class="up">▲ nuevo</span>`:`<span class="flat">—</span>`
+    const pct=Math.round((cur-prev)/prev*100)
+    return pct>0?`<span class="up">▲ ${pct}%</span>`:pct<0?`<span class="down">▼ ${Math.abs(pct)}%</span>`:`<span class="flat">= sin cambio</span>`
+  }
+  document.getElementById('rep-comparativa').innerHTML=`
+    <div class="comp-card"><div><div class="comp-label">Total vendido</div><div class="comp-val">$${tot.toLocaleString('es-MX')} vs $${prevTot.toLocaleString('es-MX')}</div></div><div class="comp-delta">${delta(tot,prevTot)}</div></div>
+    <div class="comp-card"><div><div class="comp-label">Comisión Trueno</div><div class="comp-val">$${tru.toLocaleString('es-MX')} vs $${prevTru.toLocaleString('es-MX')}</div></div><div class="comp-delta">${delta(tru,prevTru)}</div></div>
+    <div class="comp-card"><div><div class="comp-label">Piezas vendidas</div><div class="comp-val">${vs.length} vs ${vsPrev.length}</div></div><div class="comp-delta">${delta(vs.length,vsPrev.length)}</div></div>`
+
+  // Top productos
+  const prodMap={}
+  vs.forEach(v=>{
+    const k=v.nombre+(v.sub?'|'+v.sub:'')
+    if(!prodMap[k]) prodMap[k]={nombre:v.nombre,sub:v.sub||'',cnt:0,rev:0}
+    prodMap[k].cnt++; prodMap[k].rev+=v.precio_venta
+  })
+  const top5=Object.values(prodMap).sort((a,b)=>b.cnt-a.cnt).slice(0,5)
+  const topEl=document.getElementById('rep-top-prods')
+  if(!top5.length){ topEl.innerHTML='<div class="empty" style="padding:10px">Sin ventas en el período</div>'; }
+  else {
+    const medals=['🥇','🥈','🥉','4️⃣','5️⃣']
+    topEl.innerHTML=`<div class="section-box" style="padding:10px"><table class="top-table"><thead><tr><th></th><th>Producto</th><th class="top-cnt">Pzas</th><th class="top-rev">Total</th></tr></thead><tbody>`
+      +top5.map((p,i)=>`<tr><td class="top-rank">${medals[i]}</td><td><div class="top-name">${p.nombre}</div>${p.sub?`<div class="top-sub">${p.sub}</div>`:''}</td><td class="top-cnt">${p.cnt}</td><td class="top-rev">$${p.rev.toLocaleString('es-MX')}</td></tr>`).join('')
+      +`</tbody></table></div>`
+  }
+
+  // Mejor vendedor
+  const vendMap={}
+  vs.forEach(v=>{ if(!vendMap[v.vendedor]) vendMap[v.vendedor]={cnt:0,rev:0}; vendMap[v.vendedor].cnt++; vendMap[v.vendedor].rev+=v.precio_venta })
+  const vends=Object.entries(vendMap).sort((a,b)=>b[1].cnt-a[1].cnt)
+  const mvEl=document.getElementById('rep-mejor-vendedor')
+  if(!vends.length){ mvEl.innerHTML='<div class="empty" style="padding:10px">Sin datos</div>' }
+  else {
+    mvEl.innerHTML=vends.map((([nom,d],i)=>`<div class="comp-card">${i===0?'🏆':'👤'} <div style="flex:1;margin-left:8px"><div class="comp-val">${nom}</div><div class="comp-label">${d.cnt} pieza${d.cnt!==1?'s':''} · $${d.rev.toLocaleString('es-MX')}</div></div></div>`)).join('')
+  }
+
+  // Lista ventas
+  const catOf=v=>{const c=cats.find(x=>x.name===v.cat);return c?c.icon:'📦'}
+  const listEl=document.getElementById('rep-ventas-list')
+  if(!vs.length){ listEl.innerHTML='<div class="empty">Sin ventas en el período</div>'; return }
+  listEl.innerHTML=[...vs].reverse().map(v=>`
     <div class="venta-row">
       <div style="font-size:20px">${catOf(v)}</div>
       <div class="venta-info">
@@ -1103,9 +1365,12 @@ function renderReporte() {
 
 // ─── Export Excel ─────────────────────────────────────────────────────────────
 function exportExcel() {
-  const lun=getLunes(semanaOffset), dom=getDomingo(lun)
-  let vs=ventas.filter(v=>{ const t=new Date(v.ts); return t>=lun&&t<=dom })
+  const hFrom=document.getElementById('rep-h-from')?.value??0
+  const hTo=document.getElementById('rep-h-to')?.value??23
+  let vs=filterByPeriodAndHour(ventas,repPeriod,repOffset,hFrom,hTo)
   if (repCat!=='TODOS') vs=vs.filter(v=>v.cat===repCat)
+  const {rango}=getPeriodLabel()
+  const lun=getPeriodRange().from, dom=getPeriodRange().to
   const wb = XLSX.utils.book_new()
   const detRows = [
     ['Fecha','Categoría','Producto','Subtítulo','Tipo','Precio Venta','Precio Proveedor','Utilidad Trueno','Vendedor'],
@@ -1117,27 +1382,153 @@ function exportExcel() {
   XLSX.utils.book_append_sheet(wb,ws1,'Detalle')
   const tot=vs.reduce((s,v)=>s+v.precio_venta,0),prov=vs.reduce((s,v)=>s+(v.precio_proveedor||0),0),tru=vs.reduce((s,v)=>s+(v.utilidad||0),0)
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
-    ['Reporte Semanal Consignación — Trueno'],
-    ['Semana',`${fmtF(lun)} — ${fmtF(dom)}`],[''],[`Total vendido`,tot],['Del proveedor (CLIP)',prov],['De Trueno',tru],['Piezas',vs.length]
+    ['Reporte Consignación — Trueno'],
+    ['Período',rango],[''],[`Total vendido`,tot],['Del proveedor (CLIP)',prov],['De Trueno',tru],['Piezas',vs.length]
   ]),'Resumen')
-  XLSX.writeFile(wb,`Consignacion_${fmtF(lun).replace(' ','_')}.xlsx`)
+  XLSX.writeFile(wb,`Consignacion_${rango.replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'')}.xlsx`)
 }
 
 async function enviarSheets() {
-  const lun=getLunes(semanaOffset),dom=getDomingo(lun)
-  let vs=ventas.filter(v=>{ const t=new Date(v.ts); return t>=lun&&t<=dom })
+  const hFrom=document.getElementById('rep-h-from')?.value??0
+  const hTo=document.getElementById('rep-h-to')?.value??23
+  let vs=filterByPeriodAndHour(ventas,repPeriod,repOffset,hFrom,hTo)
   if (repCat!=='TODOS') vs=vs.filter(v=>v.cat===repCat)
+  const {rango}=getPeriodLabel()
   const btn=document.getElementById('btn-sheets')
   btn.disabled=true; btn.textContent='Enviando...'
   try {
     await fetch(GAS,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({tipo:'reporte_consignacion',semana:`${fmtF(lun)}-${fmtF(dom)}`,
+      body:JSON.stringify({tipo:'reporte_consignacion',semana:rango,
         total:vs.reduce((s,v)=>s+v.precio_venta,0),proveedor:vs.reduce((s,v)=>s+(v.precio_proveedor||0),0),
         trueno:vs.reduce((s,v)=>s+(v.utilidad||0),0),piezas:vs.length,
         rows:vs.map(v=>[v.fecha,v.cat||'',v.nombre,v.sub||'',v.precio_venta,v.precio_proveedor||0,v.utilidad||0,v.vendedor])})})
     showToast('✓ Enviado a Google Sheets')
   } catch(e) { showToast('Error: '+e.message,true) }
   btn.disabled=false; btn.textContent='📊 Enviar a Google Sheets'
+}
+
+// ─── Historial ────────────────────────────────────────────────────────────────
+function initHistorial() {
+  buildHourSelects('hist-h-from','hist-h-to',0,23)
+  // populate cat select
+  const catSel=document.getElementById('hist-cat')
+  if(catSel && catSel.options.length<=1){
+    cats.forEach(c=>{ const o=document.createElement('option'); o.value=c.name; o.textContent=c.icon+' '+c.name; catSel.appendChild(o) })
+  }
+  // default dates: last 30 days
+  const to=new Date(), from=new Date(); from.setDate(from.getDate()-30)
+  const fi=document.getElementById('hist-f-from'), ti=document.getElementById('hist-f-to')
+  if(fi && !fi.value) fi.value=from.toISOString().slice(0,10)
+  if(ti && !ti.value) ti.value=to.toISOString().slice(0,10)
+  renderHistorial()
+}
+
+function renderHistorial() {
+  const fFrom=document.getElementById('hist-f-from')?.value
+  const fTo=document.getElementById('hist-f-to')?.value
+  const hFrom=parseInt(document.getElementById('hist-h-from')?.value??0)
+  const hTo=parseInt(document.getElementById('hist-h-to')?.value??23)
+  const texto=(document.getElementById('hist-texto')?.value||'').toLowerCase()
+  const vendedor=document.getElementById('hist-vendedor')?.value||''
+  const cat=document.getElementById('hist-cat')?.value||''
+
+  const dateFrom=fFrom?new Date(fFrom+'T00:00:00'):null
+  const dateTo=fTo?new Date(fTo+'T23:59:59'):null
+
+  let vs=[...ventas].filter(v=>{
+    const t=new Date(v.ts)
+    if(dateFrom && t<dateFrom) return false
+    if(dateTo && t>dateTo) return false
+    if(t.getHours()<hFrom || t.getHours()>hTo) return false
+    if(vendedor && v.vendedor!==vendedor) return false
+    if(cat && v.cat!==cat) return false
+    if(texto && !v.nombre.toLowerCase().includes(texto) && !(v.sub||'').toLowerCase().includes(texto)) return false
+    return true
+  }).sort((a,b)=>new Date(b.ts)-new Date(a.ts))
+
+  document.getElementById('hist-count').textContent=`${vs.length} venta${vs.length!==1?'s':''} encontrada${vs.length!==1?'s':''}`
+  const catOf=v=>{const c=cats.find(x=>x.name===v.cat);return c?c.icon:'📦'}
+  const el=document.getElementById('hist-list')
+  if(!vs.length){ el.innerHTML='<div class="empty">Sin resultados</div>'; return }
+  el.innerHTML=vs.map(v=>`
+    <div class="venta-row">
+      <div style="font-size:20px">${catOf(v)}</div>
+      <div class="venta-info">
+        <div class="venta-prod">${v.nombre}${v.sub?` — ${v.sub}`:''}</div>
+        <div class="venta-meta">${v.vendedor} · ${new Date(v.ts).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+      <div class="venta-right">
+        <div class="venta-pv">$${v.precio_venta.toLocaleString('es-MX')}</div>
+        ${v.precio_proveedor?`<div class="venta-split">Prov: $${v.precio_proveedor.toLocaleString('es-MX')}</div>`:''}
+      </div>
+    </div>`).join('')
+}
+
+// ─── Registros ────────────────────────────────────────────────────────────────
+let regTipo = 'apertura'
+function setRegTab(t, btn) {
+  regTipo=t
+  document.querySelectorAll('.reg-tab').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  renderRegistros()
+}
+
+async function renderRegistros() {
+  const el=document.getElementById('reg-list')
+  el.innerHTML='<div class="empty">Cargando...</div>'
+  const fFrom=document.getElementById('reg-f-from')?.value
+  const fTo=document.getElementById('reg-f-to')?.value
+  try {
+    let q=sb.from('trueno_registros').select('*').eq('tipo',regTipo).order('ts',{ascending:false}).limit(60)
+    if(fFrom) q=q.gte('fecha',fFrom)
+    if(fTo) q=q.lte('fecha',fTo)
+    const {data,error}=await q
+    if(error||!data?.length){ el.innerHTML='<div class="empty">Sin registros</div>'; return }
+    el.innerHTML=data.map((r,i)=>{
+      const d=r.datos||{}
+      let detail=''
+      if(regTipo==='apertura'||regTipo==='cierre'){
+        detail=`<b>Estado:</b> ${d.estado||'—'}<br>${d.fondo!=null?`<b>Fondo:</b> $${d.fondo}<br>`:''}<b>Ítems OK:</b> ${d.items_ok||0}/${d.items_total||0}${d.notas?`<br><b>Notas:</b> ${d.notas}`:''}`
+      } else {
+        detail=`<b>Ventas:</b> $${(d.ventas||0).toLocaleString('es-MX')} (ef: $${d.ventas_efectivo||0} · tj: $${d.ventas_tarjeta||0})<br>`
+          +`<b>Propinas:</b> $${(d.propinas||0).toLocaleString('es-MX')}<br>`
+          +`<b>Gastos:</b> $${d.gastos||0}${d.detalle_gastos?` (${d.detalle_gastos})`:''}<br>`
+          +`<b>Neto:</b> $${(d.neto||0).toLocaleString('es-MX')}<br>`
+          +`<b>Estado:</b> ${d.estado||'—'}${d.notas?`<br><b>Notas:</b> ${d.notas}`:''}`
+      }
+      return `<div class="reg-card" onclick="this.querySelector('.reg-detail').classList.toggle('open')">
+        <div class="reg-top">
+          <div><div class="reg-fecha">${r.fecha||r.ts?.slice(0,10)}</div><div class="reg-enc">${r.encargada||''}</div></div>
+          <div class="reg-estado">${(r.datos?.estado||'').includes('✅')?'✅':'⚠️'}</div>
+        </div>
+        <div class="reg-detail">${detail}</div>
+      </div>`
+    }).join('')
+  } catch(e){ el.innerHTML=`<div class="empty">Error: ${e.message}</div>` }
+}
+
+function initRegistros() {
+  const to=new Date(), from=new Date(); from.setDate(from.getDate()-30)
+  const fi=document.getElementById('reg-f-from'), ti=document.getElementById('reg-f-to')
+  if(fi && !fi.value) fi.value=from.toISOString().slice(0,10)
+  if(ti && !ti.value) ti.value=to.toISOString().slice(0,10)
+  renderRegistros()
+}
+
+// ─── Stock bajo ───────────────────────────────────────────────────────────────
+function renderStockBajo() {
+  const bajos=getAllProducts().filter(p=>getStock(p.id)<=2).sort((a,b)=>getStock(a.id)-getStock(b.id))
+  const banner=document.getElementById('stock-bajo-banner')
+  const list=document.getElementById('stock-bajo-list')
+  if(!bajos.length){ banner.style.display='none'; return }
+  banner.style.display='block'
+  list.innerHTML=bajos.map(p=>{
+    const s=getStock(p.id)
+    return `<div class="stock-bajo-item">
+      <span>${p.nombre}${p.sub?' — '+p.sub:''}</span>
+      <span class="${s===0?'sbz':'sbl'}">${s===0?'Sin stock':s+' pza'}</span>
+    </div>`
+  }).join('')
 }
 
 // ─── Manual add ───────────────────────────────────────────────────────────────

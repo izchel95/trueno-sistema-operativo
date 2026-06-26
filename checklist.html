@@ -342,8 +342,12 @@
   <div class="success-sub">Hasta mañana. Que descanses.</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   let encargada = '';
+  const { createClient: _cc2 } = supabase
+  const _sb = _cc2('https://axxbsjbywivolwluzvrd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk')
+
   const total = 25;
 
   // Mostrar fecha
@@ -397,6 +401,14 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tipo: 'checklist', row })
       });
+
+      _sb.from('trueno_registros').insert({
+        tipo: 'cierre',
+        fecha: hoy.toLocaleDateString('es-MX'),
+        encargada,
+        datos: { estado, notas: row[row.length-1], items_ok: checked, items_total: total },
+        ts: new Date().toISOString()
+      }).then().catch(() => {})
 
       document.getElementById('form-view').style.display = 'none';
       document.getElementById('success-screen').style.display = 'flex';

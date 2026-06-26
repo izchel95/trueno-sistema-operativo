@@ -502,7 +502,11 @@
   <div class="success-sub">Ya quedó guardado en Notion.</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+  const { createClient: _ccc } = supabase
+  const _sb = _ccc('https://axxbsjbywivolwluzvrd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk')
+
   let encargada = '';
 
   const hoy = new Date();
@@ -627,6 +631,21 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tipo: 'corte', row })
       });
+
+      _sb.from('trueno_registros').insert({
+        tipo: 'corte',
+        fecha: hoy.toLocaleDateString('es-MX'),
+        encargada,
+        datos: {
+          ventas_efectivo: val('ventas-efectivo'), ventas_tarjeta: val('ventas-tarjeta'), ventas,
+          propinas_efectivo: val('propinas-efectivo'), propinas_tarjeta: val('propinas-tarjeta'), propinas,
+          fondo_inicial: val('fondo-inicial'), efectivo_cierre: val('efectivo-cierre'), diff,
+          gastos: totalGastos, detalle_gastos: detalleGastos.join(' | '), neto,
+          notas: document.getElementById('notas').value || '',
+          estado: diff === 0 ? '✅ Completo' : '⚠️ Revisar'
+        },
+        ts: new Date().toISOString()
+      }).then().catch(() => {})
 
       document.getElementById('neto-final').textContent = fmt(neto);
       document.getElementById('form-view').style.display = 'none';
