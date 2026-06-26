@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Recetario — Trueno ⚡</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0e0e0e;
+    color: #f0ede8;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  header {
+    background: #0e0e0e;
+    padding: 20px 20px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #1e1e1e;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .logo span { color: #f5c842; }
+
+  .back-link {
+    font-size: 13px;
+    color: #555;
+    text-decoration: none;
+    padding: 4px 0;
+  }
+
+  .search-wrap {
+    display: flex;
+    align-items: center;
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 0 14px;
+    margin-bottom: 10px;
+  }
+
+  .search-wrap:focus-within { border-color: #f5c842; }
+
+  .search-icon { color: #444; font-size: 16px; margin-right: 8px; }
+
+  input[type="search"] {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #f0ede8;
+    font-size: 15px;
+    padding: 12px 0;
+    outline: none;
+    font-family: inherit;
+  }
+
+  input[type="search"]::placeholder { color: #444; }
+
+  .cats {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .cats::-webkit-scrollbar { display: none; }
+
+  .cat-btn {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border: 1px solid #2a2a2a;
+    border-radius: 20px;
+    background: #141414;
+    color: #666;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .cat-btn.active {
+    background: #f5c842;
+    color: #0e0e0e;
+    border-color: #f5c842;
+    font-weight: 600;
+  }
+
+  .list { padding: 12px 16px; }
+
+  .recipe-card {
+    background: #141414;
+    border: 1px solid #1e1e1e;
+    border-radius: 16px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .recipe-card.open { border-color: #f5c842; }
+
+  .recipe-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .recipe-emoji { font-size: 28px; flex-shrink: 0; }
+
+  .recipe-info { flex: 1; }
+
+  .recipe-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f0ede8;
+  }
+
+  .recipe-meta {
+    font-size: 12px;
+    color: #555;
+    margin-top: 2px;
+  }
+
+  .recipe-arrow {
+    font-size: 18px;
+    color: #333;
+    transition: transform 0.2s;
+  }
+
+  .recipe-card.open .recipe-arrow { transform: rotate(90deg); color: #f5c842; }
+
+  .recipe-body {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px solid #1e1e1e;
+  }
+
+  .recipe-card.open .recipe-body { display: block; }
+
+  .recipe-section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #444;
+    margin: 12px 0 8px;
+  }
+
+  .ingredient {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid #1e1e1e;
+    font-size: 14px;
+  }
+
+  .ingredient:last-child { border-bottom: none; }
+
+  .ingredient .name { color: #ccc; }
+  .ingredient .amount { color: #f5c842; font-weight: 600; font-size: 13px; }
+
+  .steps { margin-top: 4px; }
+
+  .step {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 13px;
+    color: #999;
+    line-height: 1.5;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .step:last-child { border-bottom: none; }
+
+  .step-num {
+    width: 20px;
+    height: 20px;
+    background: #1e1e1e;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #555;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .tip {
+    background: #1a1600;
+    border: 1px solid #3a2e00;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #a88a00;
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+
+  .no-results {
+    text-align: center;
+    color: #444;
+    padding: 60px 20px;
+    font-size: 15px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo">⚡ <span>Trueno</span></div>
+    <a class="back-link" href="index.html">← Menú</a>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="search" id="busqueda" placeholder="Buscar bebida..." oninput="filtrar()">
+  </div>
+  <div class="cats" id="cats"></div>
+</header>
+
+<div class="list" id="lista"></div>
+
+<script>
+const RECETAS = [
+  {
+    nombre: 'Espresso', emoji: '☕', cat: 'Café',
+    meta: '1 shot · 30 ml',
+    ingredientes: [
+      { name: 'Café en grano (molido fino)', amount: '18-20 g' },
+      { name: 'Agua', amount: '30 ml' },
+    ],
+    pasos: [
+      'Pesar 18-20 g de café y moler fino.',
+      'Colocar en portafiltros y presionar con tampón uniforme.',
+      'Extraer en 25-30 segundos. El shot debe verse dorado.',
+      'Temperatura ideal de agua: 92-94 °C.',
+    ],
+    tip: '💡 Si sale muy rápido (<20 seg), muele más fino. Si tarda mucho (>35 seg), muele más grueso.'
+  },
+  {
+    nombre: 'Americano', emoji: '☕', cat: 'Café',
+    meta: '1 shot + agua · 240 ml',
+    ingredientes: [
+      { name: 'Espresso', amount: '1 shot (30 ml)' },
+      { name: 'Agua caliente', amount: '180-210 ml' },
+    ],
+    pasos: [
+      'Preparar espresso en taza.',
+      'Agregar agua caliente sobre el espresso.',
+      'Servir inmediatamente.',
+    ],
+    tip: '💡 Agrega el agua DESPUÉS del espresso para preservar la crema.'
+  },
+  {
+    nombre: 'Latte', emoji: '☕', cat: 'Café',
+    meta: '1 shot + leche · 360 ml',
+    ingredientes: [
+      { name: 'Espresso', amount: '1 shot (30 ml)' },
+      { name: 'Leche entera', amount: '300 ml' },
+    ],
+    pasos: [
+      'Preparar espresso en taza grande.',
+      'Vaporizar leche hasta 65°C con textura sedosa (microespuma).',
+      'Verter leche sobre el espresso con movimiento suave.',
+      'Decorar con latte art si es posible.',
+    ],
+    tip: '💡 La leche debe sonar como papel al vaporizarse. Evitar burbujas grandes.'
+  },
+  {
+    nombre: 'Cappuccino', emoji: '☕', cat: 'Café',
+    meta: '1 shot + leche · 180 ml',
+    ingredientes: [
+      { name: 'Espresso', amount: '1 shot (30 ml)' },
+      { name: 'Leche entera', amount: '100 ml' },
+      { name: 'Espuma de leche', amount: '50 ml' },
+    ],
+    pasos: [
+      'Preparar espresso en taza mediana.',
+      'Vaporizar leche con más espuma que para latte (textura más densa).',
+      'Verter leche y terminar con capa gruesa de espuma.',
+    ],
+    tip: '💡 El cappuccino clásico lleva 1/3 espresso, 1/3 leche, 1/3 espuma.'
+  },
+  {
+    nombre: 'Cortado', emoji: '☕', cat: 'Café',
+    meta: '1 shot + poca leche · 90 ml',
+    ingredientes: [
+      { name: 'Espresso', amount: '1 shot (30 ml)' },
+      { name: 'Leche vaporizada', amount: '30-60 ml' },
+    ],
+    pasos: [
+      'Preparar espresso en taza pequeña.',
+      'Vaporizar poca leche con espuma ligera.',
+      'Agregar leche sobre el espresso. No mezclar.',
+    ],
+    tip: '💡 El cortado es para quien quiere espresso pero más suave. Poco volumen, mucho sabor.'
+  },
+  {
+    nombre: 'Macchiato', emoji: '☕', cat: 'Café',
+    meta: '1 shot + toque de espuma',
+    ingredientes: [
+      { name: 'Espresso', amount: '1 shot (30 ml)' },
+      { name: 'Espuma de leche', amount: '1 cucharada' },
+    ],
+    pasos: [
+      'Preparar espresso en taza pequeña.',
+      'Agregar una cucharada de espuma de leche encima.',
+    ],
+    tip: '💡 "Macchiato" significa manchado en italiano — es espresso apenas manchado de leche.'
+  },
+  {
+    nombre: 'Date Latte', emoji: '🌟', cat: 'Café',
+    meta: 'Firma Trueno · 360 ml',
+    ingredientes: [
+      { name: 'Espresso', amount: '1 shot (30 ml)' },
+      { name: 'Leche entera', amount: '280 ml' },
+      { name: 'Pasta de dátil', amount: '2 cucharadas' },
+      { name: 'Canela', amount: '1 pizca' },
+    ],
+    pasos: [
+      'Disolver pasta de dátil en el espresso caliente.',
+      'Vaporizar leche entera con textura sedosa.',
+      'Verter leche sobre el espresso con dátil.',
+      'Decorar con pizca de canela encima.',
+    ],
+    tip: '🌟 Esta es la bebida firma de Trueno. Presentarla con cuidado — es nuestro diferenciador.'
+  },
+  {
+    nombre: 'Cold Brew', emoji: '🧊', cat: 'Frías',
+    meta: 'Macerado en frío · 240 ml',
+    ingredientes: [
+      { name: 'Café molido grueso', amount: '80 g' },
+      { name: 'Agua fría filtrada', amount: '1 litro' },
+      { name: 'Hielo', amount: 'al gusto' },
+    ],
+    pasos: [
+      'Mezclar café molido grueso con agua fría.',
+      'Refrigerar 12-18 horas tapado.',
+      'Filtrar con colador fino o manta.',
+      'Servir sobre hielo. Concentrado: diluir 1:1 con agua o leche.',
+    ],
+    tip: '💡 El cold brew se prepara un día antes. Verificar que haya en refrigerador al abrir.'
+  },
+  {
+    nombre: 'Café frío (Iced Latte)', emoji: '🧊', cat: 'Frías',
+    meta: '1 shot + leche fría · 360 ml',
+    ingredientes: [
+      { name: 'Espresso', amount: '1 shot (30 ml)' },
+      { name: 'Leche entera fría', amount: '250 ml' },
+      { name: 'Hielo', amount: '1 taza' },
+    ],
+    pasos: [
+      'Llenar vaso con hielo.',
+      'Preparar espresso y dejar enfriar 30 segundos.',
+      'Verter leche fría sobre el hielo.',
+      'Agregar el espresso encima. Mezclar suavemente.',
+    ],
+    tip: '💡 Si el cliente pide dulce, agregar jarabe de vainilla o caramelo al gusto.'
+  },
+  {
+    nombre: 'Frappe de Café', emoji: '🧋', cat: 'Frappes',
+    meta: 'Licuado frío · 360 ml',
+    ingredientes: [
+      { name: 'Espresso o café frío', amount: '60 ml' },
+      { name: 'Leche', amount: '150 ml' },
+      { name: 'Hielo', amount: '1.5 tazas' },
+      { name: 'Jarabe simple', amount: '30 ml (al gusto)' },
+    ],
+    pasos: [
+      'Agregar todos los ingredientes en licuadora.',
+      'Licuar hasta obtener consistencia espesa y uniforme.',
+      'Servir en vaso frío. Decorar con crema si aplica.',
+    ],
+    tip: '💡 Para frappe de caramelo: agregar 30 ml de jarabe de caramelo. Para moka: 30 ml de salsa de chocolate.'
+  },
+  {
+    nombre: 'Frappe de Chocolate', emoji: '🧋', cat: 'Frappes',
+    meta: 'Licuado frío · 360 ml',
+    ingredientes: [
+      { name: 'Leche', amount: '180 ml' },
+      { name: 'Salsa de chocolate', amount: '40 ml' },
+      { name: 'Hielo', amount: '1.5 tazas' },
+      { name: 'Jarabe simple', amount: '20 ml' },
+    ],
+    pasos: [
+      'Agregar todos los ingredientes en licuadora.',
+      'Licuar hasta textura espesa.',
+      'Servir decorado con hilo de chocolate encima.',
+    ],
+    tip: '💡 Sin café — ideal para quienes no toman cafeína.'
+  },
+  {
+    nombre: 'Matcha Latte', emoji: '🍵', cat: 'Alternativas',
+    meta: 'Sin café · 300 ml',
+    ingredientes: [
+      { name: 'Polvo de matcha', amount: '2 cucharaditas (4 g)' },
+      { name: 'Agua caliente (80°C)', amount: '30 ml' },
+      { name: 'Leche vaporizada', amount: '250 ml' },
+      { name: 'Jarabe simple', amount: 'al gusto' },
+    ],
+    pasos: [
+      'Disolver el matcha en agua caliente con batidor de bambú en zig-zag. Sin grumos.',
+      'Vaporizar leche con textura sedosa.',
+      'Verter leche sobre el matcha disuelto.',
+      'Agregar jarabe si el cliente lo pide.',
+    ],
+    tip: '💡 El agua NO debe estar hirviendo (100°C) — quema el matcha y amarga. Usar 75-80°C.'
+  },
+  {
+    nombre: 'Chai Latte', emoji: '🍵', cat: 'Alternativas',
+    meta: 'Sin café · 300 ml',
+    ingredientes: [
+      { name: 'Concentrado de chai', amount: '60 ml' },
+      { name: 'Leche vaporizada', amount: '240 ml' },
+    ],
+    pasos: [
+      'Verter concentrado de chai en taza.',
+      'Vaporizar leche con microespuma.',
+      'Verter leche sobre el chai.',
+    ],
+    tip: '💡 Si el cliente quiere picante extra, agregar una pizca de canela o jengibre encima.'
+  },
+  {
+    nombre: 'Tisana / Té', emoji: '🌿', cat: 'Tisanas',
+    meta: 'Sin cafeína · 300 ml',
+    ingredientes: [
+      { name: 'Bolsa de té o tisana', amount: '1 bolsa' },
+      { name: 'Agua caliente (90°C)', amount: '280 ml' },
+    ],
+    pasos: [
+      'Calentar agua. NO hervir para tés delicados (verde, blanco, floral).',
+      'Colocar bolsa en taza y verter agua.',
+      'Dejar reposar 3-5 minutos según el tipo.',
+      'Retirar bolsa. Servir con miel o limón si el cliente pide.',
+    ],
+    tip: '💡 Tés negros: 95°C, 4-5 min. Tés verdes: 75-80°C, 2-3 min. Tisanas de hierbas: 90°C, 5 min.'
+  },
+];
+
+const CATS = ['Todos', ...new Set(RECETAS.map(r => r.cat))];
+let catActual = 'Todos';
+let busqueda = '';
+
+function renderCats() {
+  const el = document.getElementById('cats');
+  el.innerHTML = CATS.map(c =>
+    `<button class="cat-btn${c === catActual ? ' active' : ''}" onclick="setcat('${c}')">${c}</button>`
+  ).join('');
+}
+
+function setcat(c) {
+  catActual = c;
+  renderCats();
+  renderLista();
+}
+
+function filtrar() {
+  busqueda = document.getElementById('busqueda').value.toLowerCase();
+  renderLista();
+}
+
+function renderLista() {
+  const filtradas = RECETAS.filter(r => {
+    const matchCat = catActual === 'Todos' || r.cat === catActual;
+    const matchSearch = r.nombre.toLowerCase().includes(busqueda) || r.cat.toLowerCase().includes(busqueda);
+    return matchCat && matchSearch;
+  });
+
+  const el = document.getElementById('lista');
+  if (filtradas.length === 0) {
+    el.innerHTML = '<div class="no-results">Sin resultados 🔍</div>';
+    return;
+  }
+
+  el.innerHTML = filtradas.map((r, i) => `
+    <div class="recipe-card" id="card-${i}" onclick="toggleCard(${i})">
+      <div class="recipe-header">
+        <div class="recipe-emoji">${r.emoji}</div>
+        <div class="recipe-info">
+          <div class="recipe-name">${r.nombre}</div>
+          <div class="recipe-meta">${r.cat} · ${r.meta}</div>
+        </div>
+        <div class="recipe-arrow">›</div>
+      </div>
+      <div class="recipe-body">
+        <div class="recipe-section-title">Ingredientes</div>
+        ${r.ingredientes.map(ing => `
+          <div class="ingredient">
+            <span class="name">${ing.name}</span>
+            <span class="amount">${ing.amount}</span>
+          </div>
+        `).join('')}
+        <div class="recipe-section-title">Preparación</div>
+        <div class="steps">
+          ${r.pasos.map((p, pi) => `
+            <div class="step">
+              <div class="step-num">${pi + 1}</div>
+              <div>${p}</div>
+            </div>
+          `).join('')}
+        </div>
+        ${r.tip ? `<div class="tip">${r.tip}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleCard(i) {
+  const card = document.getElementById('card-' + i);
+  card.classList.toggle('open');
+}
+
+renderCats();
+renderLista();
+</script>
+</body>
+</html>

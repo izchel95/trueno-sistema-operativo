@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Apertura — Trueno ⚡</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0e0e0e;
+    color: #f0ede8;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 100px;
+  }
+
+  header {
+    background: #0e0e0e;
+    padding: 20px 20px 10px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #1e1e1e;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .back-btn {
+    font-size: 14px;
+    color: #555;
+    text-decoration: none;
+    padding: 6px 0;
+  }
+
+  .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .logo span { color: #f5c842; }
+
+  .fecha-badge {
+    font-size: 12px;
+    color: #888;
+    background: #1a1a1a;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .progress-bar {
+    margin-top: 12px;
+    height: 3px;
+    background: #1e1e1e;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: #f5c842;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  .progress-text {
+    font-size: 11px;
+    color: #666;
+    margin-top: 6px;
+    text-align: right;
+  }
+
+  .encargada-section {
+    padding: 16px 20px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .encargada-section label {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .encargada-btns {
+    display: flex;
+    gap: 8px;
+  }
+
+  .enc-btn {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    background: #1a1a1a;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .enc-btn.active {
+    background: #f5c842;
+    color: #0e0e0e;
+    border-color: #f5c842;
+    font-weight: 600;
+  }
+
+  .section {
+    padding: 16px 20px 0;
+  }
+
+  .section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #555;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .check-item {
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 12px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .check-item.checked {
+    background: #1a2a1a;
+    border-color: #2d5a2d;
+  }
+
+  .check-icon {
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid #333;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+
+  .check-item.checked .check-icon {
+    background: #3d8b3d;
+    border-color: #3d8b3d;
+  }
+
+  .check-label {
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.3;
+    transition: color 0.15s;
+  }
+
+  .check-item.checked .check-label {
+    color: #6fcf6f;
+  }
+
+  .fondo-section {
+    padding: 0 20px 16px;
+  }
+
+  .field label {
+    font-size: 12px;
+    color: #666;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .input-wrap {
+    display: flex;
+    align-items: center;
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 0 14px;
+    transition: border-color 0.15s;
+  }
+
+  .input-wrap:focus-within { border-color: #f5c842; }
+
+  .currency { color: #555; font-size: 16px; margin-right: 6px; }
+
+  input[type="number"] {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #f0ede8;
+    font-size: 20px;
+    font-weight: 600;
+    padding: 14px 0;
+    outline: none;
+    -moz-appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  .notas-section {
+    padding: 0 20px 16px;
+  }
+
+  .notas-section label {
+    font-size: 11px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  textarea {
+    width: 100%;
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 12px;
+    color: #f0ede8;
+    font-size: 14px;
+    padding: 12px;
+    resize: none;
+    height: 80px;
+    font-family: inherit;
+  }
+
+  textarea:focus { outline: none; border-color: #f5c842; }
+
+  .submit-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 20px;
+    background: #0e0e0e;
+    border-top: 1px solid #1a1a1a;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: #f5c842;
+    color: #0e0e0e;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: -0.3px;
+    transition: opacity 0.15s;
+  }
+
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .submit-btn:active { opacity: 0.8; }
+
+  .success-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .success-icon { font-size: 64px; margin-bottom: 20px; }
+  .success-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .success-sub { font-size: 14px; color: #666; margin-bottom: 32px; }
+
+  .success-btn {
+    padding: 14px 32px;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    color: #f0ede8;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+
+<div id="form-view">
+  <header>
+    <div class="header-top">
+      <div class="logo">⚡ <span>Trueno</span></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="fecha-badge" id="fecha-display"></div>
+        <a href="index.html" style="font-size:13px;color:#555;text-decoration:none">← Menú</a>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-text" id="progress-text">0 de 22 completados</div>
+  </header>
+
+  <div class="encargada-section">
+    <label>¿Quién abre hoy?</label>
+    <div class="encargada-btns">
+      <button class="enc-btn" onclick="setEncargada('Melanie', this)">Melanie</button>
+      <button class="enc-btn" onclick="setEncargada('Daniela', this)">Daniela</button>
+      <button class="enc-btn" onclick="setEncargada('Daniel', this)">Daniel</button>
+      <button class="enc-btn" onclick="setEncargada('Izchel', this)">Izchel</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">☕ Máquina espresso</div>
+    <div class="grid">
+      <div class="check-item" onclick="toggle(this)" data-key="Encender máquina espresso"><div class="check-icon"></div><div class="check-label">Encender máquina</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Purgar vaporizador"><div class="check-icon"></div><div class="check-label">Purgar vaporizador</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Enjuagar portafiltros"><div class="check-icon"></div><div class="check-label">Enjuagar portafiltros</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Limpiar cabezales"><div class="check-icon"></div><div class="check-label">Limpiar cabezales</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Shot de prueba y calibración"><div class="check-icon"></div><div class="check-label">Shot de prueba</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Verificar presión de caldera"><div class="check-icon"></div><div class="check-label">Presión OK</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🧊 Refrigeración e insumos</div>
+    <div class="grid">
+      <div class="check-item" onclick="toggle(this)" data-key="Sacar leches y refrigerados"><div class="check-icon"></div><div class="check-label">Sacar leches</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Revisar caducidades"><div class="check-icon"></div><div class="check-label">Revisar caducidades</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Verificar nivel de café en grano"><div class="check-icon"></div><div class="check-label">Nivel de café</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Preparar jarabes y bases"><div class="check-icon"></div><div class="check-label">Jarabes listos</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Hielo en hielera"><div class="check-icon"></div><div class="check-label">Hielo en hielera</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Vasos y tazas listos"><div class="check-icon"></div><div class="check-label">Vasos listos</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🪑 Salón</div>
+    <div class="grid">
+      <div class="check-item" onclick="toggle(this)" data-key="Mesas limpias y acomodadas"><div class="check-icon"></div><div class="check-label">Mesas limpias</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Sillas acomodadas"><div class="check-icon"></div><div class="check-label">Sillas acomodadas</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Piso limpio"><div class="check-icon"></div><div class="check-label">Piso limpio</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Música encendida"><div class="check-icon"></div><div class="check-label">Música encendida</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💳 Caja</div>
+    <div class="grid">
+      <div class="check-item" onclick="toggle(this)" data-key="Fondo de caja contado"><div class="check-icon"></div><div class="check-label">Fondo contado</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Terminal de tarjeta encendida"><div class="check-icon"></div><div class="check-label">Terminal lista</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="FaveCards a la mano"><div class="check-icon"></div><div class="check-label">FaveCards listas</div></div>
+      <div class="check-item" onclick="toggle(this)" data-key="Revisar WhatsApp y pedidos"><div class="check-icon"></div><div class="check-label">WhatsApp revisado</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💰 Fondo inicial</div>
+  </div>
+  <div class="fondo-section">
+    <div class="field">
+      <label>Efectivo contado en caja al abrir</label>
+      <div class="input-wrap">
+        <span class="currency">$</span>
+        <input type="number" id="fondo" placeholder="500">
+      </div>
+    </div>
+  </div>
+
+  <div class="notas-section">
+    <label>Notas de apertura</label>
+    <textarea id="notas" placeholder="¿Falta algo? ¿Algo importante para el turno?"></textarea>
+  </div>
+
+  <div class="submit-bar">
+    <button class="submit-btn" id="submit-btn" onclick="enviar()">Registrar apertura</button>
+  </div>
+</div>
+
+<div class="success-screen" id="success-screen">
+  <div class="success-icon">☀️</div>
+  <div class="success-title">¡Apertura lista!</div>
+  <div class="success-sub">Todo registrado. ¡Que sea un gran día!</div>
+  <a class="success-btn" href="index.html">← Volver al menú</a>
+</div>
+
+<script>
+  const TOTAL = 22;
+  let encargada = '';
+
+  const hoy = new Date();
+  const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
+  document.getElementById('fecha-display').textContent = hoy.toLocaleDateString('es-MX', opciones);
+
+  function setEncargada(nombre, btn) {
+    encargada = nombre;
+    document.querySelectorAll('.enc-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function toggle(el) {
+    el.classList.toggle('checked');
+    el.querySelector('.check-icon').textContent = el.classList.contains('checked') ? '✓' : '';
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const checked = document.querySelectorAll('.check-item.checked').length;
+    const pct = Math.round((checked / TOTAL) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = `${checked} de ${TOTAL} completados`;
+  }
+
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec';
+
+  async function enviar() {
+    if (!encargada) { alert('¿Quién abre hoy? Selecciona tu nombre.'); return; }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    const items = document.querySelectorAll('.check-item');
+    const checked = document.querySelectorAll('.check-item.checked').length;
+    const estado = checked === TOTAL ? '✅ Completo' : checked >= TOTAL * 0.8 ? '⚠️ Faltó algo' : '❌ Incompleto';
+
+    const row = [hoy.toLocaleDateString('es-MX'), encargada];
+    items.forEach(item => row.push(item.classList.contains('checked') ? '✅' : '❌'));
+    row.push(parseFloat(document.getElementById('fondo').value) || 0);
+    row.push(document.getElementById('notas').value || '');
+    row.push(estado);
+
+    try {
+      await fetch(GAS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: 'apertura', row })
+      });
+
+      document.getElementById('form-view').style.display = 'none';
+      document.getElementById('success-screen').style.display = 'flex';
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Registrar apertura';
+      alert('Error al enviar: ' + e.message);
+    }
+  }
+</script>
+</body>
+</html>

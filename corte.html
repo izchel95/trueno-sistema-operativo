@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Corte — Trueno ⚡</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0e0e0e;
+    color: #f0ede8;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 100px;
+  }
+
+  header {
+    background: #0e0e0e;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .logo span { color: #f5c842; }
+
+  .fecha-badge {
+    font-size: 12px;
+    color: #888;
+    background: #1a1a1a;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .encargada-section {
+    padding: 16px 20px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .section-label {
+    font-size: 11px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .enc-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .enc-btn {
+    padding: 10px;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    background: #1a1a1a;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .enc-btn.active {
+    background: #f5c842;
+    color: #0e0e0e;
+    border-color: #f5c842;
+    font-weight: 600;
+  }
+
+  .section {
+    padding: 20px 20px 4px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #555;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .field {
+    margin-bottom: 12px;
+  }
+
+  .field label {
+    font-size: 12px;
+    color: #666;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .input-wrap {
+    display: flex;
+    align-items: center;
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 0 14px;
+    transition: border-color 0.15s;
+  }
+
+  .input-wrap:focus-within { border-color: #f5c842; }
+
+  .currency {
+    color: #555;
+    font-size: 16px;
+    margin-right: 6px;
+  }
+
+  input[type="number"] {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #f0ede8;
+    font-size: 20px;
+    font-weight: 600;
+    padding: 14px 0;
+    outline: none;
+    -moz-appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  .resumen-card {
+    margin: 16px 20px;
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .resumen-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 14px;
+  }
+
+  .resumen-row .label { color: #666; }
+  .resumen-row .value { color: #f0ede8; font-weight: 500; }
+
+  .resumen-divider {
+    height: 1px;
+    background: #222;
+    margin: 8px 0;
+  }
+
+  .resumen-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 4px;
+  }
+
+  .resumen-total .label { font-size: 13px; color: #888; font-weight: 600; }
+  .resumen-total .value { font-size: 22px; font-weight: 700; color: #f5c842; }
+
+  .alerta {
+    margin: 0 20px 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    display: none;
+  }
+
+  .alerta.ok { background: #1a2a1a; color: #6fcf6f; border: 1px solid #2d5a2d; }
+  .alerta.error { background: #2a1a1a; color: #cf6f6f; border: 1px solid #5a2d2d; }
+
+  .gastos-section {
+    padding: 0 20px;
+  }
+
+  .gasto-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+  }
+
+  .gasto-concepto {
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 10px;
+    color: #f0ede8;
+    font-size: 14px;
+    padding: 12px;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .gasto-concepto:focus { border-color: #f5c842; }
+
+  .gasto-monto-wrap {
+    display: flex;
+    align-items: center;
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 0 10px;
+    width: 110px;
+  }
+
+  .gasto-monto-wrap:focus-within { border-color: #f5c842; }
+
+  .gasto-monto {
+    background: transparent;
+    border: none;
+    color: #f0ede8;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 0;
+    outline: none;
+    width: 80px;
+    -moz-appearance: textfield;
+  }
+
+  .gasto-monto::-webkit-inner-spin-button,
+  .gasto-monto::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  .add-gasto-btn {
+    width: 100%;
+    padding: 12px;
+    background: #1a1a1a;
+    border: 1px dashed #333;
+    border-radius: 12px;
+    color: #555;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 4px;
+    margin-bottom: 16px;
+  }
+
+  .ops-section {
+    padding: 0 20px 16px;
+  }
+
+  .ops-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .ops-item {
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 14px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .ops-item.checked {
+    background: #1a2a1a;
+    border-color: #2d5a2d;
+  }
+
+  .ops-icon {
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid #333;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 13px;
+  }
+
+  .ops-item.checked .ops-icon {
+    background: #3d8b3d;
+    border-color: #3d8b3d;
+  }
+
+  .ops-label {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.3;
+  }
+
+  .ops-item.checked .ops-label { color: #6fcf6f; }
+
+  textarea {
+    width: 100%;
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 12px;
+    color: #f0ede8;
+    font-size: 14px;
+    padding: 12px;
+    resize: none;
+    height: 70px;
+    font-family: inherit;
+    outline: none;
+  }
+
+  textarea:focus { border-color: #f5c842; }
+
+  .submit-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 20px;
+    background: #0e0e0e;
+    border-top: 1px solid #1a1a1a;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: #f5c842;
+    color: #0e0e0e;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .submit-btn:active { opacity: 0.8; }
+
+  .success-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .success-icon { font-size: 64px; margin-bottom: 20px; }
+  .success-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .success-sub { font-size: 14px; color: #666; margin-bottom: 32px; }
+
+  .neto-grande {
+    font-size: 48px;
+    font-weight: 800;
+    color: #f5c842;
+    margin-bottom: 4px;
+  }
+
+  .neto-label { font-size: 13px; color: #555; }
+</style>
+</head>
+<body>
+
+<div id="form-view">
+  <header>
+    <div class="header-top">
+      <div class="logo">⚡ <span>Trueno</span></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="fecha-badge" id="fecha-display"></div>
+        <a href="index.html" style="font-size:13px;color:#555;text-decoration:none">← Menú</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Encargada -->
+  <div class="encargada-section">
+    <span class="section-label">¿Quién hace el corte?</span>
+    <div class="enc-btns">
+      <button class="enc-btn" onclick="setEnc('Melanie', this)">Melanie</button>
+      <button class="enc-btn" onclick="setEnc('Daniela', this)">Daniela</button>
+      <button class="enc-btn" onclick="setEnc('Daniel', this)">Daniel</button>
+      <button class="enc-btn" onclick="setEnc('Izchel', this)">Izchel</button>
+    </div>
+  </div>
+
+  <!-- Ventas -->
+  <div class="section">
+    <div class="section-title">💰 Ventas del día</div>
+    <div class="field">
+      <label>Ventas en efectivo</label>
+      <div class="input-wrap">
+        <span class="currency">$</span>
+        <input type="number" id="ventas-efectivo" placeholder="0" oninput="calcular()">
+      </div>
+    </div>
+    <div class="field">
+      <label>Ventas con tarjeta</label>
+      <div class="input-wrap">
+        <span class="currency">$</span>
+        <input type="number" id="ventas-tarjeta" placeholder="0" oninput="calcular()">
+      </div>
+    </div>
+  </div>
+
+  <!-- Propinas -->
+  <div class="section">
+    <div class="section-title">🙌 Propinas</div>
+    <div class="field">
+      <label>Propinas en efectivo</label>
+      <div class="input-wrap">
+        <span class="currency">$</span>
+        <input type="number" id="propinas-efectivo" placeholder="0" oninput="calcular()">
+      </div>
+    </div>
+    <div class="field">
+      <label>Propinas con tarjeta</label>
+      <div class="input-wrap">
+        <span class="currency">$</span>
+        <input type="number" id="propinas-tarjeta" placeholder="0" oninput="calcular()">
+      </div>
+    </div>
+  </div>
+
+  <!-- Fondo de caja -->
+  <div class="section">
+    <div class="section-title">🏦 Fondo de caja</div>
+    <div class="field">
+      <label>Fondo inicial del día</label>
+      <div class="input-wrap">
+        <span class="currency">$</span>
+        <input type="number" id="fondo-inicial" placeholder="500" value="500" oninput="calcular()">
+      </div>
+    </div>
+    <div class="field">
+      <label>Efectivo en caja al cierre</label>
+      <div class="input-wrap">
+        <span class="currency">$</span>
+        <input type="number" id="efectivo-cierre" placeholder="0" oninput="calcular()">
+      </div>
+    </div>
+    <div class="alerta" id="alerta-caja"></div>
+  </div>
+
+  <!-- Gastos -->
+  <div class="section">
+    <div class="section-title">🧾 Gastos del día</div>
+  </div>
+  <div class="gastos-section" id="gastos-container">
+    <div class="gasto-item">
+      <input type="text" class="gasto-concepto" placeholder="¿Qué se compró?" oninput="calcular()">
+      <div class="gasto-monto-wrap"><span class="currency" style="font-size:14px">$</span><input type="number" class="gasto-monto" placeholder="0" oninput="calcular()"></div>
+    </div>
+  </div>
+  <div class="gastos-section">
+    <button class="add-gasto-btn" onclick="agregarGasto()">+ Agregar otro gasto</button>
+  </div>
+
+  <!-- Resumen -->
+  <div class="resumen-card" id="resumen">
+    <div class="resumen-row"><span class="label">Total ventas</span><span class="value" id="r-ventas">$0</span></div>
+    <div class="resumen-row"><span class="label">Total propinas</span><span class="value" id="r-propinas">$0</span></div>
+    <div class="resumen-row"><span class="label">Total gastos</span><span class="value" id="r-gastos">$0</span></div>
+    <div class="resumen-divider"></div>
+    <div class="resumen-total"><span class="label">NETO DEL DÍA</span><span class="value" id="r-neto">$0</span></div>
+  </div>
+
+  <!-- Operación -->
+  <div class="section">
+    <div class="section-title">✅ Operación</div>
+  </div>
+  <div class="ops-section">
+    <div class="ops-grid">
+      <div class="ops-item" onclick="toggleOps(this)"><div class="ops-icon"></div><div class="ops-label">¿Se selló FaveCard?</div></div>
+      <div class="ops-item" onclick="toggleOps(this)"><div class="ops-icon"></div><div class="ops-label">¿Se pidió reseña Google?</div></div>
+    </div>
+  </div>
+
+  <!-- Notas -->
+  <div class="section">
+    <div class="section-title">📝 Notas</div>
+  </div>
+  <div class="ops-section">
+    <textarea id="notas" placeholder="¿Pasó algo importante hoy?"></textarea>
+  </div>
+
+  <div class="submit-bar">
+    <button class="submit-btn" id="submit-btn" onclick="enviar()">Registrar corte</button>
+  </div>
+</div>
+
+<div class="success-screen" id="success-screen">
+  <div class="success-icon">⚡</div>
+  <div class="neto-grande" id="neto-final">$0</div>
+  <div class="neto-label">neto del día</div>
+  <br><br>
+  <div class="success-title">¡Corte registrado!</div>
+  <div class="success-sub">Ya quedó guardado en Notion.</div>
+</div>
+
+<script>
+  let encargada = '';
+
+  const hoy = new Date();
+  const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
+  document.getElementById('fecha-display').textContent = hoy.toLocaleDateString('es-MX', opciones);
+
+  function setEnc(nombre, btn) {
+    encargada = nombre;
+    document.querySelectorAll('.enc-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function val(id) { return parseFloat(document.getElementById(id).value) || 0; }
+  function fmt(n) { return '$' + n.toLocaleString('es-MX', {minimumFractionDigits: 0}); }
+
+  function calcular() {
+    const ventas = val('ventas-efectivo') + val('ventas-tarjeta');
+    const propinas = val('propinas-efectivo') + val('propinas-tarjeta');
+
+    let totalGastos = 0;
+    document.querySelectorAll('.gasto-monto').forEach(i => { totalGastos += parseFloat(i.value) || 0; });
+
+    const neto = ventas + propinas - totalGastos;
+
+    document.getElementById('r-ventas').textContent = fmt(ventas);
+    document.getElementById('r-propinas').textContent = fmt(propinas);
+    document.getElementById('r-gastos').textContent = fmt(totalGastos);
+    document.getElementById('r-neto').textContent = fmt(neto);
+
+    // Alerta de caja
+    const fondo = val('fondo-inicial');
+    const cierre = val('efectivo-cierre');
+    const diff = cierre - fondo;
+    const alerta = document.getElementById('alerta-caja');
+
+    if (document.getElementById('efectivo-cierre').value) {
+      alerta.style.display = 'block';
+      if (diff === 0) {
+        alerta.className = 'alerta ok';
+        alerta.textContent = '✅ Caja cuadrada perfecta';
+      } else if (diff > 0) {
+        alerta.className = 'alerta ok';
+        alerta.textContent = `✅ Sobran $${diff} en caja`;
+      } else {
+        alerta.className = 'alerta error';
+        alerta.textContent = `⚠️ Faltan $${Math.abs(diff)} en caja — revisar`;
+      }
+    } else {
+      alerta.style.display = 'none';
+    }
+  }
+
+  function agregarGasto() {
+    const container = document.getElementById('gastos-container');
+    const div = document.createElement('div');
+    div.className = 'gasto-item';
+    div.innerHTML = `
+      <input type="text" class="gasto-concepto" placeholder="¿Qué se compró?" oninput="calcular()">
+      <div class="gasto-monto-wrap"><span class="currency" style="font-size:14px">$</span><input type="number" class="gasto-monto" placeholder="0" oninput="calcular()"></div>
+    `;
+    container.appendChild(div);
+  }
+
+  function toggleOps(el) {
+    el.classList.toggle('checked');
+    el.querySelector('.ops-icon').textContent = el.classList.contains('checked') ? '✓' : '';
+  }
+
+  async function enviar() {
+    if (!encargada) { alert('¿Quién hace el corte? Selecciona tu nombre.'); return; }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    const ventas = val('ventas-efectivo') + val('ventas-tarjeta');
+    const propinas = val('propinas-efectivo') + val('propinas-tarjeta');
+
+    let totalGastos = 0;
+    let detalleGastos = [];
+    document.querySelectorAll('.gasto-item').forEach(item => {
+      const concepto = item.querySelector('.gasto-concepto').value;
+      const monto = parseFloat(item.querySelector('.gasto-monto').value) || 0;
+      if (concepto || monto) {
+        totalGastos += monto;
+        detalleGastos.push(`${concepto || 'Sin concepto'}: $${monto}`);
+      }
+    });
+
+    const neto = ventas + propinas - totalGastos;
+    const favecard = document.querySelectorAll('.ops-item')[0].classList.contains('checked');
+    const reseña = document.querySelectorAll('.ops-item')[1].classList.contains('checked');
+    const diff = val('efectivo-cierre') - val('fondo-inicial');
+
+    const row = [
+      hoy.toLocaleDateString('es-MX'),
+      encargada,
+      val('ventas-efectivo'),
+      val('ventas-tarjeta'),
+      ventas,
+      val('propinas-efectivo'),
+      val('propinas-tarjeta'),
+      propinas,
+      ventas + propinas,
+      val('fondo-inicial'),
+      val('efectivo-cierre'),
+      diff,
+      totalGastos,
+      detalleGastos.join(' | '),
+      neto,
+      diff === 0 ? '✅' : '❌',
+      favecard ? '✅' : '❌',
+      reseña ? '✅' : '❌',
+      document.getElementById('notas').value || '',
+      diff === 0 ? '✅ Completo' : '⚠️ Revisar'
+    ];
+
+    try {
+      await fetch('https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: 'corte', row })
+      });
+
+      document.getElementById('neto-final').textContent = fmt(neto);
+      document.getElementById('form-view').style.display = 'none';
+      document.getElementById('success-screen').style.display = 'flex';
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = 'Registrar corte';
+      alert('Error al enviar: ' + e.message);
+    }
+  }
+</script>
+</body>
+</html>

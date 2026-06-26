@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Consignación — Trueno ⚡</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e0e0e; position: sticky; top: 0; z-index: 10; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.logo span { color: #f5c842; }
+
+/* Category home */
+#cat-home { padding: 16px; }
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.cat-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 16px; padding: 20px 16px; text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; cursor: pointer; transition: border-color 0.15s; -webkit-tap-highlight-color: transparent; }
+.cat-card:active { background: #1a1a1a; }
+.cat-icon { font-size: 32px; }
+.cat-name { font-size: 15px; font-weight: 700; }
+.cat-count { font-size: 12px; color: #555; }
+.cat-add { border: 2px dashed #2a2a2a; color: #444; align-items: center; justify-content: center; }
+.cat-add:active { border-color: #f5c842; }
+
+/* Category view */
+#cat-view { display: none; }
+.tabs { display: flex; }
+.tab { flex: 1; padding: 10px 8px; text-align: center; font-size: 13px; color: #555; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+.tab.active { color: #f5c842; border-bottom-color: #f5c842; font-weight: 600; }
+
+.panel { display: none; padding: 14px 16px 110px; }
+.panel.active { display: block; }
+
+.search-wrap { display: flex; align-items: center; background: #141414; border: 1px solid #222; border-radius: 12px; padding: 0 14px; margin-bottom: 10px; }
+.search-wrap:focus-within { border-color: #f5c842; }
+.search-wrap input { flex: 1; background: transparent; border: none; color: #f0ede8; font-size: 15px; padding: 11px 0 11px 8px; outline: none; font-family: inherit; }
+.search-wrap input::placeholder { color: #444; }
+
+.filter-row { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 2px; }
+.filter-row::-webkit-scrollbar { display: none; }
+.filter-btn { padding: 6px 14px; border: 1px solid #2a2a2a; border-radius: 20px; background: #141414; color: #666; font-size: 13px; cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0; }
+.filter-btn.active { background: #f5c842; color: #0e0e0e; border-color: #f5c842; font-weight: 600; }
+
+.product-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: border-color 0.15s; -webkit-tap-highlight-color: transparent; }
+.product-card.selected { border-color: #f5c842; background: #1a1600; }
+.product-card.out-of-stock { opacity: 0.4; cursor: not-allowed; }
+.prod-emoji { font-size: 24px; flex-shrink: 0; }
+.prod-info { flex: 1; min-width: 0; }
+.prod-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prod-sub { font-size: 12px; color: #555; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prod-desc { font-size: 11px; color: #3a3a3a; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prod-right { text-align: right; flex-shrink: 0; }
+.prod-precio { font-size: 15px; font-weight: 700; color: #f5c842; }
+.stock-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-top: 4px; }
+.stock-ok { background: #1a2a1a; color: #6fcf6f; }
+.stock-low { background: #2a1e00; color: #f5c842; }
+.stock-zero { background: #2a1a1a; color: #cf6f6f; }
+
+.section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin: 14px 0 8px; }
+.enc-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.enc-btn { padding: 10px; border: 1px solid #2a2a2a; border-radius: 10px; background: #1a1a1a; color: #888; font-size: 14px; cursor: pointer; transition: all 0.15s; text-align: center; }
+.enc-btn.active { background: #f5c842; color: #0e0e0e; border-color: #f5c842; font-weight: 600; }
+
+.selected-card { background: #1a1600; border: 1px solid #3a2e00; border-radius: 14px; padding: 14px; margin-bottom: 14px; display: none; }
+.selected-card.visible { display: block; }
+.sel-title { font-size: 14px; font-weight: 700; }
+.sel-sub { font-size: 12px; color: #666; margin-top: 2px; }
+.sel-pv { font-size: 28px; font-weight: 800; color: #f5c842; margin-top: 10px; }
+
+.submit-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px 20px; background: #0e0e0e; border-top: 1px solid #1a1a1a; z-index: 5; }
+.submit-btn { width: 100%; padding: 16px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; }
+.submit-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.toast { position: fixed; bottom: 90px; left: 16px; right: 16px; background: #1a2a1a; border: 1px solid #2d5a2d; color: #6fcf6f; padding: 14px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; z-index: 500; text-align: center; }
+.toast.err { background: #2a1a1a; border-color: #5a2d2d; color: #cf6f6f; }
+.toast.show { display: block; }
+
+/* ── ADMIN ── */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 300; display: none; align-items: center; justify-content: center; padding: 24px; }
+.overlay.open { display: flex; }
+.modal-box { background: #141414; border: 1px solid #2a2a2a; border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 360px; }
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.modal-sub { font-size: 13px; color: #555; margin-bottom: 20px; }
+.pin-input { width: 100%; background: #0e0e0e; border: 1px solid #333; border-radius: 12px; color: #f0ede8; font-size: 18px; padding: 14px; outline: none; font-family: inherit; letter-spacing: 2px; }
+.pin-input:focus { border-color: #f5c842; }
+.modal-btn { width: 100%; padding: 14px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 12px; }
+.modal-cancel { width: 100%; padding: 10px; background: transparent; border: none; color: #555; font-size: 13px; cursor: pointer; margin-top: 6px; }
+.pin-error { color: #cf6f6f; font-size: 13px; margin-top: 8px; display: none; text-align: center; }
+
+#admin-panel { position: fixed; inset: 0; background: #0e0e0e; z-index: 250; display: none; overflow-y: auto; padding-bottom: 40px; }
+#admin-panel.open { display: block; }
+.admin-header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e0e0e; position: sticky; top: 0; z-index: 10; }
+.admin-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.admin-badge { background: #1a1600; border: 1px solid #f5c842; color: #f5c842; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+.logout-btn { font-size: 13px; color: #555; cursor: pointer; background: none; border: none; padding: 4px 0; }
+.admin-tabs { display: flex; }
+.admin-tab { flex: 1; padding: 10px 6px; text-align: center; font-size: 12px; color: #555; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+.admin-tab.active { color: #f5c842; border-bottom-color: #f5c842; font-weight: 600; }
+.admin-panel-inner { padding: 14px 16px 60px; }
+
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.kpi-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; }
+.kpi-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: #555; }
+.kpi-val { font-size: 22px; font-weight: 800; margin-top: 6px; }
+.kpi-sub { font-size: 11px; color: #444; margin-top: 2px; }
+.c-gold { color: #f5c842; } .c-green { color: #6fcf6f; } .c-blue { color: #6fa6cf; }
+
+.venta-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #1a1a1a; }
+.venta-row:last-child { border-bottom: none; }
+.venta-info { flex: 1; min-width: 0; }
+.venta-prod { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.venta-meta { font-size: 11px; color: #555; margin-top: 2px; }
+.venta-right { text-align: right; flex-shrink: 0; }
+.venta-pv { font-size: 14px; font-weight: 700; color: #f5c842; }
+.venta-split { font-size: 10px; color: #444; margin-top: 2px; }
+
+.btn-green { width: 100%; padding: 14px; background: #1a2a1a; border: 1px solid #2d5a2d; border-radius: 14px; color: #6fcf6f; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+.btn-outline { width: 100%; padding: 12px; background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; color: #888; font-size: 14px; cursor: pointer; margin-top: 8px; }
+.btn-blue { width: 100%; padding: 14px; background: #0f2233; border: 1px solid #1a4060; border-radius: 14px; color: #6fa6cf; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+.btn-red { width: 100%; padding: 12px; background: #2a1a1a; border: 1px solid #5a2d2d; border-radius: 12px; color: #cf6f6f; font-size: 13px; cursor: pointer; margin-top: 8px; }
+
+.form-field { margin-bottom: 12px; }
+.form-field label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+.form-input { width: 100%; background: #141414; border: 1px solid #222; border-radius: 10px; color: #f0ede8; font-size: 15px; padding: 12px 14px; outline: none; font-family: inherit; }
+.form-input:focus { border-color: #f5c842; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.form-select { width: 100%; background: #141414; border: 1px solid #222; border-radius: 10px; color: #f0ede8; font-size: 15px; padding: 12px 14px; outline: none; font-family: inherit; appearance: none; }
+.btn-submit-form { width: 100%; padding: 14px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 4px; }
+
+.upload-zone { border: 2px dashed #2a2a2a; border-radius: 14px; padding: 30px 20px; text-align: center; cursor: pointer; transition: border-color 0.15s; margin-bottom: 12px; }
+.upload-zone:hover, .upload-zone.drag { border-color: #f5c842; }
+.upload-zone input { display: none; }
+.upload-icon { font-size: 36px; margin-bottom: 10px; }
+.upload-text { font-size: 14px; color: #888; }
+.upload-sub { font-size: 12px; color: #444; margin-top: 4px; }
+
+.preview-box { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 12px; margin-bottom: 12px; max-height: 220px; overflow-y: auto; }
+.preview-row { display: flex; gap: 8px; padding: 7px 0; border-bottom: 1px solid #1a1a1a; font-size: 12px; align-items: center; }
+.preview-row:last-child { border-bottom: none; }
+.preview-artista { flex: 1; color: #f0ede8; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.preview-album { flex: 1; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.preview-tipo { color: #888; font-size: 11px; flex-shrink: 0; }
+.preview-pv { color: #f5c842; font-weight: 700; flex-shrink: 0; }
+
+.custom-prod-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+.del-btn { background: #2a1a1a; border: none; color: #cf6f6f; font-size: 16px; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; flex-shrink: 0; }
+
+.bottom-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 400; display: none; align-items: flex-end; }
+.bottom-overlay.open { display: flex; }
+.stock-modal { background: #141414; border-radius: 20px 20px 0 0; padding: 24px 20px; width: 100%; }
+.stock-modal-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.stock-modal-sub { font-size: 12px; color: #555; margin-bottom: 20px; }
+.stock-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.stock-count { font-size: 48px; font-weight: 800; color: #f5c842; text-align: center; flex: 1; }
+.stock-btn { width: 56px; height: 56px; border-radius: 50%; border: none; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.s-minus { background: #2a1a1a; color: #cf6f6f; }
+.s-plus { background: #1a2a1a; color: #6fcf6f; }
+.stock-save { width: 100%; padding: 14px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 20px; }
+
+.empty { text-align: center; color: #444; padding: 40px 20px; font-size: 14px; }
+.section-box { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+.section-box-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+
+/* Category picker in admin */
+.cat-pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.cat-pill { padding: 6px 14px; border: 1px solid #2a2a2a; border-radius: 20px; background: #1a1a1a; color: #888; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.cat-pill.active { background: #f5c842; color: #0e0e0e; border-color: #f5c842; font-weight: 600; }
+.cat-x { font-size: 11px; opacity: 0.6; }
+
+/* Stock quantity input in import */
+.stock-qty-box { background: #1a1600; border: 1px solid #3a2e00; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.stock-qty-box p { font-size: 13px; color: #aaa; margin-bottom: 10px; }
+.qty-row { display: flex; align-items: center; gap: 10px; }
+.qty-input { flex: 1; background: #141414; border: 1px solid #333; border-radius: 10px; color: #f5c842; font-size: 24px; font-weight: 800; padding: 10px 14px; outline: none; font-family: inherit; text-align: center; }
+.qty-input:focus { border-color: #f5c842; }
+</style>
+</head>
+<body>
+
+<!-- ═══ WORKER HEADER ═══ -->
+<header id="main-header">
+  <div class="header-top">
+    <div class="logo">⚡ <span>Trueno</span></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="index.html" style="font-size:13px;color:#555;text-decoration:none">← Menú</a>
+      <button onclick="openAdminLogin()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#333" title="Admin">🔐</button>
+    </div>
+  </div>
+  <!-- tabs only visible inside a category -->
+  <div id="cat-tabs" style="display:none">
+    <div class="tabs">
+      <div class="tab active" onclick="setTab('catalogo')">📦 Catálogo</div>
+      <div class="tab" onclick="setTab('vender')">💸 Vender</div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ CATEGORY HOME ═══ -->
+<div id="cat-home">
+  <div style="padding:14px 16px 4px;font-size:11px;color:#444;text-transform:uppercase;letter-spacing:1px">Categorías</div>
+  <div class="cat-grid" id="cat-grid"></div>
+</div>
+
+<!-- ═══ CATEGORY VIEW ═══ -->
+<div id="cat-view">
+  <!-- Catálogo -->
+  <div class="panel active" id="panel-catalogo">
+    <div class="search-wrap" style="margin-top:4px">
+      <span style="color:#444;font-size:16px">🔍</span>
+      <input type="search" id="cat-search" placeholder="Buscar..." oninput="renderCatalogo()">
+    </div>
+    <div class="filter-row" id="cat-tipo-filters"></div>
+    <div id="catalogo-list"></div>
+  </div>
+
+  <!-- Vender -->
+  <div class="panel" id="panel-vender">
+    <div class="section-label">¿Quién vende?</div>
+    <div class="enc-btns">
+      <button class="enc-btn" onclick="setVendedor('Melanie',this)">Melanie</button>
+      <button class="enc-btn" onclick="setVendedor('Daniela',this)">Daniela</button>
+      <button class="enc-btn" onclick="setVendedor('Daniel',this)">Daniel</button>
+      <button class="enc-btn" onclick="setVendedor('Izchel',this)">Izchel</button>
+    </div>
+    <div class="selected-card" id="sel-card">
+      <div class="sel-title" id="sel-titulo">—</div>
+      <div class="sel-sub" id="sel-sub">—</div>
+      <div class="sel-pv" id="sel-pv">—</div>
+    </div>
+    <div class="section-label">Selecciona el producto</div>
+    <div class="search-wrap">
+      <span style="color:#444;font-size:16px">🔍</span>
+      <input type="search" id="venta-search" placeholder="Buscar..." oninput="renderVentaList()">
+    </div>
+    <div class="filter-row" id="venta-tipo-filters"></div>
+    <div id="venta-list"></div>
+    <div style="height:80px"></div>
+    <div class="submit-bar">
+      <button class="submit-btn" id="btn-vender" onclick="registrarVenta()" disabled>Registrar venta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN LOGIN ═══ -->
+<div class="overlay" id="admin-login-overlay">
+  <div class="modal-box">
+    <div class="modal-title">🔐 Acceso Admin</div>
+    <div class="modal-sub">Solo para Izchel</div>
+    <input class="pin-input" type="password" id="pin-input" placeholder="Contraseña" onkeydown="if(event.key==='Enter')checkPin()">
+    <div class="pin-error" id="pin-error">Contraseña incorrecta</div>
+    <button class="modal-btn" onclick="checkPin()">Entrar</button>
+    <button class="modal-cancel" onclick="closeAdminLogin()">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══ ADD CATEGORY MODAL ═══ -->
+<div class="overlay" id="addcat-overlay">
+  <div class="modal-box">
+    <div class="modal-title">Nueva categoría</div>
+    <div class="modal-sub">¿Qué producto nuevo va a entrar?</div>
+    <div class="form-field" style="margin-bottom:8px">
+      <label>Nombre</label>
+      <input class="form-input" type="text" id="newcat-name" placeholder="Ej: Velas, Ropa, Libros...">
+    </div>
+    <div class="form-field">
+      <label>Emoji</label>
+      <input class="form-input" type="text" id="newcat-icon" placeholder="🕯️" maxlength="2" style="font-size:24px;text-align:center">
+    </div>
+    <button class="modal-btn" onclick="agregarCategoria()">Agregar</button>
+    <button class="modal-cancel" onclick="document.getElementById('addcat-overlay').classList.remove('open')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══ ADMIN PANEL ═══ -->
+<div id="admin-panel">
+  <div class="admin-header">
+    <div class="admin-header-top">
+      <div class="logo">⚡ <span>Trueno</span> <span class="admin-badge">ADMIN</span></div>
+      <button class="logout-btn" onclick="cerrarAdmin()">Salir 🔓</button>
+    </div>
+    <div class="admin-tabs">
+      <div class="admin-tab active" onclick="setAdminTab('reporte')">📊 Reporte</div>
+      <div class="admin-tab" onclick="setAdminTab('inventario')">📦 Inventario</div>
+      <div class="admin-tab" onclick="setAdminTab('productos')">➕ Productos</div>
+    </div>
+  </div>
+
+  <!-- Reporte -->
+  <div class="admin-panel-inner" id="apanel-reporte">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 12px">
+      <div>
+        <div style="font-size:11px;color:#555" id="rep-semana-label">Semana actual</div>
+        <div style="font-size:18px;font-weight:700" id="rep-rango"></div>
+      </div>
+    </div>
+    <!-- Category filter in report -->
+    <div class="filter-row" id="rep-cat-filters" style="margin-bottom:14px"></div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">Total vendido</div><div class="kpi-val c-gold" id="rep-total">$0</div><div class="kpi-sub" id="rep-count">0 piezas</div></div>
+      <div class="kpi-card"><div class="kpi-label">De Trueno</div><div class="kpi-val c-green" id="rep-trueno">$0</div><div class="kpi-sub">Comisión</div></div>
+      <div class="kpi-card" style="grid-column:1/-1"><div class="kpi-label">Del proveedor (CLIP)</div><div class="kpi-val c-blue" id="rep-proveedor">$0</div><div class="kpi-sub">A liquidar</div></div>
+    </div>
+    <div class="section-label">Ventas de la semana</div>
+    <div id="rep-ventas-list"><div class="empty">Sin ventas esta semana</div></div>
+    <button class="btn-blue" onclick="exportExcel()">📥 Exportar a Excel</button>
+    <button class="btn-green" id="btn-sheets" onclick="enviarSheets()">📊 Enviar a Google Sheets</button>
+    <button class="btn-outline" onclick="semanaOffset--;renderReporte()">← Semana anterior</button>
+    <button class="btn-outline" onclick="if(semanaOffset<0){semanaOffset++;renderReporte()}">Semana siguiente →</button>
+  </div>
+
+  <!-- Inventario -->
+  <div class="admin-panel-inner" id="apanel-inventario" style="display:none">
+    <div class="filter-row" id="inv-cat-filters" style="margin-bottom:10px"></div>
+    <div class="search-wrap" style="margin-top:4px">
+      <span style="color:#444;font-size:16px">🔍</span>
+      <input type="search" id="inv-search" placeholder="Buscar..." oninput="renderInventario()">
+    </div>
+    <div class="filter-row" id="inv-tipo-filters"></div>
+    <div id="inv-list"></div>
+  </div>
+
+  <!-- Productos -->
+  <div class="admin-panel-inner" id="apanel-productos" style="display:none">
+
+    <!-- Subir Excel -->
+    <div class="section-box">
+      <div class="section-box-title">📂 Subir Excel para actualizar catálogo</div>
+      <div class="form-field">
+        <label>Categoría del archivo</label>
+        <select class="form-select" id="import-cat"></select>
+      </div>
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="handleDrop(event)">
+        <input type="file" id="file-input" accept=".xlsx,.xls" onchange="handleFile(this.files[0])">
+        <div class="upload-icon">📄</div>
+        <div class="upload-text">Toca para seleccionar el archivo</div>
+        <div class="upload-sub">Formato: hojas VINYL y CD (o columnas: Artista, Nombre, Precio...)</div>
+      </div>
+      <div id="preview-area" style="display:none">
+        <div style="font-size:13px;color:#888;margin-bottom:8px" id="preview-count"></div>
+        <div class="preview-box" id="preview-list"></div>
+        <!-- Stock quantity input (shown when file has no stock column) -->
+        <div class="stock-qty-box" id="import-stock-box">
+          <p>¿Cuántas piezas hay de cada producto?</p>
+          <div class="qty-row">
+            <button class="stock-btn s-minus" onclick="cambiarImportQty(-1)">−</button>
+            <input class="qty-input" type="number" id="import-qty" value="1" min="0">
+            <button class="stock-btn s-plus" onclick="cambiarImportQty(1)">+</button>
+          </div>
+        </div>
+        <button class="btn-submit-form" onclick="importarProductos()">Agregar al catálogo</button>
+        <button class="btn-outline" onclick="cancelarImport()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Agregar manual -->
+    <div class="section-box">
+      <div class="section-box-title">✏️ Agregar producto manualmente</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Categoría</label>
+          <select class="form-select" id="new-cat"></select>
+        </div>
+        <div class="form-field">
+          <label>Tipo / Variante</label>
+          <input class="form-input" type="text" id="new-tipo" placeholder="Ej: Vinilo, Vela grande...">
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Nombre / Artista</label>
+        <input class="form-input" type="text" id="new-nombre" placeholder="Nombre del producto o artista">
+      </div>
+      <div class="form-field">
+        <label>Subtítulo / Álbum</label>
+        <input class="form-input" type="text" id="new-sub" placeholder="Álbum, colección, variante...">
+      </div>
+      <div class="form-field">
+        <label>Descripción (opcional)</label>
+        <input class="form-input" type="text" id="new-desc" placeholder="Color, edición especial...">
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Precio proveedor</label>
+          <input class="form-input" type="number" id="new-pp" placeholder="0" oninput="calcPrecios()">
+        </div>
+        <div class="form-field">
+          <label>Precio venta <span style="font-size:10px;color:#555">(auto)</span></label>
+          <input class="form-input" type="number" id="new-pv" placeholder="auto" style="color:#f5c842" oninput="recalcUtilidad()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Utilidad Trueno <span style="font-size:10px;color:#555">(auto)</span></label>
+          <input class="form-input" type="number" id="new-ut" placeholder="—" readonly style="color:#6fcf6f">
+        </div>
+        <div class="form-field">
+          <label>Piezas en stock</label>
+          <input class="form-input" type="number" id="new-stock" placeholder="0" min="0">
+        </div>
+      </div>
+      <button class="btn-submit-form" onclick="agregarProductoManual()">Agregar producto</button>
+    </div>
+
+    <!-- Gestionar categorías -->
+    <div class="section-box">
+      <div class="section-box-title">🗂️ Categorías</div>
+      <div id="cat-manage-list"></div>
+      <button class="btn-outline" onclick="document.getElementById('addcat-overlay').classList.add('open')">+ Nueva categoría</button>
+    </div>
+
+    <!-- Productos custom -->
+    <div id="custom-prods-section" style="display:none">
+      <div class="section-label">Productos agregados</div>
+      <div id="custom-prods-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Stock bottom modal -->
+<div class="bottom-overlay" id="stock-overlay" onclick="closeStockModal(event)">
+  <div class="stock-modal">
+    <div class="stock-modal-title" id="stock-modal-title">Producto</div>
+    <div class="stock-modal-sub">Ajustar piezas en inventario</div>
+    <div class="stock-row">
+      <button class="stock-btn s-minus" onclick="cambiarStock(-1)">−</button>
+      <div class="stock-count" id="stock-num">0</div>
+      <button class="stock-btn s-plus" onclick="cambiarStock(1)">+</button>
+    </div>
+    <button class="stock-save" onclick="guardarStock()">Guardar</button>
+    <button class="modal-cancel" onclick="cerrarStockModal()">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── Supabase ─────────────────────────────────────────────────────────────────
+const { createClient } = supabase
+const sb = createClient(
+  'https://axxbsjbywivolwluzvrd.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+)
+const GAS = 'https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec'
+const ADMIN_PASS = 'IZ9595iz'
+const TG_TOKEN = '8765854864:AAEuMxt5p264TL3LPHbQI89S6uqqyIEnQd8'
+const TG_CHAT = '8309237078'
+function tg(msg) {
+  fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ chat_id: TG_CHAT, text: msg, parse_mode: 'HTML' })
+  }).catch(()=>{})
+}
+
+// ─── Base catalog (Discos) ────────────────────────────────────────────────────
+const BASE_CATALOG = [
+  ['A Tribe Called Quest','Midnight Marauders',null,1010,690,103.5,'VINILO','Discos'],
+  ['Aaron Frazer','My God Has A Telephone/Live On','45 RPM 7 Inch',880,600,90,'VINILO','Discos'],
+  ['Aaron Frazer','Introducing…','Con Foto',1030,700,105,'VINILO','Discos'],
+  ['AC/DC','If You Want Blood',null,300,200,30,'VINILO','Discos'],
+  ['Air','Moon Safari',null,950,650,97.5,'VINILO','Discos'],
+  ['Alabama Shakes','Boys & Girls','Color Azul/Rosa',950,650,97.5,'VINILO','Discos'],
+  ['Amy Winehouse','Back To Black',null,1030,700,105,'VINILO','Discos'],
+  ['Anderson .Paak & Bruno Mars','An Evening With Silk Sonic',null,1130,770,115.5,'VINILO','Discos'],
+  ['Arctic Monkeys','AM','Gatefold, Foto Lyrics',1030,700,105,'VINILO','Discos'],
+  ['Art Blakey & The Jazz Messengers',"Moanin'",'180 gr Virgin Vinyl',730,500,75,'VINILO','Discos'],
+  ['Ásgeir','Sátt (Bury The Moon)','Con Poster-libro',1170,800,120,'VINILO','Discos'],
+  ['Aurora','The Gods We Can Touch','2 LP',1230,840,126,'VINILO','Discos'],
+  ['BADBADNOTGOOD','IV','Gatefold 2 LP + Tarjetita',1170,800,120,'VINILO','Discos'],
+  ['BADBADNOTGOOD','lll','Gatefold 2 LP',1100,750,112.5,'VINILO','Discos'],
+  ['BADBADNOTGOOD','Talk Memory','Gatefold 2 LP, 45 RPM',1170,800,120,'VINILO','Discos'],
+  ['Beach House','Depression Cherry',null,1030,700,105,'VINILO','Discos'],
+  ['Björk','Post',null,1060,720,108,'VINILO','Discos'],
+  ['Black Country, New Road','For The First Time','Booklet',1030,700,105,'VINILO','Discos'],
+  ['Black Flag','Damaged',null,1030,700,105,'VINILO','Discos'],
+  ['Black Pumas','Black Pumas','Color Blanco',1130,770,115.5,'VINILO','Discos'],
+  ['Black Sabbath','Vol. 4','Poster',300,200,30,'VINILO','Discos'],
+  ['Black Sabbath','Paranoid',null,410,280,42,'VINILO','Discos'],
+  ['Bob Seger','Greatest Hits','Regalo, Gatefold, 2 LP',950,650,97.5,'VINILO','Discos'],
+  ['Brittany Howard','Jaime','Color Arena',1100,750,112.5,'VINILO','Discos'],
+  ['Chet Faker','Thinking In Textures',null,1030,700,105,'VINILO','Discos'],
+  ['Childish Gambino','Awaken, My Love!',null,1190,810,121.5,'VINILO','Discos'],
+  ['Cigarettes After Sex','Cry','Foto',1030,700,105,'VINILO','Discos'],
+  ['Cigarettes After Sex','I.','EP',950,650,97.5,'VINILO','Discos'],
+  ['Cocteau Twins','Heaven Or Las Vegas',null,1060,720,108,'VINILO','Discos'],
+  ['Cream','Best of Cream',null,220,150,22.5,'VINILO','Discos'],
+  ['Cream','Disraeli Gears',null,300,200,30,'VINILO','Discos'],
+  ['Creedence Clearwater Revival','Pendulum',null,520,350,52.5,'VINILO','Discos'],
+  ['Creedence Clearwater Revival','Bayou Country',null,440,300,45,'VINILO','Discos'],
+  ['Creedence Clearwater Revival','Willy And The Poor Boys',null,440,300,45,'VINILO','Discos'],
+  ['Crumb','Locket',null,1000,680,102,'VINILO','Discos'],
+  ['Crystal Castles','lll',null,1170,800,120,'VINILO','Discos'],
+  ['Crystal Castles','Crystal Castles','2 LP',2490,1700,255,'VINILO','Discos'],
+  ['Culture Club','Colour By Numbers',null,590,400,60,'VINILO','Discos'],
+  ['De La Soul','3 Feet High And Rising','Color Amarillo, 2 LP',1230,840,126,'VINILO','Discos'],
+  ['Donna Summer','A Love Trilogy',null,220,150,22.5,'VINILO','Discos'],
+  ['Dua Lipa','Future Nostalgia','Carta lyrics',980,670,100.5,'VINILO','Discos'],
+  ['Durand Jones & The Indications','American Call Love','Poster',1060,720,108,'VINILO','Discos'],
+  ['Durand Jones & The Indications','Durand Jones & The Indications',null,950,650,97.5,'VINILO','Discos'],
+  ['Durand Jones & The Indications','Private Space',null,970,660,99,'VINILO','Discos'],
+  ['Durand Jones & The Indications','Flowers',null,910,620,93,'VINILO','Discos'],
+  ['Earth, Wind & Fire','The Best Of Earth, Wind & Fire Vol. I',null,730,500,75,'VINILO','Discos'],
+  ['Electric Light Orchestra','Discovery',null,520,350,52.5,'VINILO','Discos'],
+  ['Elvis Presley',"You'll Never Walk Alone",null,300,200,30,'VINILO','Discos'],
+  ['Explosions in the Sky','The Earth Is Not A Cold Dead Place','2 LP Grabado',1170,800,120,'VINILO','Discos'],
+  ['Fela Kuti','Zombie','EP',1030,700,105,'VINILO','Discos'],
+  ['FKJ','Ylang Ylang','45 RPM, Libro',1320,900,135,'VINILO','Discos'],
+  ['Fleetwood Mac','Rumors','Foto Libro, Transparente',1030,700,105,'VINILO','Discos'],
+  ['Gil Scott-Heron','The Revolution Will Not Be Televised','Compilación',950,650,97.5,'VINILO','Discos'],
+  ['Gil Scott-Heron & Brian Jackson','The First Minute Of A New Day','Gatefold',590,400,60,'VINILO','Discos'],
+  ['Gorillaz','Cracked Island','Poster',1030,700,105,'VINILO','Discos'],
+  ['Guru','Jazzmatazz Vol.1',null,950,650,97.5,'VINILO','Discos'],
+  ['GusGus','Mobile Home',null,1320,900,135,'VINILO','Discos'],
+  ['GusGus','Arabian Horse','2 LP',1760,1200,180,'VINILO','Discos'],
+  ['GusGus','México','Sticker',1460,1000,150,'VINILO','Discos'],
+  ['Hollie Cook','Twice',null,1100,750,112.5,'VINILO','Discos'],
+  ['Hollie Cook','Hollie Cook',null,880,600,90,'VINILO','Discos'],
+  ['Home Alone','Christmas','Rojo Translúcido',950,650,97.5,'VINILO','Discos'],
+  ['Hozier','Hozier','2 LP + 1 CD',1100,750,112.5,'VINILO','Discos'],
+  ['Incredible Bongo Band','Bongo Rock',null,950,650,97.5,'VINILO','Discos'],
+  ['Interpol','The Other Side Of Make-Believe',null,950,650,97.5,'VINILO','Discos'],
+  ['J Dilla','Donuts','2 LP',1100,750,112.5,'VINILO','Discos'],
+  ['Jamie xx','In Waves',null,1030,700,105,'VINILO','Discos'],
+  ['Jamie xx','In Colours',null,1110,760,114,'VINILO','Discos'],
+  ['Jamie xx','All Under One Roof Raving','45 RPM',590,400,60,'VINILO','Discos'],
+  ['Jamie xx & Gil Scott-Heron',"We're Now Here",'Poster',730,500,75,'VINILO','Discos'],
+  ['Janis Joplin','Greatest Hits',null,440,300,45,'VINILO','Discos'],
+  ['Jeff Buckley','Grace','Con Foto',1030,700,105,'VINILO','Discos'],
+  ['Jefferson Airplane','Crown Of Creation',null,220,150,22.5,'VINILO','Discos'],
+  ['John Lennon','Imagine',null,660,450,67.5,'VINILO','Discos'],
+  ['John Lennon','Shaved Fish',null,660,450,67.5,'VINILO','Discos'],
+  ['Johnny Cash','Live At San Quentin',null,300,200,30,'VINILO','Discos'],
+  ['Jimi Hendrix','Live At Monterey','Con Foto',950,650,97.5,'VINILO','Discos'],
+  ['Jimi Hendrix','Are You Experienced?','Con Foto',1030,700,105,'VINILO','Discos'],
+  ['John Coltrane','A Love Supreme','Azul, Gatefold',1030,700,105,'VINILO','Discos'],
+  ['John Williams','E.T. The Extra-Terrestrial',null,910,620,93,'VINILO','Discos'],
+  ['Jungle','Jungle',null,1100,750,112.5,'VINILO','Discos'],
+  ['Justice','Audio, Video, Disco','Gatefold 2 LP + Bonus + CD',1320,900,135,'VINILO','Discos'],
+  ['Justice','Hyperdrama','Gatefold 2 LP',1170,800,120,'VINILO','Discos'],
+  ['Justice','Cross','Gatefold 2 LP',1320,900,135,'VINILO','Discos'],
+  ['KC & The Sunshine Band','KC & The Sunshine Band',null,370,250,37.5,'VINILO','Discos'],
+  ['Kendrick Lamar','DAMN.','2 LP, Gatefold',1230,840,126,'VINILO','Discos'],
+  ['Khalid','American Teen','2 LP Color Azul translúcido',1170,800,120,'VINILO','Discos'],
+  ['Khruangbin','The Universe Smiles Upon You',null,1060,720,108,'VINILO','Discos'],
+  ['Khruangbin','Mordechai',null,1060,720,108,'VINILO','Discos'],
+  ['Khruangbin','Con Todo El Mundo',null,950,650,97.5,'VINILO','Discos'],
+  ['Khruangbin & Leon Bridges','Texas Sun',null,1030,700,105,'VINILO','Discos'],
+  ['Khruangbin & Leon Bridges','Texas Moon',null,1030,700,105,'VINILO','Discos'],
+  ['King Gizzard & The Lizard Wizard','Flying Microtonal Banana','Color Verde, Con Folder',1160,790,118.5,'VINILO','Discos'],
+  ['King Gizzard & The Lizard Wizard',"Infest The Rats' Nest",'Gatefold + Poster + Rojo/Negro',1160,790,118.5,'VINILO','Discos'],
+  ['King Gizzard & The Lizard Wizard','Fishing For Fishies','Poster, Color Verde Tóxico',1160,790,118.5,'VINILO','Discos'],
+  ['King Gizzard & The Lizard Wizard','Oddments','Color Púrpura, Gatefold Art',1160,790,118.5,'VINILO','Discos'],
+  ['Kraak & Smaak','Twenty','Gatefold 2 LP',1360,930,139.5,'VINILO','Discos'],
+  ['Lady Gaga','Chromatica','Nuevo',1760,1200,180,'VINILO','Discos'],
+  ['Led Zeppelin','Presence',null,370,250,37.5,'VINILO','Discos'],
+  ['Led Zeppelin','IV',null,370,250,37.5,'VINILO','Discos'],
+  ['Led Zeppelin','II','2 LP',440,300,45,'VINILO','Discos'],
+  ["L'imperatrice",'Tako Tsubo','2 LP Gatefold, Con Hoja',1270,870,130.5,'VINILO','Discos'],
+  ['Lizzo','Cuz I Love You','Color Violeta, Con Foto',920,630,94.5,'VINILO','Discos'],
+  ['Mac DeMarco','Another One','Poster',1170,800,120,'VINILO','Discos'],
+  ['Mac DeMarco','Salad Days','Gatefold + Poster',1000,680,102,'VINILO','Discos'],
+  ['Mac DeMarco','Rock And Roll Night Club','Con Foto',1060,720,108,'VINILO','Discos'],
+  ['Manu Chao','Clandestino','Gatefold, 2 LP + CD 2013',1320,900,135,'VINILO','Discos'],
+  ['Metronomy','The English Riviera','New',1140,780,117,'VINILO','Discos'],
+  ['MF Doom','Mm. Food','2 LP Green & Pink, Gatefold',1250,850,127.5,'VINILO','Discos'],
+  ['MGMT','Loss Of Life','Regalo, Gatefold, Color Azul',1100,750,112.5,'VINILO','Discos'],
+  ['MGMT','Oracular Spectacular',null,1030,700,105,'VINILO','Discos'],
+  ['Miles Davis','Kind of Blue','180 gr Virgin Vinyl',1100,750,112.5,'VINILO','Discos'],
+  ['Milky Chance','Sadnecessary','Foto',1170,800,120,'VINILO','Discos'],
+  ['Moderat','Moderat',null,1000,680,102,'VINILO','Discos'],
+  ['Moderat','ll','Gatefold',950,650,97.5,'VINILO','Discos'],
+  ['Moderat','MORE D4TA','Deluxe + Poster',1170,800,120,'VINILO','Discos'],
+  ['Moderat','lll','2 LP',1070,730,109.5,'VINILO','Discos'],
+  ['Mort Garson',"Mother Earth's Plantasia",'Color verde, Con Semilla, Libro',1030,700,105,'VINILO','Discos'],
+  ['Ólafur Arnalds','Island Songs',null,1030,700,105,'VINILO','Discos'],
+  ['Paul McCartney','Pipes Of Peace',null,590,400,60,'VINILO','Discos'],
+  ['Peter Appleyard & Orch','Peter Appleyard & Orch',null,300,200,30,'VINILO','Discos'],
+  ['Phoenix','United',null,810,550,82.5,'VINILO','Discos'],
+  ['Pink Floyd','The Wall','2 LP',880,600,90,'VINILO','Discos'],
+  ['Pink Floyd','Animals','New, Gatefold 2 LP',1320,900,135,'VINILO','Discos'],
+  ['Pink Floyd','Wish You Were Here','AMARILLO',1170,800,120,'VINILO','Discos'],
+  ['Pink Floyd','Atom Heart Mother',null,1100,750,112.5,'VINILO','Discos'],
+  ['Pink Floyd','Meddle','Gatefold',1100,750,112.5,'VINILO','Discos'],
+  ['Pink Floyd','The Piper At The Gates Of Dawn',null,810,550,82.5,'VINILO','Discos'],
+  ['Pink Floyd','The Dark Side Of The Moon',null,710,480,72,'VINILO','Discos'],
+  ['Pixies','Surfer Rosa',null,1030,700,105,'VINILO','Discos'],
+  ['Pixies','Doolittle',null,1030,700,105,'VINILO','Discos'],
+  ['Polo & Pan','Feel Good',null,880,600,90,'VINILO','Discos'],
+  ['Polo & Pan','Caravelle','Gatefold 2 LP & Sticker',1190,810,121.5,'VINILO','Discos'],
+  ['Polo & Pan','Cyclorama','Gatefold 2 LP',1300,890,133.5,'VINILO','Discos'],
+  ['Poolside','Low Season','Color verdoso, Con Foto',1030,700,105,'VINILO','Discos'],
+  ['Queen','Greatest Hits','Gatefold, Blanco/Rojo 2 LP',950,650,97.5,'VINILO','Discos'],
+  ['Radiohead','The Bends',null,1030,700,105,'VINILO','Discos'],
+  ['Radiohead','The King Of Limbs',null,950,650,97.5,'VINILO','Discos'],
+  ['Ray Charles','Greatest Hits',null,300,200,30,'VINILO','Discos'],
+  ['Rick James','Street Songs',null,300,200,30,'VINILO','Discos'],
+  ['Rüfüs Du Sol','Innerbloom','2 LP',2190,1500,225,'VINILO','Discos'],
+  ['Rüfüs Du Sol','Surrender','2 LP, Con Foto',1540,1050,157.5,'VINILO','Discos'],
+  ['Rüfüs Du Sol','Solace','Con Foto',1170,800,120,'VINILO','Discos'],
+  ['Rüfüs Du Sol','Live At Joshua Tree','Transparente',2190,1500,225,'VINILO','Discos'],
+  ['Santana','Santana (lll)',null,300,200,30,'VINILO','Discos'],
+  ['Sonic Youth','Goo','Made In Poland, Con Imagen',1030,700,105,'VINILO','Discos'],
+  ['Space','Just Blue',null,520,350,52.5,'VINILO','Discos'],
+  ['Stardust','Music Sounds Better With You','Grabado',810,550,82.5,'VINILO','Discos'],
+  ['Survivor','Eye Of The Tiger',null,440,300,45,'VINILO','Discos'],
+  ['Tame Impala','Innerspeaker','2 LP Gatefold',1300,890,133.5,'VINILO','Discos'],
+  ['Tame Impala','Slow Rush','2 LP + Imagen',1610,1100,165,'VINILO','Discos'],
+  ['Tame Impala','Currents','2 LP',1130,770,115.5,'VINILO','Discos'],
+  ['Tame Impala','Lonerism','2 LP',1250,850,127.5,'VINILO','Discos'],
+  ['Tash Sultana','Flow State','Gatefold, 2 LP, 45 RPM',1250,850,127.5,'VINILO','Discos'],
+  ['The 1975','The 1975','2 LP Color Transparente/Azul',1250,850,127.5,'VINILO','Discos'],
+  ['The Avalanches','Wildflowers','2 LP + 1 CD',1460,1000,150,'VINILO','Discos'],
+  ['The Avalanches','Since I Left You','2 LP',1350,920,138,'VINILO','Discos'],
+  ['The Beatles','The White Album','2 LP + 4 Fotos & 1 Poster',810,550,82.5,'VINILO','Discos'],
+  ['The Beatles','Abbey Road',null,660,450,67.5,'VINILO','Discos'],
+  ['The Beatles','Meet The Beatles',null,880,600,90,'VINILO','Discos'],
+  ['The Blaze','Jungle',null,1100,750,112.5,'VINILO','Discos'],
+  ['The Carpenters','The Singles 1969-1973','Gatefold + Libro',440,300,45,'VINILO','Discos'],
+  ['The Cure','Disintegration','2 LP Gatefold',1030,700,105,'VINILO','Discos'],
+  ['The Doors','Strange Days',null,370,250,37.5,'VINILO','Discos'],
+  ['The Doors','Morrison Hotel','180 Gr, Elektra Records',1030,700,105,'VINILO','Discos'],
+  ['The Doors','The Doors',null,370,250,37.5,'VINILO','Discos'],
+  ['The Lumineers','lll','2 LP Gatefold',880,600,90,'VINILO','Discos'],
+  ['The Lumineers','Cleopatra','2 LP, Color Plata 180 gr',1360,930,139.5,'VINILO','Discos'],
+  ["The Mama's And The Papa's",'If You Can Believe Your Eyes And Ears',null,370,250,37.5,'VINILO','Discos'],
+  ['The Original Movie Soundtrack','Saturday Night Fever','2 LP & Tarjetita',590,400,60,'VINILO','Discos'],
+  ['The Rolling Stones','Let It Bleed',null,730,500,75,'VINILO','Discos'],
+  ['The Rolling Stones',"December's Children (And Everybody's)",null,730,500,75,'VINILO','Discos'],
+  ['The Rolling Stones','Between The Buttons','Sticker Viejo',300,200,30,'VINILO','Discos'],
+  ['The Smile','Wall Of Eyes','Gatefold, Color Azul',1140,780,117,'VINILO','Discos'],
+  ['The Smiths','Hatful Of Hollow','Gatefold',1030,700,105,'VINILO','Discos'],
+  ['The Who',"Who's Next",null,590,400,60,'VINILO','Discos'],
+  ['The xx','xx','Bonus Track',1170,800,120,'VINILO','Discos'],
+  ['Thee Sacred Souls','Thee Sacred Souls',null,1070,730,109.5,'VINILO','Discos'],
+  ['Thundercat','The Golden Age Of Apocalypse','Color Rojo Translúcido, 10th Aniversario',1170,800,120,'VINILO','Discos'],
+  ['Thundercat','It Is What It Is','Color Rojo, Con Imagen',1130,770,115.5,'VINILO','Discos'],
+  ['Tom Misch','Geography','Gatefold, 2 LP',1100,750,112.5,'VINILO','Discos'],
+  ['Toots & The Maytals','Funky Kingston','180 gr',1100,750,112.5,'VINILO','Discos'],
+  ['Twenty One Pilots','Vessels','Color Plateado, Con Foto',1030,700,105,'VINILO','Discos'],
+  ['Tyler, The Creator','Igor','Gatefold + Imagen',1170,800,120,'VINILO','Discos'],
+  ['Tyler, The Creator','Flower Boy','2 LP Gatefold, Poster + Card',1320,900,135,'VINILO','Discos'],
+  ['Unknown Mortal Orchestra','ll','10th Anniversary 2 LP, Color Aluminio',1200,820,123,'VINILO','Discos'],
+  ['Unknown Mortal Orchestra','V','2 LP Gatefold Color Oro',1220,830,124.5,'VINILO','Discos'],
+  ['Van Halen','1984',null,520,350,52.5,'VINILO','Discos'],
+  ['Van Morrison','Tupelo Honey','Poster',370,250,37.5,'VINILO','Discos'],
+  ['Varios Surf',"Surfin' Roots",'2 LP Gatefold',520,350,52.5,'VINILO','Discos'],
+  ['Vince Guaraldi Trio','A Charlie Brown Christmas','Rojo, Splatter',1030,700,105,'VINILO','Discos'],
+  ['Wu-Tang Clan','Enter The Wu-Tang (36 Chambers)',null,950,650,97.5,'VINILO','Discos'],
+  ['Yussef Dayes','Black Classical Music','2 LP, Gatefold',1250,850,127.5,'VINILO','Discos'],
+  ['The Wizard of Oz & Pinocchio','Walt Disney & Musical Score Soundtrack',null,440,300,45,'VINILO','Discos'],
+  ['Village People','YMCA',null,590,400,60,'VINILO','Discos'],
+  ['Rio Kosta','Unicorn','Poster',1030,700,105,'VINILO','Discos'],
+  ['Alvvays','Alvvays','Color Azul',1250,850,127.5,'VINILO','Discos'],
+  ['Willie Colón & Rubén Blades','Siembra',null,880,600,90,'VINILO','Discos'],
+  ['Mychael Danna by DeVotchKa','Little Miss Sunshine Soundtrack',null,1030,700,105,'VINILO','Discos'],
+  ['Melanie Martinez','Cry Baby','2 LP A Color Y Poster',1760,1200,180,'VINILO','Discos'],
+  ['Chalino Sánchez','Nieves de Enero',null,950,650,97.5,'VINILO','Discos'],
+  ['Caribou','Honey',null,1140,780,117,'VINILO','Discos'],
+  ['Sigur Rós','med sud i eyrum vid spilum endalaust',null,1610,1100,165,'VINILO','Discos'],
+  ['Ghostbusters','Ghostbusters',null,730,500,75,'VINILO','Discos'],
+  ['Alice In Chains','MTV Unplugged',null,150,100,15,'CD','Discos'],
+  ['Chet Faker','Built On Glass',null,520,350,52.5,'CD','Discos'],
+  ['Ed Maverick','Mplletc',null,150,100,15,'CD','Discos'],
+  ['Foo Fighters','Foo Fighters',null,150,100,15,'CD','Discos'],
+  ['Frank Zappa','Strictly Commercial',null,150,100,15,'CD','Discos'],
+  ['Franz Ferdinand','Franz Ferdinand',null,150,100,15,'CD','Discos'],
+  ['Interpol','El Pintor',null,370,250,37.5,'CD','Discos'],
+  ['Interpol','Turn On The Bright Lights',null,220,150,22.5,'CD','Discos'],
+  ['Janis Joplin','Greatest Hits',null,150,100,15,'CD','Discos'],
+  ['Jimi Hendrix','Smash Hits',null,150,100,15,'CD','Discos'],
+  ['Jimi Hendrix','Band Of Gypsys',null,150,100,15,'CD','Discos'],
+  ['Kings Of Leon','Because Of The Times',null,300,200,30,'CD','Discos'],
+  ['Maroon 5','Songs About Jane',null,150,100,15,'CD','Discos'],
+  ['Matchbox Twenty','Mad Season',null,150,100,15,'CD','Discos'],
+  ['Nirvana','Nevermind',null,220,150,22.5,'CD','Discos'],
+  ['Nirvana','In Utero',null,220,150,22.5,'CD','Discos'],
+  ['Nirvana','MTV Unplugged',null,150,100,15,'CD','Discos'],
+  ['Pearl Jam','Yield',null,150,100,15,'CD','Discos'],
+  ['Pearl Jam','Ten',null,220,150,22.5,'CD','Discos'],
+  ['Pixies','Doolittle',null,220,150,22.5,'CD','Discos'],
+  ['R.E.M.','Automatic For The People',null,150,100,15,'CD','Discos'],
+  ['Radiohead','Pablo Honey',null,150,100,15,'CD','Discos'],
+  ['Santana','The Best Of Santana',null,150,100,15,'CD','Discos'],
+  ['Sex Pistols','Filthy Lucre Live',null,150,100,15,'CD','Discos'],
+  ['Smashing Pumpkins','Mellon Collie And The Infinite Sadness',null,440,300,45,'CD','Discos'],
+  ['The Beatles','1962-1966 (Red Album)',null,220,150,22.5,'CD','Discos'],
+  ['The Strokes','Is This It',null,150,100,15,'CD','Discos'],
+  ['Van Morrison','The Best Of Van Morrison',null,150,100,15,'CD','Discos'],
+  ['Infamous Stiffs','Kill For The Sound',null,150,100,15,'CD','Discos'],
+  ['Athlete Tourist','Athlete Tourist',null,150,100,15,'CD','Discos'],
+]
+
+// [nombre, sub, desc, pv, pp, ut, tipo, cat]
+const BASE = BASE_CATALOG.map((r,i) => ({
+  id:'b'+i, nombre:r[0], sub:r[1], desc:r[2], pv:r[3], pp:r[4], ut:r[5], tipo:r[6], cat:r[7], custom:false
+}))
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let stock = {}, ventas = [], customProds = [], pendingImport = []
+let cats = [] // [{name, icon}]
+let vendedor = '', selectedProd = null
+let activeCat = null      // which category is open
+let catFilter = 'TODOS', ventaFilter = 'TODOS'
+let invCat = null, invTipo = 'TODOS'
+let repCat = 'TODOS'
+let stockModalId = null, stockTemp = 0
+let semanaOffset = 0
+let importHasStock = false // whether uploaded file had stock column
+
+const K = { stock:'tc_consig_stock', ventas:'tc_consig_ventas', custom:'tc_consig_custom', cats:'tc_consig_cats', seeded:'tc_consig_seeded' }
+
+function getAllProducts() { return [...BASE, ...customProds] }
+function getCatProducts(cat) { return getAllProducts().filter(p=>p.cat===cat) }
+function getStock(id) { return stock[id] ?? 0 }
+
+// ─── Categories ───────────────────────────────────────────────────────────────
+function loadCats() {
+  try { cats = JSON.parse(localStorage.getItem(K.cats)||'[]') } catch { cats=[] }
+  if (!cats.find(c=>c.name==='Discos')) cats.unshift({name:'Discos', icon:'🎵'})
+}
+function saveCats() { localStorage.setItem(K.cats, JSON.stringify(cats)) }
+
+function agregarCategoria() {
+  const name = document.getElementById('newcat-name').value.trim()
+  const icon = document.getElementById('newcat-icon').value.trim()||'📦'
+  if (!name) return
+  if (cats.find(c=>c.name===name)) { showToast('Ya existe esa categoría',true); return }
+  cats.push({name, icon})
+  saveCats()
+  document.getElementById('newcat-name').value=''; document.getElementById('newcat-icon').value=''
+  document.getElementById('addcat-overlay').classList.remove('open')
+  renderCatHome()
+  renderCatManage()
+  updateCatSelects()
+  showToast(`✓ Categoría "${name}" agregada`)
+}
+
+function eliminarCategoria(name) {
+  if (name==='Discos') { showToast('No se puede eliminar Discos',true); return }
+  if (!confirm(`¿Eliminar categoría "${name}"? Los productos de esa categoría quedarán sin categoría.`)) return
+  cats = cats.filter(c=>c.name!==name)
+  saveCats()
+  renderCatHome(); renderCatManage(); updateCatSelects()
+}
+
+// ─── Persistence ──────────────────────────────────────────────────────────────
+function loadLocal() {
+  try { stock = JSON.parse(localStorage.getItem(K.stock)||'{}') } catch { stock={} }
+  try { ventas = JSON.parse(localStorage.getItem(K.ventas)||'[]') } catch { ventas=[] }
+  try { customProds = JSON.parse(localStorage.getItem(K.custom)||'[]') } catch { customProds=[] }
+}
+function saveLocal() {
+  localStorage.setItem(K.stock, JSON.stringify(stock))
+  localStorage.setItem(K.ventas, JSON.stringify(ventas))
+  localStorage.setItem(K.custom, JSON.stringify(customProds))
+}
+
+// ─── Supabase sync ────────────────────────────────────────────────────────────
+async function syncFromCloud() {
+  try {
+    const [{ data: sv }, { data: ss }, { data: sc }] = await Promise.all([
+      sb.from('consig_ventas').select('*'),
+      sb.from('consig_stock').select('*'),
+      sb.from('consig_products').select('*').eq('is_custom', true)
+    ])
+    if (sv?.length) { ventas = sv; localStorage.setItem(K.ventas, JSON.stringify(ventas)) }
+    if (ss?.length) { stock={}; ss.forEach(r=>{ stock[r.prod_id]=r.stock }); localStorage.setItem(K.stock, JSON.stringify(stock)) }
+    if (sc?.length) { customProds = sc; localStorage.setItem(K.custom, JSON.stringify(customProds)) }
+  } catch(e) { console.warn('[sync]',e) }
+}
+function pushVenta(v) { sb.from('consig_ventas').upsert(v).then().catch(()=>{}) }
+function pushStock(id, n) { sb.from('consig_stock').upsert({prod_id:id, stock:n}).then().catch(()=>{}) }
+function pushProduct(p) { sb.from('consig_products').upsert({...p, is_custom:true}).then().catch(()=>{}) }
+function deleteProductCloud(id) { sb.from('consig_products').delete().eq('id',id).then().catch(()=>{}) }
+
+// ─── Seed base stock once ─────────────────────────────────────────────────────
+function seedBaseStock() {
+  if (localStorage.getItem(K.seeded)) return
+  BASE.forEach(p => { if (stock[p.id] === undefined) { stock[p.id]=1; pushStock(p.id,1) } })
+  localStorage.setItem(K.seeded, '1')
+  saveLocal()
+}
+
+// ─── Category home ────────────────────────────────────────────────────────────
+function renderCatHome() {
+  const grid = document.getElementById('cat-grid')
+  const cards = cats.map(c => {
+    const count = getCatProducts(c.name).length
+    return `<div class="cat-card" onclick="openCat('${c.name}')">
+      <div class="cat-icon">${c.icon}</div>
+      <div class="cat-name">${c.name}</div>
+      <div class="cat-count">${count} productos</div>
+    </div>`
+  })
+  cards.push(`<div class="cat-card cat-add" onclick="document.getElementById('addcat-overlay').classList.add('open')">
+    <div style="font-size:28px;color:#444">＋</div>
+    <div style="font-size:13px;color:#444">Nueva categoría</div>
+  </div>`)
+  grid.innerHTML = cards.join('')
+}
+
+function openCat(name) {
+  activeCat = name
+  catFilter = 'TODOS'; ventaFilter = 'TODOS'; selectedProd = null; vendedor = ''
+  document.getElementById('cat-home').style.display = 'none'
+  document.getElementById('cat-view').style.display = 'block'
+  document.getElementById('cat-tabs').style.display = 'block'
+  setTab('catalogo')
+  buildTipoFilters()
+  renderCatalogo()
+  renderVentaList()
+}
+
+function goHome() {
+  activeCat = null
+  document.getElementById('cat-home').style.display = 'block'
+  document.getElementById('cat-view').style.display = 'none'
+  document.getElementById('cat-tabs').style.display = 'none'
+}
+
+function buildTipoFilters() {
+  const prods = getCatProducts(activeCat)
+  const tipos = [...new Set(prods.map(p=>p.tipo).filter(Boolean))]
+  const mkFilters = (containerId, activeVal) => {
+    const el = document.getElementById(containerId)
+    el.innerHTML = `<button class="filter-btn${activeVal==='TODOS'?' active':''}" onclick="setTipoFilter('${containerId}','TODOS',this)">Todos</button>`
+      + tipos.map(t=>`<button class="filter-btn${activeVal===t?' active':''}" onclick="setTipoFilter('${containerId}','${t}',this)">${t}</button>`).join('')
+  }
+  mkFilters('cat-tipo-filters', catFilter)
+  mkFilters('venta-tipo-filters', ventaFilter)
+}
+
+function setTipoFilter(container, f, btn) {
+  if (container==='cat-tipo-filters') catFilter=f
+  else ventaFilter=f
+  document.querySelectorAll(`#${container} .filter-btn`).forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  if (container==='cat-tipo-filters') renderCatalogo()
+  else renderVentaList()
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+function setTab(t) {
+  document.querySelectorAll('#cat-tabs .tab').forEach((el,i)=>el.classList.toggle('active',['catalogo','vender'][i]===t))
+  document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'))
+  document.getElementById('panel-'+t).classList.add('active')
+}
+
+// ─── Catalog (worker) ─────────────────────────────────────────────────────────
+function getProdEmoji(p) {
+  if (p.cat==='Discos') return p.tipo==='VINILO'?'🎵':'💿'
+  const c = cats.find(x=>x.name===p.cat)
+  return c ? c.icon : '📦'
+}
+
+function renderCatalogo() {
+  const q = (document.getElementById('cat-search').value||'').toLowerCase()
+  const list = getCatProducts(activeCat).filter(p => {
+    const mt = catFilter==='TODOS'||p.tipo===catFilter
+    const mq = !q||p.nombre.toLowerCase().includes(q)||(p.sub||'').toLowerCase().includes(q)
+    return mt&&mq
+  })
+  const el = document.getElementById('catalogo-list')
+  if (!list.length) { el.innerHTML='<div class="empty">Sin resultados</div>'; return }
+  el.innerHTML = list.map(p => {
+    const s = getStock(p.id)
+    const bc = s===0?'stock-zero':s<=2?'stock-low':'stock-ok'
+    return `<div class="product-card${s===0?' out-of-stock':''}">
+      <div class="prod-emoji">${getProdEmoji(p)}</div>
+      <div class="prod-info">
+        <div class="prod-name">${p.nombre}</div>
+        ${p.sub?`<div class="prod-sub">${p.sub}</div>`:''}
+        ${p.desc?`<div class="prod-desc">${p.desc}</div>`:''}
+        <span class="stock-badge ${bc}">${s===0?'Sin stock':s+' pza'}</span>
+      </div>
+      <div class="prod-right"><div class="prod-precio">$${p.pv.toLocaleString('es-MX')}</div></div>
+    </div>`
+  }).join('')
+}
+
+// ─── Vender ───────────────────────────────────────────────────────────────────
+function setVendedor(n,btn) {
+  vendedor=n
+  document.querySelectorAll('#panel-vender .enc-btn').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active'); checkBtn()
+}
+
+function renderVentaList() {
+  const q = (document.getElementById('venta-search').value||'').toLowerCase()
+  const list = getCatProducts(activeCat).filter(p => {
+    const mt = ventaFilter==='TODOS'||p.tipo===ventaFilter
+    const mq = !q||p.nombre.toLowerCase().includes(q)||(p.sub||'').toLowerCase().includes(q)
+    return mt&&mq
+  })
+  const el = document.getElementById('venta-list')
+  if (!list.length) { el.innerHTML='<div class="empty">Sin resultados</div>'; return }
+  el.innerHTML = list.map(p => {
+    const s = getStock(p.id)
+    const isSel = selectedProd?.id===p.id
+    return `<div class="product-card${isSel?' selected':''}${s===0?' out-of-stock':''}" onclick="${s>0?`selectProd('${p.id}')`:''}" >
+      <div class="prod-emoji">${getProdEmoji(p)}</div>
+      <div class="prod-info">
+        <div class="prod-name">${p.nombre}</div>
+        ${p.sub?`<div class="prod-sub">${p.sub}</div>`:''}
+        ${p.desc?`<div class="prod-desc">${p.desc}</div>`:''}
+        <span class="stock-badge ${s===0?'stock-zero':s<=2?'stock-low':'stock-ok'}">${s===0?'Sin stock':s+' pza'}</span>
+      </div>
+      <div class="prod-right"><div class="prod-precio">$${p.pv.toLocaleString('es-MX')}</div></div>
+    </div>`
+  }).join('')
+}
+
+function selectProd(id) {
+  selectedProd = getAllProducts().find(p=>p.id===id)
+  const c = document.getElementById('sel-card')
+  c.classList.add('visible')
+  document.getElementById('sel-titulo').textContent = selectedProd.nombre + (selectedProd.sub?` — ${selectedProd.sub}`:'')
+  document.getElementById('sel-sub').textContent = selectedProd.desc||selectedProd.tipo||''
+  document.getElementById('sel-pv').textContent = `$${selectedProd.pv.toLocaleString('es-MX')}`
+  renderVentaList(); checkBtn()
+}
+
+function checkBtn() { document.getElementById('btn-vender').disabled = !selectedProd||!vendedor }
+
+async function registrarVenta() {
+  if (!selectedProd||!vendedor) return
+  const btn = document.getElementById('btn-vender')
+  btn.disabled=true; btn.textContent='Registrando...'
+  const v = {
+    id: Date.now().toString(),
+    fecha: new Date().toLocaleDateString('es-MX'),
+    prod_id: selectedProd.id,
+    nombre: selectedProd.nombre,
+    sub: selectedProd.sub||'',
+    tipo: selectedProd.tipo||'',
+    cat: selectedProd.cat,
+    precio_venta: selectedProd.pv,
+    precio_proveedor: selectedProd.pp||0,
+    utilidad: selectedProd.ut||0,
+    vendedor,
+    ts: new Date().toISOString()
+  }
+  ventas.push(v)
+  stock[selectedProd.id] = Math.max(0, getStock(selectedProd.id)-1)
+  saveLocal(); pushVenta(v); pushStock(selectedProd.id, stock[selectedProd.id])
+  tg(`💸 <b>Venta registrada</b>\n🎵 ${v.nombre}${v.sub?' — '+v.sub:''}\n💰 $${v.precio_venta.toLocaleString('es-MX')}\n👤 ${v.vendedor}\n📅 ${new Date().toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
+  selectedProd=null; vendedor=''
+  document.getElementById('sel-card').classList.remove('visible')
+  document.querySelectorAll('#panel-vender .enc-btn').forEach(b=>b.classList.remove('active'))
+  document.getElementById('venta-search').value=''; renderVentaList()
+  btn.disabled=true; btn.textContent='Registrar venta'
+  showToast('✓ Venta registrada')
+}
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+function openAdminLogin() {
+  document.getElementById('admin-login-overlay').classList.add('open')
+  document.getElementById('pin-input').value=''
+  document.getElementById('pin-error').style.display='none'
+  setTimeout(()=>document.getElementById('pin-input').focus(),200)
+}
+function closeAdminLogin() { document.getElementById('admin-login-overlay').classList.remove('open') }
+function checkPin() {
+  if (document.getElementById('pin-input').value===ADMIN_PASS) { closeAdminLogin(); openAdmin() }
+  else { document.getElementById('pin-error').style.display='block'; document.getElementById('pin-input').value=''; document.getElementById('pin-input').focus() }
+}
+function openAdmin() {
+  document.getElementById('admin-panel').classList.add('open'); setAdminTab('reporte')
+  tg(`🔐 <b>Admin abierto</b>\n📅 ${new Date().toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
+}
+function cerrarAdmin() { document.getElementById('admin-panel').classList.remove('open') }
+
+function setAdminTab(t) {
+  document.querySelectorAll('.admin-tab').forEach((el,i)=>el.classList.toggle('active',['reporte','inventario','productos'][i]===t))
+  document.getElementById('apanel-reporte').style.display = t==='reporte'?'block':'none'
+  document.getElementById('apanel-inventario').style.display = t==='inventario'?'block':'none'
+  document.getElementById('apanel-productos').style.display = t==='productos'?'block':'none'
+  if (t==='reporte') renderReporte()
+  if (t==='inventario') renderInventarioCatFilters()
+  if (t==='productos') { renderCustomProds(); renderCatManage(); updateCatSelects() }
+}
+
+// ─── Inventario admin ─────────────────────────────────────────────────────────
+function renderInventarioCatFilters() {
+  const el = document.getElementById('inv-cat-filters')
+  el.innerHTML = cats.map(c=>`<button class="filter-btn${invCat===c.name?' active':''}" onclick="setInvCat('${c.name}',this)">${c.icon} ${c.name}</button>`).join('')
+  if (!invCat && cats.length) { invCat=cats[0].name }
+  renderInvTipoFilters(); renderInventario()
+}
+
+function setInvCat(name,btn) {
+  invCat=name; invTipo='TODOS'
+  document.querySelectorAll('#inv-cat-filters .filter-btn').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  renderInvTipoFilters(); renderInventario()
+}
+
+function renderInvTipoFilters() {
+  const prods = getAllProducts().filter(p=>p.cat===invCat)
+  const tipos = [...new Set(prods.map(p=>p.tipo).filter(Boolean))]
+  const el = document.getElementById('inv-tipo-filters')
+  el.innerHTML = `<button class="filter-btn${invTipo==='TODOS'?' active':''}" onclick="setInvTipo('TODOS',this)">Todos</button>`
+    + tipos.map(t=>`<button class="filter-btn${invTipo===t?' active':''}" onclick="setInvTipo('${t}',this)">${t}</button>`).join('')
+}
+
+function setInvTipo(t,btn) { invTipo=t; document.querySelectorAll('#inv-tipo-filters .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderInventario() }
+
+function renderInventario() {
+  const q = (document.getElementById('inv-search').value||'').toLowerCase()
+  const list = getAllProducts().filter(p => p.cat===invCat && (invTipo==='TODOS'||p.tipo===invTipo) && (!q||p.nombre.toLowerCase().includes(q)||(p.sub||'').toLowerCase().includes(q)))
+  const el = document.getElementById('inv-list')
+  if (!list.length) { el.innerHTML='<div class="empty">Sin resultados</div>'; return }
+  el.innerHTML = list.map(p => {
+    const s = getStock(p.id)
+    const bc = s===0?'stock-zero':s<=2?'stock-low':'stock-ok'
+    return `<div class="product-card" onclick="openStockModal('${p.id}')">
+      <div class="prod-emoji">${getProdEmoji(p)}</div>
+      <div class="prod-info">
+        <div class="prod-name">${p.nombre}</div>
+        ${p.sub?`<div class="prod-sub">${p.sub}</div>`:''}
+        ${p.desc?`<div class="prod-desc">${p.desc}</div>`:''}
+      </div>
+      <div class="prod-right">
+        ${p.pp?`<div class="prod-precio" style="font-size:11px;color:#555">Prov: $${p.pp.toLocaleString('es-MX')}</div>`:''}
+        <div class="prod-precio">$${p.pv.toLocaleString('es-MX')}</div>
+        <span class="stock-badge ${bc}">${s===0?'Sin stock':s+' pza'}</span>
+      </div>
+    </div>`
+  }).join('')
+}
+
+// ─── Stock modal ──────────────────────────────────────────────────────────────
+function openStockModal(id) {
+  const p = getAllProducts().find(x=>x.id===id); if (!p) return
+  stockModalId=id; stockTemp=getStock(id)
+  document.getElementById('stock-modal-title').textContent=p.nombre+(p.sub?` — ${p.sub}`:'')
+  document.getElementById('stock-num').textContent=stockTemp
+  document.getElementById('stock-overlay').classList.add('open')
+}
+function cambiarStock(d) { stockTemp=Math.max(0,stockTemp+d); document.getElementById('stock-num').textContent=stockTemp }
+function guardarStock() {
+  const p = getAllProducts().find(x=>x.id===stockModalId)
+  stock[stockModalId]=stockTemp; saveLocal(); pushStock(stockModalId,stockTemp)
+  cerrarStockModal(); renderInventario(); renderCatalogo(); renderVentaList()
+  if (p) tg(`📦 <b>Stock ajustado</b>\n${p.nombre}${p.sub?' — '+p.sub:''}\nCantidad: ${stockTemp} pza\n📅 ${new Date().toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
+  showToast('Stock actualizado ✓')
+}
+function cerrarStockModal() { document.getElementById('stock-overlay').classList.remove('open'); stockModalId=null }
+function closeStockModal(e) { if (e.target===document.getElementById('stock-overlay')) cerrarStockModal() }
+
+// ─── Reporte ──────────────────────────────────────────────────────────────────
+function getLunes(off=0) { const d=new Date(),day=d.getDay()||7; d.setDate(d.getDate()-day+1+off*7); d.setHours(0,0,0,0); return d }
+function getDomingo(l) { const d=new Date(l); d.setDate(d.getDate()+6); d.setHours(23,59,59,999); return d }
+function fmtF(d) { return d.toLocaleDateString('es-MX',{day:'numeric',month:'short'}) }
+
+function renderRepCatFilters() {
+  const el = document.getElementById('rep-cat-filters')
+  el.innerHTML = `<button class="filter-btn${repCat==='TODOS'?' active':''}" onclick="setRepCat('TODOS',this)">Todas</button>`
+    + cats.map(c=>`<button class="filter-btn${repCat===c.name?' active':''}" onclick="setRepCat('${c.name}',this)">${c.icon} ${c.name}</button>`).join('')
+}
+
+function setRepCat(name,btn) { repCat=name; document.querySelectorAll('#rep-cat-filters .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderReporte() }
+
+function renderReporte() {
+  renderRepCatFilters()
+  const lun=getLunes(semanaOffset), dom=getDomingo(lun)
+  document.getElementById('rep-semana-label').textContent = semanaOffset===0?'Semana actual':`Semana del ${fmtF(lun)}`
+  document.getElementById('rep-rango').textContent = `${fmtF(lun)} — ${fmtF(dom)}`
+  let vs = ventas.filter(v=>{ const t=new Date(v.ts); return t>=lun&&t<=dom })
+  if (repCat!=='TODOS') vs = vs.filter(v=>v.cat===repCat)
+  const tot=vs.reduce((s,v)=>s+v.precio_venta,0)
+  const prov=vs.reduce((s,v)=>s+(v.precio_proveedor||0),0)
+  const tru=vs.reduce((s,v)=>s+(v.utilidad||0),0)
+  document.getElementById('rep-total').textContent=`$${tot.toLocaleString('es-MX')}`
+  document.getElementById('rep-proveedor').textContent=`$${prov.toLocaleString('es-MX')}`
+  document.getElementById('rep-trueno').textContent=`$${tru.toLocaleString('es-MX')}`
+  document.getElementById('rep-count').textContent=`${vs.length} pieza${vs.length!==1?'s':''}`
+  const el=document.getElementById('rep-ventas-list')
+  if (!vs.length) { el.innerHTML='<div class="empty">Sin ventas esta semana</div>'; return }
+  const catOf = v => { const c=cats.find(x=>x.name===v.cat); return c?c.icon:'📦' }
+  el.innerHTML=[...vs].reverse().map(v=>`
+    <div class="venta-row">
+      <div style="font-size:20px">${catOf(v)}</div>
+      <div class="venta-info">
+        <div class="venta-prod">${v.nombre}${v.sub?` — ${v.sub}`:''}</div>
+        <div class="venta-meta">${v.vendedor} · ${new Date(v.ts).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})} · ${v.fecha}</div>
+      </div>
+      <div class="venta-right">
+        <div class="venta-pv">$${v.precio_venta.toLocaleString('es-MX')}</div>
+        ${v.precio_proveedor?`<div class="venta-split">Prov: $${v.precio_proveedor.toLocaleString('es-MX')} · Trueno: $${(v.utilidad||0).toLocaleString('es-MX')}</div>`:''}
+      </div>
+    </div>`).join('')
+}
+
+// ─── Export Excel ─────────────────────────────────────────────────────────────
+function exportExcel() {
+  const lun=getLunes(semanaOffset), dom=getDomingo(lun)
+  let vs=ventas.filter(v=>{ const t=new Date(v.ts); return t>=lun&&t<=dom })
+  if (repCat!=='TODOS') vs=vs.filter(v=>v.cat===repCat)
+  const wb = XLSX.utils.book_new()
+  const detRows = [
+    ['Fecha','Categoría','Producto','Subtítulo','Tipo','Precio Venta','Precio Proveedor','Utilidad Trueno','Vendedor'],
+    ...vs.map(v=>[v.fecha,v.cat||'',v.nombre,v.sub||'',v.tipo||'',v.precio_venta,v.precio_proveedor||0,v.utilidad||0,v.vendedor]),
+    [],['TOTALES','','','','',vs.reduce((s,v)=>s+v.precio_venta,0),vs.reduce((s,v)=>s+(v.precio_proveedor||0),0),vs.reduce((s,v)=>s+(v.utilidad||0),0),'']
+  ]
+  const ws1=XLSX.utils.aoa_to_sheet(detRows)
+  ws1['!cols']=[{wch:12},{wch:10},{wch:28},{wch:22},{wch:8},{wch:14},{wch:18},{wch:16},{wch:12}]
+  XLSX.utils.book_append_sheet(wb,ws1,'Detalle')
+  const tot=vs.reduce((s,v)=>s+v.precio_venta,0),prov=vs.reduce((s,v)=>s+(v.precio_proveedor||0),0),tru=vs.reduce((s,v)=>s+(v.utilidad||0),0)
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
+    ['Reporte Semanal Consignación — Trueno'],
+    ['Semana',`${fmtF(lun)} — ${fmtF(dom)}`],[''],[`Total vendido`,tot],['Del proveedor (CLIP)',prov],['De Trueno',tru],['Piezas',vs.length]
+  ]),'Resumen')
+  XLSX.writeFile(wb,`Consignacion_${fmtF(lun).replace(' ','_')}.xlsx`)
+}
+
+async function enviarSheets() {
+  const lun=getLunes(semanaOffset),dom=getDomingo(lun)
+  let vs=ventas.filter(v=>{ const t=new Date(v.ts); return t>=lun&&t<=dom })
+  if (repCat!=='TODOS') vs=vs.filter(v=>v.cat===repCat)
+  const btn=document.getElementById('btn-sheets')
+  btn.disabled=true; btn.textContent='Enviando...'
+  try {
+    await fetch(GAS,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tipo:'reporte_consignacion',semana:`${fmtF(lun)}-${fmtF(dom)}`,
+        total:vs.reduce((s,v)=>s+v.precio_venta,0),proveedor:vs.reduce((s,v)=>s+(v.precio_proveedor||0),0),
+        trueno:vs.reduce((s,v)=>s+(v.utilidad||0),0),piezas:vs.length,
+        rows:vs.map(v=>[v.fecha,v.cat||'',v.nombre,v.sub||'',v.precio_venta,v.precio_proveedor||0,v.utilidad||0,v.vendedor])})})
+    showToast('✓ Enviado a Google Sheets')
+  } catch(e) { showToast('Error: '+e.message,true) }
+  btn.disabled=false; btn.textContent='📊 Enviar a Google Sheets'
+}
+
+// ─── Manual add ───────────────────────────────────────────────────────────────
+// pv = pp × 1.15 ÷ (1 - 0.21176), redondeado al $10 más cercano
+const DEDUCTIONS = 0.21176
+function calcPV(pp) { return Math.round(pp * 1.15 / (1 - DEDUCTIONS) / 10) * 10 }
+function calcUT(pp, pv) { return Math.round(pv * (1 - DEDUCTIONS) - pp) }
+
+function calcPrecios() {
+  const pp = parseFloat(document.getElementById('new-pp').value) || 0
+  if (!pp) { document.getElementById('new-pv').value=''; document.getElementById('new-ut').value=''; return }
+  const pv = calcPV(pp)
+  document.getElementById('new-pv').value = pv
+  document.getElementById('new-ut').value = calcUT(pp, pv)
+}
+
+function recalcUtilidad() {
+  const pp = parseFloat(document.getElementById('new-pp').value) || 0
+  const pv = parseFloat(document.getElementById('new-pv').value) || 0
+  document.getElementById('new-ut').value = pp && pv ? calcUT(pp, pv) : ''
+}
+
+function agregarProductoManual() {
+  const nombre=document.getElementById('new-nombre').value.trim()
+  const sub=document.getElementById('new-sub').value.trim()||null
+  const desc=document.getElementById('new-desc').value.trim()||null
+  const tipo=document.getElementById('new-tipo').value.trim()||null
+  const cat=document.getElementById('new-cat').value
+  const pv=parseFloat(document.getElementById('new-pv').value)||0
+  const pp=parseFloat(document.getElementById('new-pp').value)||0
+  const ut=pp>0?pp*0.15:parseFloat(document.getElementById('new-ut').value)||0
+  const stockQty=parseInt(document.getElementById('new-stock').value)||0
+  if (!nombre||!pv) { showToast('Llena nombre y precio de venta',true); return }
+  const p={id:'c'+Date.now(),nombre,sub,desc,tipo,cat,pv,pp,ut,custom:true,is_custom:true}
+  customProds.push(p); stock[p.id]=stockQty; saveLocal(); pushProduct(p); pushStock(p.id,stockQty)
+  tg(`➕ <b>Producto agregado</b>\n${nombre}${sub?' — '+sub:''}\n📦 ${cat}${tipo?' · '+tipo:''}\n💰 $${pv.toLocaleString('es-MX')}${pp?' · Prov: $'+pp.toLocaleString('es-MX'):''}\nStock: ${stockQty} pza`)
+  ;['new-nombre','new-sub','new-desc','new-tipo','new-pv','new-pp','new-ut','new-stock'].forEach(id=>document.getElementById(id).value='')
+  renderCustomProds(); renderCatHome(); showToast(`✓ ${nombre} agregado`)
+}
+
+function eliminarProducto(id) {
+  customProds=customProds.filter(p=>p.id!==id); delete stock[id]; saveLocal(); deleteProductCloud(id)
+  renderCustomProds(); renderCatHome()
+}
+
+function renderCustomProds() {
+  const sec=document.getElementById('custom-prods-section')
+  const el=document.getElementById('custom-prods-list')
+  if (!customProds.length) { sec.style.display='none'; return }
+  sec.style.display='block'
+  el.innerHTML=customProds.map(p=>`<div class="custom-prod-card">
+    <div style="font-size:20px">${getProdEmoji(p)}</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.nombre}</div>
+      <div style="font-size:12px;color:#555">${p.cat}${p.tipo?` · ${p.tipo}`:''}</div>
+      <div style="font-size:11px;color:#3a3a3a;margin-top:2px">$${p.pv.toLocaleString('es-MX')}${p.pp?` · Prov: $${p.pp.toLocaleString('es-MX')}`:''}</div>
+    </div>
+    <button class="del-btn" onclick="eliminarProducto('${p.id}')">✕</button>
+  </div>`).join('')
+}
+
+function renderCatManage() {
+  const el=document.getElementById('cat-manage-list')
+  el.innerHTML=cats.map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1a1a1a">
+    <span style="font-size:20px">${c.icon}</span>
+    <span style="flex:1;font-size:14px">${c.name}</span>
+    ${c.name!=='Discos'?`<button class="del-btn" onclick="eliminarCategoria('${c.name}')">✕</button>`:'<span style="font-size:11px;color:#333">Base</span>'}
+  </div>`).join('')
+}
+
+function updateCatSelects() {
+  const opts = cats.map(c=>`<option value="${c.name}">${c.icon} ${c.name}</option>`).join('')
+  document.getElementById('new-cat').innerHTML = opts
+  document.getElementById('import-cat').innerHTML = opts
+}
+
+// ─── Import Excel ─────────────────────────────────────────────────────────────
+function cambiarImportQty(d) {
+  const inp=document.getElementById('import-qty'); inp.value=Math.max(0,(parseInt(inp.value)||0)+d)
+}
+
+function handleDrop(e) { e.preventDefault(); document.getElementById('upload-zone').classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f) handleFile(f) }
+
+function handleFile(f) {
+  if (!f) return
+  const reader=new FileReader()
+  reader.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:'array'})
+    const importCat=document.getElementById('import-cat').value
+    pendingImport=[]; importHasStock=false
+    wb.SheetNames.forEach(name=>{
+      const up=name.toUpperCase()
+      let tipo=null
+      if (up.includes('VINYL')) tipo='VINILO'
+      else if (up.includes('CD')) tipo='CD'
+      // else treat as generic sheet for the selected category
+      const ws=wb.Sheets[name]
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null})
+      rows.forEach((r,i)=>{
+        if (i<2) return
+        const nombre=r[0], sub=r[1]
+        if (!nombre) return
+        const isVinylSheet=tipo==='VINILO'
+        let pv,pp,ut,desc=null,stockQty=null
+        if (tipo==='VINILO') { desc=r[2]; pv=r[3]; pp=r[8]; ut=r[9]; if(r[10]!=null)stockQty=r[10] }
+        else if (tipo==='CD') { pv=r[2]; pp=r[7]; ut=r[8]; if(r[9]!=null)stockQty=r[9] }
+        else { pv=r[2]||r[3]; pp=r[4]||null; ut=pp?pp*0.15:null; if(r[5]!=null)stockQty=r[5] }
+        if (!pv) return
+        if (stockQty!=null && !importHasStock) importHasStock=true
+        const isDup=getAllProducts().some(p=>p.nombre.toLowerCase()===String(nombre).toLowerCase()&&(p.sub||'').toLowerCase()===(sub?String(sub).toLowerCase():'')&&p.cat===importCat)
+        if (!isDup) pendingImport.push({id:'c'+Date.now()+Math.random().toString(36).slice(2),nombre:String(nombre),sub:sub?String(sub):null,desc:desc?String(desc):null,pv:Number(pv),pp:pp?Number(pp):0,ut:ut?Number(ut):0,tipo,cat:importCat,custom:true,is_custom:true,_stockQty:stockQty!=null?Number(stockQty):null})
+      })
+    })
+    showPreview()
+  }
+  reader.readAsArrayBuffer(f)
+}
+
+function showPreview() {
+  const area=document.getElementById('preview-area')
+  if (!pendingImport.length) { showToast('No se encontraron productos nuevos',true); return }
+  document.getElementById('preview-count').textContent=`${pendingImport.length} productos nuevos encontrados`
+  document.getElementById('preview-list').innerHTML=pendingImport.map(p=>`<div class="preview-row">
+    <div class="preview-tipo">${p.tipo||'—'}</div>
+    <div class="preview-artista">${p.nombre}</div>
+    <div class="preview-album">${p.sub||''}</div>
+    <div class="preview-pv">$${Number(p.pv).toLocaleString('es-MX')}</div>
+    ${p._stockQty!=null?`<div style="font-size:11px;color:#6fcf6f;flex-shrink:0">${p._stockQty}pz</div>`:''}
+  </div>`).join('')
+  // Show stock qty input only if file didn't include stock numbers
+  document.getElementById('import-stock-box').style.display = importHasStock?'none':'block'
+  area.style.display='block'
+  document.getElementById('upload-zone').style.display='none'
+}
+
+function importarProductos() {
+  const defaultQty = importHasStock ? null : (parseInt(document.getElementById('import-qty').value)||0)
+  pendingImport.forEach(p=>{
+    const {_stockQty,...prod}=p
+    const qty = importHasStock ? (_stockQty??0) : defaultQty
+    customProds.push(prod); stock[prod.id]=qty; pushProduct(prod); pushStock(prod.id,qty)
+  })
+  const n = pendingImport.length
+  saveLocal(); cancelarImport(); renderCustomProds(); renderCatHome()
+  tg(`📂 <b>Excel importado</b>\n${n} producto${n!==1?'s':''} agregados al catálogo\n📅 ${new Date().toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
+  showToast(`✓ ${n} productos agregados`)
+  pendingImport=[]
+}
+
+function cancelarImport() {
+  pendingImport=[]
+  document.getElementById('preview-area').style.display='none'
+  document.getElementById('upload-zone').style.display='block'
+  document.getElementById('file-input').value=''
+}
+
+// ─── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg,err=false) {
+  const t=document.getElementById('toast')
+  t.textContent=msg; t.className='toast show'+(err?' err':'')
+  setTimeout(()=>t.classList.remove('show'),3000)
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadLocal(); loadCats()
+seedBaseStock()
+renderCatHome()
+updateCatSelects()
+syncFromCloud().then(()=>{ renderCatHome() })
+tg(`👀 <b>Consignación abierta</b>\n📅 ${new Date().toLocaleString('es-MX',{weekday:'long',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
+</script>
+
+<!-- Back button from category view to home -->
+<script>
+// Override header back button behavior depending on view state
+document.querySelector('a[href="index.html"]').addEventListener('click', function(e) {
+  if (activeCat) { e.preventDefault(); goHome() }
+})
+</script>
+</body>
+</html>
