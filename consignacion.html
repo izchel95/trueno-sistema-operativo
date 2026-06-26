@@ -776,7 +776,10 @@ async function syncFromCloud() {
 }
 function pushVenta(v) { sb.from('consig_ventas').upsert(v).then().catch(()=>{}) }
 function pushStock(id, n) { sb.from('consig_stock').upsert({prod_id:id, stock:n}).then().catch(()=>{}) }
-function pushProduct(p) { sb.from('consig_products').upsert({...p, is_custom:true}).then().catch(()=>{}) }
+function pushProduct(p) {
+  const row = {...p, is_custom:true, descripcion: p.desc}
+  sb.from('consig_products').upsert(row).then().catch(()=>{})
+}
 function deleteProductCloud(id) { sb.from('consig_products').delete().eq('id',id).then().catch(()=>{}) }
 
 // ─── Seed base stock once ─────────────────────────────────────────────────────
