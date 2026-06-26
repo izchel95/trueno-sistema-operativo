@@ -390,9 +390,6 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
       <div class="kpi-card"><div class="kpi-label">De Trueno</div><div class="kpi-val c-green" id="rep-trueno">$0</div><div class="kpi-sub">Comisión</div></div>
       <div class="kpi-card" style="grid-column:1/-1"><div class="kpi-label">Del proveedor (CLIP)</div><div class="kpi-val c-blue" id="rep-proveedor">$0</div><div class="kpi-sub">A liquidar</div></div>
     </div>
-    <!-- Comparativa -->
-    <div class="section-label">Comparativa vs período anterior</div>
-    <div id="rep-comparativa"></div>
     <!-- Top productos -->
     <div class="section-label">🏆 Top productos</div>
     <div id="rep-top-prods"></div>
@@ -1302,21 +1299,6 @@ function renderReporte() {
   document.getElementById('rep-proveedor').textContent=`$${prov.toLocaleString('es-MX')}`
   document.getElementById('rep-trueno').textContent=`$${tru.toLocaleString('es-MX')}`
   document.getElementById('rep-count').textContent=`${vs.length} pieza${vs.length!==1?'s':''}`
-
-  // Comparativa
-  let vsPrev=filterByPeriodAndHour(ventas,repPeriod,repOffset-1,hFrom,hTo)
-  if(repCat!=='TODOS') vsPrev=vsPrev.filter(v=>v.cat===repCat)
-  const prevTot=vsPrev.reduce((s,v)=>s+v.precio_venta,0)
-  const prevTru=vsPrev.reduce((s,v)=>s+(v.utilidad||0),0)
-  function delta(cur,prev) {
-    if(!prev) return cur>0?`<span class="up">▲ nuevo</span>`:`<span class="flat">—</span>`
-    const pct=Math.round((cur-prev)/prev*100)
-    return pct>0?`<span class="up">▲ ${pct}%</span>`:pct<0?`<span class="down">▼ ${Math.abs(pct)}%</span>`:`<span class="flat">= sin cambio</span>`
-  }
-  document.getElementById('rep-comparativa').innerHTML=`
-    <div class="comp-card"><div><div class="comp-label">Total vendido</div><div class="comp-val">$${tot.toLocaleString('es-MX')} vs $${prevTot.toLocaleString('es-MX')}</div></div><div class="comp-delta">${delta(tot,prevTot)}</div></div>
-    <div class="comp-card"><div><div class="comp-label">Comisión Trueno</div><div class="comp-val">$${tru.toLocaleString('es-MX')} vs $${prevTru.toLocaleString('es-MX')}</div></div><div class="comp-delta">${delta(tru,prevTru)}</div></div>
-    <div class="comp-card"><div><div class="comp-label">Piezas vendidas</div><div class="comp-val">${vs.length} vs ${vsPrev.length}</div></div><div class="comp-delta">${delta(vs.length,vsPrev.length)}</div></div>`
 
   // Top productos
   const prodMap={}
