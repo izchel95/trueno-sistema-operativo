@@ -34,11 +34,19 @@
   .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
   .logo span { color: #f5c842; }
 
-  .back-link {
+  .back-link, .menu-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    background: #1a1600;
+    border: 1px solid #f5c842;
+    border-radius: 10px;
+    color: #f5c842;
     font-size: 13px;
-    color: #555;
+    font-weight: 700;
     text-decoration: none;
-    padding: 4px 0;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .search-wrap {

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Calibración — Trueno ⚡</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 60px; }
+
+header { padding: 20px 20px 16px; border-bottom: 1px solid #1a1a1a; background: #0e0e0e; position: sticky; top: 0; z-index: 10; }
+.header-top { display: flex; align-items: center; justify-content: space-between; }
+.logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+.logo span { color: #f5c842; }
+.menu-btn { display: inline-flex; align-items: center; padding: 8px 14px; background: #1a1600; border: 1px solid #f5c842; border-radius: 10px; color: #f5c842; font-size: 13px; font-weight: 700; text-decoration: none; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+.menu-btn:active { opacity: 0.7; }
+
+.page { padding: 20px 16px; }
+.page-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+.page-sub { font-size: 13px; color: #555; margin-bottom: 24px; }
+
+.section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin: 20px 0 10px; }
+
+/* Nombre */
+.enc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+.enc-btn { padding: 12px; border: 1px solid #2a2a2a; border-radius: 12px; background: #141414; color: #888; font-size: 15px; cursor: pointer; transition: all 0.15s; text-align: center; font-family: inherit; font-weight: 600; }
+.enc-btn.active { background: #f5c842; color: #0e0e0e; border-color: #f5c842; }
+
+/* Fields */
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.field-row { display: flex; align-items: center; gap: 0; background: #141414; border: 1px solid #222; border-radius: 12px; overflow: hidden; }
+.field-row:focus-within { border-color: #f5c842; }
+.field-input { flex: 1; background: transparent; border: none; color: #f0ede8; font-size: 22px; font-weight: 700; padding: 14px 16px; outline: none; font-family: inherit; }
+.field-input::placeholder { color: #333; font-weight: 400; font-size: 16px; }
+.field-unit { font-size: 13px; color: #444; padding: 0 16px 0 0; font-weight: 600; flex-shrink: 0; }
+
+.field-default { font-size: 11px; color: #3a3a3a; margin-top: 5px; }
+.field-default span { color: #f5c842; }
+
+/* Molienda especial — con + / - */
+.spinner-row { display: flex; align-items: center; gap: 0; background: #141414; border: 1px solid #222; border-radius: 12px; overflow: hidden; }
+.spinner-row:focus-within { border-color: #f5c842; }
+.spin-btn { width: 52px; height: 56px; background: #1a1a1a; border: none; color: #f0ede8; font-size: 24px; cursor: pointer; flex-shrink: 0; font-family: inherit; }
+.spin-btn:active { background: #2a2a2a; }
+.spin-val { flex: 1; background: transparent; border: none; color: #f5c842; font-size: 26px; font-weight: 800; text-align: center; outline: none; font-family: inherit; padding: 10px 0; }
+.spin-label { font-size: 11px; color: #555; text-align: center; margin-top: 5px; }
+
+/* Notas */
+.notes-input { width: 100%; background: #141414; border: 1px solid #222; border-radius: 12px; color: #f0ede8; font-size: 15px; padding: 14px; outline: none; font-family: inherit; resize: none; min-height: 80px; }
+.notes-input:focus { border-color: #f5c842; }
+
+/* Submit */
+.submit-btn { width: 100%; padding: 18px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 24px; transition: opacity 0.15s; }
+.submit-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Success */
+#success-screen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; padding: 40px 20px; text-align: center; }
+.success-icon { font-size: 64px; margin-bottom: 16px; }
+.success-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+.success-sub { font-size: 14px; color: #555; margin-bottom: 8px; }
+.success-ts { font-size: 12px; color: #3a3a3a; margin-bottom: 32px; }
+.success-btn { display: block; width: 100%; padding: 16px; background: #141414; border: 1px solid #2a2a2a; border-radius: 14px; color: #f0ede8; font-size: 15px; font-weight: 700; text-align: center; text-decoration: none; margin-bottom: 10px; }
+.success-btn.gold { background: #f5c842; color: #0e0e0e; border-color: #f5c842; }
+
+/* Historial preview */
+.hist-section { margin-top: 32px; }
+.hist-title { font-size: 13px; font-weight: 700; color: #555; margin-bottom: 10px; }
+.calib-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+.calib-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.calib-who { font-size: 13px; font-weight: 700; }
+.calib-when { font-size: 11px; color: #555; }
+.calib-vals { display: flex; gap: 10px; flex-wrap: wrap; }
+.calib-val { background: #0e0e0e; border: 1px solid #1e1e1e; border-radius: 8px; padding: 5px 10px; font-size: 12px; }
+.calib-val b { color: #f5c842; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <a class="menu-btn" href="index.html">← Menú</a>
+    <div class="logo">⚡ <span>Trueno</span></div>
+    <div style="width:72px"></div>
+  </div>
+</header>
+
+<div id="form-view" class="page">
+  <div class="page-title">☕ Calibración</div>
+  <div class="page-sub" id="fecha-display"></div>
+
+  <div class="section-label">¿Quién calibra?</div>
+  <div class="enc-grid">
+    <button class="enc-btn" onclick="setNombre('Melanie',this)">Melanie</button>
+    <button class="enc-btn" onclick="setNombre('Daniela',this)">Daniela</button>
+    <button class="enc-btn" onclick="setNombre('Daniel',this)">Daniel</button>
+    <button class="enc-btn" onclick="setNombre('Izchel',this)">Izchel</button>
+  </div>
+
+  <div class="section-label">Parámetros</div>
+
+  <!-- Gramaje -->
+  <div class="field">
+    <label>Gramaje (dosis)</label>
+    <div class="field-row">
+      <input class="field-input" type="number" id="gramaje" value="18" step="0.1" min="0">
+      <span class="field-unit">g</span>
+    </div>
+    <div class="field-default">Estándar Trueno: <span>18 g</span></div>
+  </div>
+
+  <!-- Molienda -->
+  <div class="field">
+    <label>Punto de molienda</label>
+    <div class="spinner-row">
+      <button class="spin-btn" onclick="spinMolienda(-1)">−</button>
+      <input class="spin-val" type="number" id="molienda" value="0" min="0" max="99">
+      <button class="spin-btn" onclick="spinMolienda(1)">+</button>
+    </div>
+    <div class="spin-label">Número del molino (más alto = más grueso)</div>
+  </div>
+
+  <!-- Tiempo de extracción -->
+  <div class="field">
+    <label>Tiempo de extracción</label>
+    <div class="field-row">
+      <input class="field-input" type="number" id="tiempo" placeholder="28" min="0" max="120">
+      <span class="field-unit">seg</span>
+    </div>
+    <div class="field-default">Rango ideal: <span>25 – 32 seg</span></div>
+  </div>
+
+  <!-- Cantidad extraída -->
+  <div class="field">
+    <label>Cantidad extraída (yield)</label>
+    <div class="field-row">
+      <input class="field-input" type="number" id="cantidad" placeholder="36" min="0" max="120">
+      <span class="field-unit">ml</span>
+    </div>
+    <div class="field-default">Ratio ideal: <span>1 : 2</span> (18 g → 36 ml)</div>
+  </div>
+
+  <!-- Notas -->
+  <div class="field">
+    <label>Notas (opcional)</label>
+    <textarea class="notes-input" id="notas" placeholder="Observaciones, ajustes realizados..."></textarea>
+  </div>
+
+  <button class="submit-btn" id="submit-btn" onclick="registrar()">Registrar calibración</button>
+
+  <!-- Últimas calibraciones -->
+  <div class="hist-section">
+    <div class="hist-title">📋 Últimas calibraciones</div>
+    <div id="hist-list"><div style="color:#333;font-size:13px;text-align:center;padding:20px">Sin registros aún</div></div>
+  </div>
+</div>
+
+<div id="success-screen">
+  <div class="success-icon">✅</div>
+  <div class="success-title">¡Calibración registrada!</div>
+  <div class="success-sub" id="success-resumen"></div>
+  <div class="success-ts" id="success-ts"></div>
+  <a class="success-btn gold" href="calibracion.html">+ Nueva calibración</a>
+  <a class="success-btn" href="index.html">← Menú principal</a>
+</div>
+
+<script>
+const { createClient } = supabase
+const sb = createClient(
+  'https://axxbsjbywivolwluzvrd.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+)
+const GAS = 'https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec'
+const TG_TOKEN = '8765854864:AAEuMxt5p264TL3LPHbQI89S6uqqyIEnQd8'
+const TG_CHAT = '8309237078'
+function tg(msg) {
+  fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: TG_CHAT, text: msg, parse_mode: 'HTML' })
+  }).catch(() => {})
+}
+
+let nombre = ''
+const hoy = new Date()
+document.getElementById('fecha-display').textContent = hoy.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
+
+function setNombre(n, btn) {
+  nombre = n
+  document.querySelectorAll('.enc-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+}
+
+function spinMolienda(d) {
+  const el = document.getElementById('molienda')
+  el.value = Math.max(0, Math.min(99, parseInt(el.value || 0) + d))
+}
+
+async function registrar() {
+  if (!nombre) { alert('¿Quién calibra? Selecciona tu nombre.'); return }
+  const tiempo = parseFloat(document.getElementById('tiempo').value)
+  const cantidad = parseFloat(document.getElementById('cantidad').value)
+  if (!tiempo || !cantidad) { alert('Ingresa el tiempo de extracción y la cantidad extraída.'); return }
+
+  const btn = document.getElementById('submit-btn')
+  btn.disabled = true; btn.textContent = 'Registrando...'
+
+  const ts = new Date()
+  const registro = {
+    id: ts.getTime().toString(),
+    ts: ts.toISOString(),
+    fecha: hoy.toLocaleDateString('es-MX'),
+    hora: ts.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    encargada: nombre,
+    gramaje: parseFloat(document.getElementById('gramaje').value) || 18,
+    molienda: parseInt(document.getElementById('molienda').value) || 0,
+    tiempo_extraccion: tiempo,
+    cantidad_extraida: cantidad,
+    notas: document.getElementById('notas').value.trim() || null
+  }
+
+  // Supabase
+  sb.from('calibraciones').insert(registro).then().catch(() => {})
+
+  // Google Sheets
+  fetch(GAS, {
+    method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      tipo: 'calibracion',
+      row: [registro.fecha, registro.hora, registro.encargada, registro.gramaje, registro.molienda, registro.tiempo_extraccion, registro.cantidad_extraida, registro.notas || '']
+    })
+  }).catch(() => {})
+
+  // Telegram
+  tg(`☕ <b>Calibración registrada</b>\n👤 ${nombre}\n📅 ${registro.fecha} · ${registro.hora}\n\n<b>Gramaje:</b> ${registro.gramaje} g\n<b>Molienda:</b> ${registro.molienda}\n<b>Extracción:</b> ${tiempo} seg\n<b>Yield:</b> ${cantidad} ml${registro.notas ? `\n<b>Notas:</b> ${registro.notas}` : ''}`)
+
+  // Guardar en localStorage para historial local
+  const histLocal = JSON.parse(localStorage.getItem('tc_calibraciones') || '[]')
+  histLocal.unshift(registro)
+  localStorage.setItem('tc_calibraciones', JSON.stringify(histLocal.slice(0, 20)))
+
+  document.getElementById('success-resumen').textContent = `${registro.gramaje}g · Molienda ${registro.molienda} · ${tiempo}s · ${cantidad}ml`
+  document.getElementById('success-ts').textContent = `${registro.fecha} a las ${registro.hora} · ${nombre}`
+  document.getElementById('form-view').style.display = 'none'
+  document.getElementById('success-screen').style.display = 'flex'
+}
+
+// Cargar historial local
+function cargarHistorial() {
+  const list = JSON.parse(localStorage.getItem('tc_calibraciones') || '[]')
+  const el = document.getElementById('hist-list')
+  if (!list.length) return
+  el.innerHTML = list.slice(0, 5).map(r => `
+    <div class="calib-card">
+      <div class="calib-top">
+        <div class="calib-who">${r.encargada}</div>
+        <div class="calib-when">${r.fecha} · ${r.hora}</div>
+      </div>
+      <div class="calib-vals">
+        <div class="calib-val">Gramaje <b>${r.gramaje}g</b></div>
+        <div class="calib-val">Molienda <b>${r.molienda}</b></div>
+        <div class="calib-val">Extracción <b>${r.tiempo_extraccion}s</b></div>
+        <div class="calib-val">Yield <b>${r.cantidad_extraida}ml</b></div>
+      </div>
+      ${r.notas ? `<div style="font-size:11px;color:#444;margin-top:6px">${r.notas}</div>` : ''}
+    </div>`).join('')
+}
+
+cargarHistorial()
+</script>
+</body>
+</html>
