@@ -9,71 +9,128 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 60px; }
 
-header { padding: 20px 20px 16px; border-bottom: 1px solid #1a1a1a; background: #0e0e0e; position: sticky; top: 0; z-index: 10; }
+header { padding: 16px 20px; border-bottom: 1px solid #1a1a1a; background: #0e0e0e; position: sticky; top: 0; z-index: 10; }
 .header-top { display: flex; align-items: center; justify-content: space-between; }
-.logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+.logo { font-size: 18px; font-weight: 700; }
 .logo span { color: #f5c842; }
 .menu-btn { display: inline-flex; align-items: center; padding: 8px 14px; background: #1a1600; border: 1px solid #f5c842; border-radius: 10px; color: #f5c842; font-size: 13px; font-weight: 700; text-decoration: none; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
 .menu-btn:active { opacity: 0.7; }
 
-.page { padding: 20px 16px; }
-.page-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
-.page-sub { font-size: 13px; color: #555; margin-bottom: 24px; }
+/* Temp badge */
+.temp-badge { display: flex; align-items: center; gap: 5px; background: #141414; border: 1px solid #222; border-radius: 8px; padding: 5px 10px; font-size: 12px; }
+.temp-dot { width: 7px; height: 7px; border-radius: 50%; background: #f5c842; }
 
-.section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin: 20px 0 10px; }
+/* Main view */
+.page { padding: 16px 16px; }
+.page-title { font-size: 21px; font-weight: 800; margin-bottom: 2px; }
+.page-sub { font-size: 13px; color: #555; margin-bottom: 20px; }
+.section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin: 18px 0 10px; }
 
 /* Nombre */
-.enc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
-.enc-btn { padding: 12px; border: 1px solid #2a2a2a; border-radius: 12px; background: #141414; color: #888; font-size: 15px; cursor: pointer; transition: all 0.15s; text-align: center; font-family: inherit; font-weight: 600; }
+.enc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.enc-btn { padding: 11px; border: 1px solid #2a2a2a; border-radius: 12px; background: #141414; color: #888; font-size: 14px; cursor: pointer; transition: all 0.15s; text-align: center; font-family: inherit; font-weight: 600; }
 .enc-btn.active { background: #f5c842; color: #0e0e0e; border-color: #f5c842; }
 
 /* Fields */
-.field { margin-bottom: 16px; }
-.field label { display: block; font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-.field-row { display: flex; align-items: center; gap: 0; background: #141414; border: 1px solid #222; border-radius: 12px; overflow: hidden; }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; }
+.field-row { display: flex; align-items: center; background: #141414; border: 1px solid #222; border-radius: 12px; overflow: hidden; }
 .field-row:focus-within { border-color: #f5c842; }
-.field-input { flex: 1; background: transparent; border: none; color: #f0ede8; font-size: 22px; font-weight: 700; padding: 14px 16px; outline: none; font-family: inherit; }
-.field-input::placeholder { color: #333; font-weight: 400; font-size: 16px; }
+.field-input { flex: 1; background: transparent; border: none; color: #f0ede8; font-size: 22px; font-weight: 700; padding: 13px 16px; outline: none; font-family: inherit; }
+.field-input::placeholder { color: #2a2a2a; font-weight: 400; font-size: 16px; }
 .field-unit { font-size: 13px; color: #444; padding: 0 16px 0 0; font-weight: 600; flex-shrink: 0; }
+.field-hint { font-size: 11px; color: #3a3a3a; margin-top: 4px; }
+.field-hint b { color: #f5c842; }
 
-.field-default { font-size: 11px; color: #3a3a3a; margin-top: 5px; }
-.field-default span { color: #f5c842; }
+/* Molienda spinner */
+.spinner-row { display: flex; align-items: center; background: #141414; border: 1px solid #222; border-radius: 12px; overflow: hidden; }
+.spin-btn { width: 52px; height: 54px; background: #1a1a1a; border: none; color: #f0ede8; font-size: 24px; cursor: pointer; flex-shrink: 0; font-family: inherit; }
+.spin-btn:active { background: #252525; }
+.spin-val { flex: 1; background: transparent; border: none; color: #f5c842; font-size: 26px; font-weight: 800; text-align: center; outline: none; font-family: inherit; padding: 8px 0; }
 
-/* Molienda especial — con + / - */
-.spinner-row { display: flex; align-items: center; gap: 0; background: #141414; border: 1px solid #222; border-radius: 12px; overflow: hidden; }
-.spinner-row:focus-within { border-color: #f5c842; }
-.spin-btn { width: 52px; height: 56px; background: #1a1a1a; border: none; color: #f0ede8; font-size: 24px; cursor: pointer; flex-shrink: 0; font-family: inherit; }
-.spin-btn:active { background: #2a2a2a; }
-.spin-val { flex: 1; background: transparent; border: none; color: #f5c842; font-size: 26px; font-weight: 800; text-align: center; outline: none; font-family: inherit; padding: 10px 0; }
-.spin-label { font-size: 11px; color: #555; text-align: center; margin-top: 5px; }
-
-/* Notas */
-.notes-input { width: 100%; background: #141414; border: 1px solid #222; border-radius: 12px; color: #f0ede8; font-size: 15px; padding: 14px; outline: none; font-family: inherit; resize: none; min-height: 80px; }
-.notes-input:focus { border-color: #f5c842; }
+/* Temp field row */
+.temp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 /* Submit */
-.submit-btn { width: 100%; padding: 18px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 24px; transition: opacity 0.15s; }
+.submit-btn { width: 100%; padding: 17px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 20px; transition: opacity 0.15s; }
 .submit-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.curve-btn { width: 100%; padding: 14px; background: #0f1a2a; border: 1px solid #1a4060; border-radius: 14px; color: #6fa6cf; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; }
 
-/* Success */
-#success-screen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; padding: 40px 20px; text-align: center; }
-.success-icon { font-size: 64px; margin-bottom: 16px; }
-.success-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
-.success-sub { font-size: 14px; color: #555; margin-bottom: 8px; }
-.success-ts { font-size: 12px; color: #3a3a3a; margin-bottom: 32px; }
-.success-btn { display: block; width: 100%; padding: 16px; background: #141414; border: 1px solid #2a2a2a; border-radius: 14px; color: #f0ede8; font-size: 15px; font-weight: 700; text-align: center; text-decoration: none; margin-bottom: 10px; }
-.success-btn.gold { background: #f5c842; color: #0e0e0e; border-color: #f5c842; }
+/* Notes */
+.notes-input { width: 100%; background: #141414; border: 1px solid #222; border-radius: 12px; color: #f0ede8; font-size: 15px; padding: 13px; outline: none; font-family: inherit; resize: none; min-height: 70px; }
+.notes-input:focus { border-color: #f5c842; }
 
-/* Historial preview */
-.hist-section { margin-top: 32px; }
-.hist-title { font-size: 13px; font-weight: 700; color: #555; margin-bottom: 10px; }
-.calib-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+/* ─── VISUALIZATION PANEL ─── */
+#viz-panel { display: none; padding: 16px; }
+
+.viz-back { display: flex; align-items: center; gap: 8px; background: none; border: none; color: #555; font-size: 14px; cursor: pointer; margin-bottom: 16px; font-family: inherit; padding: 0; }
+
+/* Badges row */
+.badge-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.badge { flex: 1; min-width: 70px; background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 10px 12px; text-align: center; }
+.badge.ok { border-color: #2d5a2d; background: #0a1a0a; }
+.badge.warn { border-color: #5a4a00; background: #1a1400; }
+.badge.bad { border-color: #5a1a1a; background: #1a0a0a; }
+.badge-val { font-size: 18px; font-weight: 800; }
+.badge-ok { color: #6fcf6f; }
+.badge-warn { color: #f5c842; }
+.badge-bad { color: #cf6f6f; }
+.badge-label { font-size: 10px; color: #444; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+
+/* Curve */
+.curve-card { background: #111; border: 1px solid #1e1e1e; border-radius: 16px; padding: 14px; margin-bottom: 14px; }
+.curve-title { font-size: 12px; color: #555; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+#curve-svg { width: 100%; display: block; }
+
+/* Temp card */
+.temp-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+.temp-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.temp-big { font-size: 32px; font-weight: 800; color: #f5c842; }
+.temp-info { flex: 1; }
+.temp-city { font-size: 12px; color: #555; }
+.temp-advisory { font-size: 13px; line-height: 1.5; color: #888; }
+.temp-advisory b { color: #f0ede8; }
+
+/* Ratio gauge */
+.ratio-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+.ratio-title { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.ratio-track { height: 8px; background: #1a1a1a; border-radius: 4px; position: relative; margin-bottom: 8px; }
+.ratio-zone-ideal { position: absolute; left: 40%; width: 26%; height: 100%; background: #1a3a1a; border-radius: 4px; }
+.ratio-zone-ok { position: absolute; left: 28%; width: 46%; height: 100%; background: #0e2a0e; border-radius: 4px; }
+.ratio-fill { position: absolute; left: 0; height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+.ratio-needle { position: absolute; top: -4px; width: 2px; height: 16px; background: #f5c842; border-radius: 1px; transform: translateX(-50%); transition: left 0.8s ease; }
+.ratio-labels { display: flex; justify-content: space-between; font-size: 10px; color: #444; }
+.ratio-val { font-size: 18px; font-weight: 800; text-align: center; margin-top: 6px; }
+
+/* Trend chart */
+.trend-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+.trend-title { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+#trend-svg { width: 100%; display: block; }
+.trend-legend { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
+.leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #555; }
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* Historial mini */
+.hist-section { margin-top: 24px; }
+.hist-title { font-size: 12px; font-weight: 700; color: #444; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.calib-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 11px 13px; margin-bottom: 7px; }
 .calib-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
 .calib-who { font-size: 13px; font-weight: 700; }
 .calib-when { font-size: 11px; color: #555; }
-.calib-vals { display: flex; gap: 10px; flex-wrap: wrap; }
-.calib-val { background: #0e0e0e; border: 1px solid #1e1e1e; border-radius: 8px; padding: 5px 10px; font-size: 12px; }
+.calib-vals { display: flex; gap: 8px; flex-wrap: wrap; }
+.calib-val { background: #0e0e0e; border: 1px solid #1a1a1a; border-radius: 7px; padding: 4px 9px; font-size: 11px; color: #666; }
 .calib-val b { color: #f5c842; }
+.calib-temp { font-size: 10px; color: #3a3a3a; margin-top: 4px; }
+
+/* Success */
+#success-screen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; padding: 40px 20px; text-align: center; }
+.success-icon { font-size: 60px; margin-bottom: 16px; }
+.success-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+.success-sub { font-size: 14px; color: #666; margin-bottom: 6px; }
+.success-ts { font-size: 11px; color: #3a3a3a; margin-bottom: 28px; }
+.success-btn { display: block; width: 100%; padding: 15px; background: #141414; border: 1px solid #2a2a2a; border-radius: 14px; color: #f0ede8; font-size: 15px; font-weight: 700; text-align: center; text-decoration: none; margin-bottom: 10px; }
+.success-btn.gold { background: #f5c842; color: #0e0e0e; border-color: #f5c842; }
+.success-btn.blue { background: #0f1a2a; border-color: #1a4060; color: #6fa6cf; }
 </style>
 </head>
 <body>
@@ -82,10 +139,14 @@ header { padding: 20px 20px 16px; border-bottom: 1px solid #1a1a1a; background: 
   <div class="header-top">
     <a class="menu-btn" href="index.html">← Menú</a>
     <div class="logo">⚡ <span>Trueno</span></div>
-    <div style="width:72px"></div>
+    <div class="temp-badge" id="temp-badge">
+      <div class="temp-dot" id="temp-dot" style="background:#333"></div>
+      <span id="temp-header">—°C</span>
+    </div>
   </div>
 </header>
 
+<!-- ═══ FORM ═══ -->
 <div id="form-view" class="page">
   <div class="page-title">☕ Calibración</div>
   <div class="page-sub" id="fecha-display"></div>
@@ -98,19 +159,17 @@ header { padding: 20px 20px 16px; border-bottom: 1px solid #1a1a1a; background: 
     <button class="enc-btn" onclick="setNombre('Izchel',this)">Izchel</button>
   </div>
 
-  <div class="section-label">Parámetros</div>
+  <div class="section-label">Parámetros del espresso</div>
 
-  <!-- Gramaje -->
   <div class="field">
     <label>Gramaje (dosis)</label>
     <div class="field-row">
       <input class="field-input" type="number" id="gramaje" value="18" step="0.1" min="0">
       <span class="field-unit">g</span>
     </div>
-    <div class="field-default">Estándar Trueno: <span>18 g</span></div>
+    <div class="field-hint">Estándar Trueno: <b>18 g</b></div>
   </div>
 
-  <!-- Molienda -->
   <div class="field">
     <label>Punto de molienda</label>
     <div class="spinner-row">
@@ -118,54 +177,137 @@ header { padding: 20px 20px 16px; border-bottom: 1px solid #1a1a1a; background: 
       <input class="spin-val" type="number" id="molienda" value="0" min="0" max="99">
       <button class="spin-btn" onclick="spinMolienda(1)">+</button>
     </div>
-    <div class="spin-label">Número del molino (más alto = más grueso)</div>
+    <div class="field-hint" style="margin-top:5px;text-align:center">Número del molino · más alto = más grueso</div>
   </div>
 
-  <!-- Tiempo de extracción -->
-  <div class="field">
-    <label>Tiempo de extracción</label>
-    <div class="field-row">
-      <input class="field-input" type="number" id="tiempo" placeholder="28" min="0" max="120">
-      <span class="field-unit">seg</span>
+  <div class="temp-row">
+    <div class="field">
+      <label>Tiempo extracción</label>
+      <div class="field-row">
+        <input class="field-input" type="number" id="tiempo" placeholder="28" min="0" max="120">
+        <span class="field-unit">s</span>
+      </div>
+      <div class="field-hint">Ideal: <b>25–32 s</b></div>
     </div>
-    <div class="field-default">Rango ideal: <span>25 – 32 seg</span></div>
-  </div>
-
-  <!-- Cantidad extraída -->
-  <div class="field">
-    <label>Cantidad extraída (yield)</label>
-    <div class="field-row">
-      <input class="field-input" type="number" id="cantidad" placeholder="36" min="0" max="120">
-      <span class="field-unit">ml</span>
+    <div class="field">
+      <label>Yield extraído</label>
+      <div class="field-row">
+        <input class="field-input" type="number" id="cantidad" placeholder="36" min="0" max="120">
+        <span class="field-unit">ml</span>
+      </div>
+      <div class="field-hint">Ideal: <b>36 ml</b></div>
     </div>
-    <div class="field-default">Ratio ideal: <span>1 : 2</span> (18 g → 36 ml)</div>
   </div>
 
-  <!-- Notas -->
+  <div class="temp-row">
+    <div class="field">
+      <label>Temp. ambiente <span style="font-size:10px;color:#3a3a3a">(Cabo)</span></label>
+      <div class="field-row">
+        <input class="field-input" type="number" id="temp-amb" placeholder="—" step="0.5">
+        <span class="field-unit">°C</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Temp. agua máquina</label>
+      <div class="field-row">
+        <input class="field-input" type="number" id="temp-agua" placeholder="93" value="93" step="0.5">
+        <span class="field-unit">°C</span>
+      </div>
+    </div>
+  </div>
+
   <div class="field">
     <label>Notas (opcional)</label>
     <textarea class="notes-input" id="notas" placeholder="Observaciones, ajustes realizados..."></textarea>
   </div>
 
   <button class="submit-btn" id="submit-btn" onclick="registrar()">Registrar calibración</button>
+  <button class="curve-btn" onclick="abrirCurva(null)">📈 Ver curvas del historial</button>
 
-  <!-- Últimas calibraciones -->
   <div class="hist-section">
     <div class="hist-title">📋 Últimas calibraciones</div>
-    <div id="hist-list"><div style="color:#333;font-size:13px;text-align:center;padding:20px">Sin registros aún</div></div>
+    <div id="hist-list"><div style="color:#2a2a2a;font-size:13px;text-align:center;padding:20px">Sin registros aún</div></div>
   </div>
 </div>
 
+<!-- ═══ VISUALIZATION ═══ -->
+<div id="viz-panel">
+  <div style="padding:16px 16px 0">
+    <button class="viz-back" onclick="cerrarCurva()">← Volver</button>
+  </div>
+
+  <div style="padding:0 16px 16px">
+    <div style="font-size:20px;font-weight:800;margin-bottom:2px" id="viz-titulo">Análisis del shot</div>
+    <div style="font-size:12px;color:#555;margin-bottom:16px" id="viz-sub"></div>
+
+    <!-- Badges de calidad -->
+    <div class="badge-row" id="viz-badges"></div>
+
+    <!-- Curva de extracción -->
+    <div class="curve-card">
+      <div class="curve-title">📈 Curva de extracción</div>
+      <svg id="curve-svg" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#333;margin-top:6px;padding:0 4px">
+        <span>0s</span><span id="curve-mid-label"></span><span id="curve-end-label"></span>
+      </div>
+    </div>
+
+    <!-- Temperatura y advisory -->
+    <div class="temp-card" id="temp-card">
+      <div class="temp-card-top">
+        <div id="temp-icon" style="font-size:32px">🌡️</div>
+        <div class="temp-info">
+          <div class="temp-big" id="viz-temp">—°C</div>
+          <div class="temp-city">Cabo San Lucas · ahora</div>
+        </div>
+      </div>
+      <div class="temp-advisory" id="temp-advisory">Cargando temperatura...</div>
+    </div>
+
+    <!-- Ratio gauge -->
+    <div class="ratio-card">
+      <div class="ratio-title">⚖️ Ratio extracción (yield ÷ gramaje)</div>
+      <div class="ratio-track">
+        <div class="ratio-zone-ok"></div>
+        <div class="ratio-zone-ideal"></div>
+        <div class="ratio-needle" id="ratio-needle"></div>
+      </div>
+      <div class="ratio-labels">
+        <span>Ristretto 1:1</span>
+        <span style="color:#6fcf6f">Ideal 1:2</span>
+        <span>Lungo 1:3</span>
+      </div>
+      <div class="ratio-val" id="ratio-val"></div>
+    </div>
+
+    <!-- Trend histórico -->
+    <div class="trend-card" id="trend-section" style="display:none">
+      <div class="trend-title">📊 Tendencia — últimos shots</div>
+      <svg id="trend-svg" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="trend-legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#f5c842"></div>Tiempo (s)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#6fa6cf"></div>Yield (ml)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#555"></div>Temp °C</div>
+      </div>
+    </div>
+
+    <button class="curve-btn" onclick="cerrarCurva()" style="margin-top:4px">← Volver al formulario</button>
+  </div>
+</div>
+
+<!-- ═══ SUCCESS ═══ -->
 <div id="success-screen">
   <div class="success-icon">✅</div>
-  <div class="success-title">¡Calibración registrada!</div>
+  <div class="success-title">¡Calibración guardada!</div>
   <div class="success-sub" id="success-resumen"></div>
   <div class="success-ts" id="success-ts"></div>
+  <button class="success-btn blue" onclick="verCurvaUltimo()">📈 Ver curva de este shot</button>
   <a class="success-btn gold" href="calibracion.html">+ Nueva calibración</a>
   <a class="success-btn" href="index.html">← Menú principal</a>
 </div>
 
 <script>
+// ─── Supabase ─────────────────────────────────────────────────────────────────
 const { createClient } = supabase
 const sb = createClient(
   'https://axxbsjbywivolwluzvrd.supabase.co',
@@ -175,32 +317,54 @@ const GAS = 'https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAE
 const TG_TOKEN = '8765854864:AAEuMxt5p264TL3LPHbQI89S6uqqyIEnQd8'
 const TG_CHAT = '8309237078'
 function tg(msg) {
-  fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: TG_CHAT, text: msg, parse_mode: 'HTML' })
-  }).catch(() => {})
+  fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:'HTML'})
+  }).catch(()=>{})
 }
 
+// ─── Estado ───────────────────────────────────────────────────────────────────
 let nombre = ''
+let tempActual = null
+let ultimoRegistro = null
 const hoy = new Date()
-document.getElementById('fecha-display').textContent = hoy.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
 
+document.getElementById('fecha-display').textContent = hoy.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'})
+
+// ─── Temperatura Cabo San Lucas ───────────────────────────────────────────────
+async function fetchTemp() {
+  try {
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=22.89&longitude=-109.92&current=temperature_2m,apparent_temperature,weather_code&timezone=America%2FMazatlan')
+    const data = await res.json()
+    const t = data.current.temperature_2m
+    const ta = data.current.apparent_temperature
+    tempActual = t
+    document.getElementById('temp-header').textContent = `${t.toFixed(1)}°C`
+    document.getElementById('temp-amb').value = t.toFixed(1)
+    const dot = document.getElementById('temp-dot')
+    dot.style.background = t >= 32 ? '#cf6f6f' : t >= 26 ? '#f5c842' : '#6fcf6f'
+  } catch(e) {
+    document.getElementById('temp-header').textContent = 'sin red'
+  }
+}
+fetchTemp()
+
+// ─── Form ─────────────────────────────────────────────────────────────────────
 function setNombre(n, btn) {
   nombre = n
   document.querySelectorAll('.enc-btn').forEach(b => b.classList.remove('active'))
   btn.classList.add('active')
 }
-
 function spinMolienda(d) {
   const el = document.getElementById('molienda')
-  el.value = Math.max(0, Math.min(99, parseInt(el.value || 0) + d))
+  el.value = Math.max(0, Math.min(99, parseInt(el.value||0) + d))
 }
 
 async function registrar() {
   if (!nombre) { alert('¿Quién calibra? Selecciona tu nombre.'); return }
   const tiempo = parseFloat(document.getElementById('tiempo').value)
   const cantidad = parseFloat(document.getElementById('cantidad').value)
-  if (!tiempo || !cantidad) { alert('Ingresa el tiempo de extracción y la cantidad extraída.'); return }
+  if (!tiempo || !cantidad) { alert('Ingresa el tiempo de extracción y el yield.'); return }
 
   const btn = document.getElementById('submit-btn')
   btn.disabled = true; btn.textContent = 'Registrando...'
@@ -210,60 +374,290 @@ async function registrar() {
     id: ts.getTime().toString(),
     ts: ts.toISOString(),
     fecha: hoy.toLocaleDateString('es-MX'),
-    hora: ts.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    hora: ts.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
     encargada: nombre,
-    gramaje: parseFloat(document.getElementById('gramaje').value) || 18,
-    molienda: parseInt(document.getElementById('molienda').value) || 0,
+    gramaje: parseFloat(document.getElementById('gramaje').value)||18,
+    molienda: parseInt(document.getElementById('molienda').value)||0,
     tiempo_extraccion: tiempo,
     cantidad_extraida: cantidad,
-    notas: document.getElementById('notas').value.trim() || null
+    temp_ambiente: parseFloat(document.getElementById('temp-amb').value)||null,
+    temp_agua: parseFloat(document.getElementById('temp-agua').value)||93,
+    notas: document.getElementById('notas').value.trim()||null
   }
 
-  // Supabase
-  sb.from('calibraciones').insert(registro).then().catch(() => {})
+  sb.from('calibraciones').insert(registro).then().catch(()=>{})
+  fetch(GAS,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({tipo:'calibracion',row:[registro.fecha,registro.hora,registro.encargada,registro.gramaje,registro.molienda,registro.tiempo_extraccion,registro.cantidad_extraida,registro.temp_ambiente||'',registro.temp_agua,registro.notas||'']})
+  }).catch(()=>{})
 
-  // Google Sheets
-  fetch(GAS, {
-    method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      tipo: 'calibracion',
-      row: [registro.fecha, registro.hora, registro.encargada, registro.gramaje, registro.molienda, registro.tiempo_extraccion, registro.cantidad_extraida, registro.notas || '']
-    })
-  }).catch(() => {})
+  const ratio = (cantidad/registro.gramaje).toFixed(2)
+  const tiempoOk = tiempo>=25&&tiempo<=32 ? '✅' : '⚠️'
+  const ratioOk = ratio>=1.8&&ratio<=2.2 ? '✅' : '⚠️'
+  tg(`☕ <b>Calibración</b>\n👤 ${nombre} · ${registro.fecha} ${registro.hora}\n\n<b>Gramaje:</b> ${registro.gramaje}g\n<b>Molienda:</b> ${registro.molienda}\n<b>Extracción:</b> ${tiempoOk} ${tiempo}s\n<b>Yield:</b> ${ratioOk} ${cantidad}ml (ratio 1:${ratio})\n<b>Temp ambiente:</b> ${registro.temp_ambiente||'—'}°C${registro.notas?`\n<b>Notas:</b> ${registro.notas}`:''}`)
 
-  // Telegram
-  tg(`☕ <b>Calibración registrada</b>\n👤 ${nombre}\n📅 ${registro.fecha} · ${registro.hora}\n\n<b>Gramaje:</b> ${registro.gramaje} g\n<b>Molienda:</b> ${registro.molienda}\n<b>Extracción:</b> ${tiempo} seg\n<b>Yield:</b> ${cantidad} ml${registro.notas ? `\n<b>Notas:</b> ${registro.notas}` : ''}`)
+  const hist = JSON.parse(localStorage.getItem('tc_calibraciones')||'[]')
+  hist.unshift(registro)
+  localStorage.setItem('tc_calibraciones', JSON.stringify(hist.slice(0,30)))
 
-  // Guardar en localStorage para historial local
-  const histLocal = JSON.parse(localStorage.getItem('tc_calibraciones') || '[]')
-  histLocal.unshift(registro)
-  localStorage.setItem('tc_calibraciones', JSON.stringify(histLocal.slice(0, 20)))
-
+  ultimoRegistro = registro
   document.getElementById('success-resumen').textContent = `${registro.gramaje}g · Molienda ${registro.molienda} · ${tiempo}s · ${cantidad}ml`
-  document.getElementById('success-ts').textContent = `${registro.fecha} a las ${registro.hora} · ${nombre}`
+  document.getElementById('success-ts').textContent = `${registro.fecha} ${registro.hora} · ${nombre}${registro.temp_ambiente?' · '+registro.temp_ambiente+'°C':''}`
   document.getElementById('form-view').style.display = 'none'
   document.getElementById('success-screen').style.display = 'flex'
 }
 
-// Cargar historial local
+function verCurvaUltimo() {
+  document.getElementById('success-screen').style.display = 'none'
+  abrirCurva(ultimoRegistro)
+}
+
+// ─── Visualización ────────────────────────────────────────────────────────────
+function abrirCurva(registro) {
+  const hist = JSON.parse(localStorage.getItem('tc_calibraciones')||'[]')
+  const r = registro || hist[0] || null
+
+  document.getElementById('form-view').style.display = 'none'
+  document.getElementById('success-screen').style.display = 'none'
+  document.getElementById('viz-panel').style.display = 'block'
+
+  if (r) {
+    document.getElementById('viz-titulo').textContent = `Shot · ${r.encargada}`
+    document.getElementById('viz-sub').textContent = `${r.fecha} ${r.hora}${r.temp_ambiente?' · '+r.temp_ambiente+'°C':''}`
+    renderBadges(r)
+    renderCurva(r)
+    renderRatio(r)
+  } else {
+    document.getElementById('viz-titulo').textContent = 'Historial de shots'
+    document.getElementById('viz-sub').textContent = 'Sin calibraciones registradas aún'
+    document.getElementById('viz-badges').innerHTML = ''
+    document.getElementById('curve-svg').innerHTML = '<text x="160" y="80" fill="#333" text-anchor="middle" font-size="13">Sin datos — registra tu primer shot</text>'
+    document.getElementById('ratio-val').textContent = '—'
+  }
+
+  renderTempCard(r?.temp_ambiente ?? tempActual)
+  if (hist.length > 1) renderTrend(hist.slice(0, 10).reverse())
+
+  window.scrollTo(0,0)
+}
+
+function cerrarCurva() {
+  document.getElementById('viz-panel').style.display = 'none'
+  document.getElementById('form-view').style.display = 'block'
+  cargarHistorial()
+}
+
+// ─── Badges ───────────────────────────────────────────────────────────────────
+function renderBadges(r) {
+  const ratio = r.cantidad_extraida / r.gramaje
+  const tOk = r.tiempo_extraccion >= 25 && r.tiempo_extraccion <= 32
+  const tClose = r.tiempo_extraccion >= 20 && r.tiempo_extraccion <= 38
+  const rOk = ratio >= 1.8 && ratio <= 2.2
+  const rClose = ratio >= 1.5 && ratio <= 2.5
+  const tClass = tOk ? 'ok' : tClose ? 'warn' : 'bad'
+  const rClass = rOk ? 'ok' : rClose ? 'warn' : 'bad'
+  const tColor = tOk ? 'badge-ok' : tClose ? 'badge-warn' : 'badge-bad'
+  const rColor = rOk ? 'badge-ok' : rClose ? 'badge-warn' : 'badge-bad'
+  document.getElementById('viz-badges').innerHTML = `
+    <div class="badge ${tClass}"><div class="badge-val ${tColor}">${r.tiempo_extraccion}s</div><div class="badge-label">Tiempo</div></div>
+    <div class="badge ${rClass}"><div class="badge-val ${rColor}">${r.cantidad_extraida}ml</div><div class="badge-label">Yield</div></div>
+    <div class="badge"><div class="badge-val" style="color:#6fa6cf">${r.gramaje}g</div><div class="badge-label">Gramaje</div></div>
+    <div class="badge"><div class="badge-val" style="color:#888">${r.molienda}</div><div class="badge-label">Molienda</div></div>`
+}
+
+// ─── Curva SVG ────────────────────────────────────────────────────────────────
+function renderCurva(r) {
+  const W = 320, H = 160
+  const padL = 28, padR = 10, padT = 10, padB = 28
+  const plotW = W - padL - padR
+  const plotH = H - padT - padB
+  const t = r.tiempo_extraccion
+  const ml = r.cantidad_extraida
+  const tMax = Math.max(t * 1.15, 35)
+
+  // Etiquetar eje X
+  document.getElementById('curve-mid-label').textContent = Math.round(tMax/2) + 's'
+  document.getElementById('curve-end-label').textContent = Math.round(tMax) + 's'
+
+  // Generar puntos de la curva (modelo logístico de extracción)
+  // y(t) = ml * (1 - e^(-k*t)) con fase pre-infusión
+  const k = -Math.log(0.05) / t  // alcanza 95% del yield en el tiempo registrado
+  const pts = []
+  const N = 60
+  for (let i = 0; i <= N; i++) {
+    const ti = (i / N) * tMax
+    const yi = ti < 3 ? 0 : ml * (1 - Math.exp(-k * (ti - 3)))  // pre-infusión 3s
+    const px = padL + (ti / tMax) * plotW
+    const py = padT + plotH - Math.min(yi / ml, 1) * plotH
+    pts.push([px, py])
+  }
+  const pathD = pts.map((p, i) => (i === 0 ? `M${p[0].toFixed(1)},${p[1].toFixed(1)}` : `L${p[0].toFixed(1)},${p[1].toFixed(1)}`)).join(' ')
+  const areaD = pathD + ` L${pts[pts.length-1][0].toFixed(1)},${(padT+plotH).toFixed(1)} L${padL},${(padT+plotH).toFixed(1)} Z`
+
+  // Zonas de tiempo (coloreadas en el fondo)
+  const xIdealStart = padL + (25 / tMax) * plotW
+  const xIdealEnd   = padL + (32 / tMax) * plotW
+  const xShot       = padL + (t / tMax) * plotW
+  const yShot       = padT + plotH - plotH  // top (ya que alcanza ml completo)
+
+  // Línea de tiempo del shot
+  const svgContent = `
+    <!-- Fondo de zonas -->
+    <rect x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="#0a0a0a" rx="4"/>
+    <rect x="${Math.max(padL, xIdealStart)}" y="${padT}" width="${Math.max(0, Math.min(xIdealEnd, padL+plotW) - Math.max(padL, xIdealStart))}" height="${plotH}" fill="#0d1f0d" opacity="0.8"/>
+
+    <!-- Ejes -->
+    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+plotH}" stroke="#1a1a1a" stroke-width="1"/>
+    <line x1="${padL}" y1="${padT+plotH}" x2="${padL+plotW}" y2="${padT+plotH}" stroke="#1a1a1a" stroke-width="1"/>
+
+    <!-- Marcas eje Y -->
+    ${[0.25,0.5,0.75,1].map(f => {
+      const y = padT + plotH - f * plotH
+      const label = Math.round(f * ml)
+      return `<line x1="${padL-3}" y1="${y}" x2="${padL+plotW}" y2="${y}" stroke="#111" stroke-width="1" stroke-dasharray="3,3"/>
+              <text x="${padL-5}" y="${y+4}" fill="#333" font-size="8" text-anchor="end">${label}</text>`
+    }).join('')}
+    <text x="${padL-5}" y="${padT+plotH+3}" fill="#333" font-size="8" text-anchor="end">0</text>
+    <text x="${padL-14}" y="${padT + plotH/2}" fill="#333" font-size="8" text-anchor="middle" transform="rotate(-90,${padL-14},${padT+plotH/2})">ml</text>
+
+    <!-- Zona ideal label -->
+    <text x="${(xIdealStart+xIdealEnd)/2}" y="${padT+10}" fill="#2d5a2d" font-size="8" text-anchor="middle">ideal</text>
+
+    <!-- Área bajo la curva -->
+    <path d="${areaD}" fill="url(#grad)" opacity="0.25"/>
+
+    <!-- Curva principal -->
+    <path d="${pathD}" fill="none" stroke="#f5c842" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <animate attributeName="stroke-dasharray" from="0 2000" to="2000 0" dur="1.4s" begin="0s" fill="freeze"/>
+    </path>
+
+    <!-- Punto final del shot -->
+    <line x1="${xShot}" y1="${padT}" x2="${xShot}" y2="${padT+plotH}" stroke="#f5c842" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+    <circle cx="${xShot}" cy="${padT+4}" r="4" fill="#f5c842"/>
+    <text x="${xShot+5}" y="${padT+10}" fill="#f5c842" font-size="9">${t}s · ${ml}ml</text>
+
+    <!-- Gradiente -->
+    <defs>
+      <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#f5c842"/>
+        <stop offset="100%" stop-color="#f5c842" stop-opacity="0"/>
+      </linearGradient>
+    </defs>`
+
+  document.getElementById('curve-svg').innerHTML = svgContent
+}
+
+// ─── Ratio gauge ──────────────────────────────────────────────────────────────
+function renderRatio(r) {
+  const ratio = r.cantidad_extraida / r.gramaje
+  // Track: 1:1 (left) to 1:3 (right) → ratio 1.0 to 3.0
+  const pct = Math.min(Math.max((ratio - 1.0) / 2.0, 0), 1)
+  document.getElementById('ratio-needle').style.left = (pct * 100) + '%'
+  const color = ratio >= 1.8 && ratio <= 2.2 ? '#6fcf6f' : ratio >= 1.5 && ratio <= 2.5 ? '#f5c842' : '#cf6f6f'
+  document.getElementById('ratio-val').innerHTML = `<span style="color:${color}">1 : ${ratio.toFixed(2)}</span> <span style="font-size:13px;color:#555;font-weight:400">${ratio < 1.5 ? '(muy corto)' : ratio > 2.5 ? '(muy largo)' : ratio >= 1.8 && ratio <= 2.2 ? '✓ perfecto' : '(aceptable)'}</span>`
+}
+
+// ─── Temperatura advisory ─────────────────────────────────────────────────────
+function renderTempCard(temp) {
+  const vizTemp = document.getElementById('viz-temp')
+  const advisory = document.getElementById('temp-advisory')
+  const icon = document.getElementById('temp-icon')
+
+  if (!temp) {
+    vizTemp.textContent = '—°C'
+    advisory.innerHTML = 'No se pudo obtener la temperatura actual.<br>Ingrésala manualmente en el formulario.'
+    return
+  }
+
+  vizTemp.textContent = `${parseFloat(temp).toFixed(1)}°C`
+
+  if (temp >= 34) {
+    icon.textContent = '🔥'
+    advisory.innerHTML = `<b>Día muy caliente.</b> A ${temp}°C el agua de red llega más caliente y la máquina trabaja diferente. Considera <b>molienda un punto más gruesa</b> y revisa que el portafiltro no esté sobrecalentado. La pre-infusión puede acortarse.`
+  } else if (temp >= 29) {
+    icon.textContent = '☀️'
+    advisory.innerHTML = `<b>Día caliente (${temp}°C).</b> El espresso puede extraerse un poco más rápido de lo normal. Si el tiempo bajó respecto a ayer, prueba <b>molienda medio punto más fina</b> antes de ajustar temperatura.`
+  } else if (temp >= 24) {
+    icon.textContent = '🌤️'
+    advisory.innerHTML = `<b>Temperatura normal para Cabo (${temp}°C).</b> Condiciones estables. Los parámetros de referencia aplican directamente. Buenas condiciones para calibrar.`
+  } else if (temp >= 20) {
+    icon.textContent = '🌥️'
+    advisory.innerHTML = `<b>Día fresco (${temp}°C).</b> Poco común en Cabo. El espresso puede extraerse más lento. Si el tiempo subió, considera <b>molienda un punto más gruesa</b> o revisa la temperatura de extracción de la máquina.`
+  } else {
+    icon.textContent = '❄️'
+    advisory.innerHTML = `<b>Temperatura inusualmente baja (${temp}°C).</b> La extracción puede ser notablemente más lenta. Ajusta la <b>molienda a más gruesa</b> y verifica que la temperatura de agua de la máquina esté en rango.`
+  }
+}
+
+// ─── Trend sparkline ──────────────────────────────────────────────────────────
+function renderTrend(hist) {
+  if (hist.length < 2) return
+  document.getElementById('trend-section').style.display = 'block'
+  const W = 320, H = 100
+  const pad = 16
+  const plotW = W - pad*2, plotH = H - pad*2
+
+  const tiempos = hist.map(r => r.tiempo_extraccion)
+  const yields  = hist.map(r => r.cantidad_extraida)
+  const temps   = hist.map(r => r.temp_ambiente).filter(Boolean)
+
+  const tMin = Math.min(...tiempos) - 3, tMax2 = Math.max(...tiempos) + 3
+  const yMin = Math.min(...yields) - 5,  yMax2 = Math.max(...yields) + 5
+  const tempMin = temps.length ? Math.min(...temps) - 2 : 0
+  const tempMax2 = temps.length ? Math.max(...temps) + 2 : 40
+
+  function mapX(i) { return pad + (i / (hist.length - 1)) * plotW }
+  function mapT(v) { return pad + plotH - ((v - tMin) / (tMax2 - tMin)) * plotH }
+  function mapY(v) { return pad + plotH - ((v - yMin) / (yMax2 - yMin)) * plotH }
+  function mapTemp(v) { return pad + plotH - ((v - tempMin) / (tempMax2 - tempMin)) * plotH }
+
+  const ptsTiempo = hist.map((r,i) => [mapX(i), mapT(r.tiempo_extraccion)])
+  const ptsYield  = hist.map((r,i) => [mapX(i), mapY(r.cantidad_extraida)])
+  const ptsTemp   = hist.filter(r=>r.temp_ambiente).map((r,i) => [mapX(i), mapTemp(r.temp_ambiente)])
+
+  function polyline(pts, color, dashed='') {
+    return `<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" ${dashed?`stroke-dasharray="${dashed}"`:''}/>`
+  }
+  function dots(pts, color) {
+    return pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${color}"/>`).join('')
+  }
+  // Zona ideal tiempo (25-32s)
+  const y25 = mapT(32), y32 = mapT(25)
+  const svg = `
+    <rect x="${pad}" y="${pad}" width="${plotW}" height="${plotH}" fill="#0a0a0a" rx="4"/>
+    <rect x="${pad}" y="${Math.min(y25,y32)}" width="${plotW}" height="${Math.abs(y32-y25)}" fill="#0d1f0d" opacity="0.6"/>
+    ${polyline(ptsTiempo,'#f5c842')}
+    ${dots(ptsTiempo,'#f5c842')}
+    ${polyline(ptsYield,'#6fa6cf')}
+    ${dots(ptsYield,'#6fa6cf')}
+    ${ptsTemp.length>1?polyline(ptsTemp,'#444','4,3'):''}
+    ${hist.map((_,i)=>`<text x="${mapX(i)}" y="${H-4}" fill="#2a2a2a" font-size="8" text-anchor="middle">${i+1}</text>`).join('')}`
+
+  document.getElementById('trend-svg').innerHTML = svg
+}
+
+// ─── Historial local ──────────────────────────────────────────────────────────
 function cargarHistorial() {
-  const list = JSON.parse(localStorage.getItem('tc_calibraciones') || '[]')
+  const list = JSON.parse(localStorage.getItem('tc_calibraciones')||'[]')
   const el = document.getElementById('hist-list')
   if (!list.length) return
-  el.innerHTML = list.slice(0, 5).map(r => `
-    <div class="calib-card">
+  el.innerHTML = list.slice(0,5).map(r => {
+    const ratio = (r.cantidad_extraida/r.gramaje).toFixed(2)
+    const tOk = r.tiempo_extraccion>=25&&r.tiempo_extraccion<=32
+    const rOk = ratio>=1.8&&ratio<=2.2
+    return `<div class="calib-card" onclick="abrirCurva(${JSON.stringify(r).replace(/"/g,'&quot;')})">
       <div class="calib-top">
         <div class="calib-who">${r.encargada}</div>
         <div class="calib-when">${r.fecha} · ${r.hora}</div>
       </div>
       <div class="calib-vals">
         <div class="calib-val">Gramaje <b>${r.gramaje}g</b></div>
+        <div class="calib-val" style="${tOk?'border-color:#2d5a2d':''}">Extracción <b style="${tOk?'color:#6fcf6f':r.tiempo_extraccion>=20&&r.tiempo_extraccion<=38?'color:#f5c842':'color:#cf6f6f'}">${r.tiempo_extraccion}s</b></div>
+        <div class="calib-val" style="${rOk?'border-color:#2d5a2d':''}">Yield <b style="${rOk?'color:#6fcf6f':ratio>=1.5&&ratio<=2.5?'color:#f5c842':'color:#cf6f6f'}">${r.cantidad_extraida}ml</b></div>
         <div class="calib-val">Molienda <b>${r.molienda}</b></div>
-        <div class="calib-val">Extracción <b>${r.tiempo_extraccion}s</b></div>
-        <div class="calib-val">Yield <b>${r.cantidad_extraida}ml</b></div>
       </div>
-      ${r.notas ? `<div style="font-size:11px;color:#444;margin-top:6px">${r.notas}</div>` : ''}
-    </div>`).join('')
+      ${r.temp_ambiente?`<div class="calib-temp">🌡️ ${r.temp_ambiente}°C · Ratio 1:${ratio}</div>`:`<div class="calib-temp">Ratio 1:${ratio}</div>`}
+    </div>`
+  }).join('')
 }
 
 cargarHistorial()
