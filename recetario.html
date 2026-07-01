@@ -245,219 +245,366 @@
 <div class="list" id="lista"></div>
 
 <script>
+// variantes: [{modo, ingredientes}] — para bebidas con versión caliente y fría
 const RECETAS = [
+  // ══════════════════════ CAFÉ ══════════════════════
   {
-    nombre: 'Espresso', emoji: '☕', cat: 'Café',
-    meta: '1 shot · 30 ml',
+    nombre: 'Espresso', emoji: '☕', cat: 'Café', meta: 'Solo · 32-60 gr',
     ingredientes: [
-      { name: 'Café en grano (molido fino)', amount: '18-20 g' },
-      { name: 'Agua', amount: '30 ml' },
+      { name: 'Espresso', amount: '32-60 gr' },
     ],
-    pasos: [
-      'Pesar 18-20 g de café y moler fino.',
-      'Colocar en portafiltros y presionar con tampón uniforme.',
-      'Extraer en 25-30 segundos. El shot debe verse dorado.',
-      'Temperatura ideal de agua: 92-94 °C.',
-    ],
-    tip: '💡 Si sale muy rápido (<20 seg), muele más fino. Si tarda mucho (>35 seg), muele más grueso.'
+    pasos: ['Extraer espresso directo. Sin más.'],
   },
   {
-    nombre: 'Americano', emoji: '☕', cat: 'Café',
-    meta: '1 shot + agua · 240 ml',
+    nombre: 'Cortado', emoji: '☕', cat: 'Café', meta: 'Caliente',
     ingredientes: [
-      { name: 'Espresso', amount: '1 shot (30 ml)' },
-      { name: 'Agua caliente', amount: '180-210 ml' },
+      { name: 'Espresso', amount: '32-60 gr' },
+      { name: 'Leche texturizada (60-70°)', amount: '60 ml' },
     ],
-    pasos: [
-      'Preparar espresso en taza.',
-      'Agregar agua caliente sobre el espresso.',
-      'Servir inmediatamente.',
-    ],
-    tip: '💡 Agrega el agua DESPUÉS del espresso para preservar la crema.'
+    pasos: ['Extraer espresso en taza pequeña.', 'Agregar leche texturizada a 60-70° encima.'],
   },
   {
-    nombre: 'Latte', emoji: '☕', cat: 'Café',
-    meta: '1 shot + leche · 360 ml',
-    ingredientes: [
-      { name: 'Espresso', amount: '1 shot (30 ml)' },
-      { name: 'Leche entera', amount: '300 ml' },
+    nombre: 'Americano', emoji: '☕', cat: 'Café', meta: 'Caliente / Frío',
+    variantes: [
+      { modo: '☀️ Caliente', ingredientes: [
+        { name: 'Espresso', amount: '32-60 gr' },
+        { name: 'Agua caliente', amount: '200 ml' },
+        { name: 'Agua tibia o al tiempo', amount: '100 ml' },
+      ]},
+      { modo: '🧊 Frío', ingredientes: [
+        { name: 'Espresso', amount: '32-60 gr' },
+        { name: 'Agua caliente', amount: '200 ml' },
+        { name: 'Agua tibia o al tiempo', amount: '100 ml' },
+        { name: 'Hielo', amount: '100 gr' },
+      ]},
     ],
-    pasos: [
-      'Preparar espresso en taza grande.',
-      'Vaporizar leche hasta 65°C con textura sedosa (microespuma).',
-      'Verter leche sobre el espresso con movimiento suave.',
-      'Decorar con latte art si es posible.',
-    ],
-    tip: '💡 La leche debe sonar como papel al vaporizarse. Evitar burbujas grandes.'
+    pasos: ['Extraer espresso.', 'Agregar agua caliente, luego agua al tiempo.', 'Para frío: agregar hielo.'],
   },
   {
-    nombre: 'Cappuccino', emoji: '☕', cat: 'Café',
-    meta: '1 shot + leche · 180 ml',
-    ingredientes: [
-      { name: 'Espresso', amount: '1 shot (30 ml)' },
-      { name: 'Leche entera', amount: '100 ml' },
-      { name: 'Espuma de leche', amount: '50 ml' },
+    nombre: 'Latte', emoji: '☕', cat: 'Café', meta: 'Caliente / Frío',
+    variantes: [
+      { modo: '☀️ Caliente', ingredientes: [
+        { name: 'Espresso', amount: '32-60 gr' },
+        { name: 'Leche texturizada (70-80°)', amount: '300 ml' },
+      ]},
+      { modo: '🧊 Frío', ingredientes: [
+        { name: 'Espresso', amount: '32-60 gr' },
+        { name: 'Leche texturizada (40-50°)', amount: '150 ml' },
+      ]},
     ],
-    pasos: [
-      'Preparar espresso en taza mediana.',
-      'Vaporizar leche con más espuma que para latte (textura más densa).',
-      'Verter leche y terminar con capa gruesa de espuma.',
-    ],
-    tip: '💡 El cappuccino clásico lleva 1/3 espresso, 1/3 leche, 1/3 espuma.'
+    pasos: ['Extraer espresso.', 'Caliente: vaporizar leche a 70-80°, verter sobre espresso.', 'Frío: usar leche a 40-50°, servir sobre hielo.'],
   },
   {
-    nombre: 'Cortado', emoji: '☕', cat: 'Café',
-    meta: '1 shot + poca leche · 90 ml',
+    nombre: 'Cappuccino', emoji: '☕', cat: 'Café', meta: 'Caliente',
     ingredientes: [
-      { name: 'Espresso', amount: '1 shot (30 ml)' },
-      { name: 'Leche vaporizada', amount: '30-60 ml' },
+      { name: 'Espresso', amount: '32-60 gr' },
+      { name: 'Leche texturizada (70-80°)', amount: '250 ml' },
     ],
-    pasos: [
-      'Preparar espresso en taza pequeña.',
-      'Vaporizar poca leche con espuma ligera.',
-      'Agregar leche sobre el espresso. No mezclar.',
-    ],
-    tip: '💡 El cortado es para quien quiere espresso pero más suave. Poco volumen, mucho sabor.'
+    pasos: ['Extraer espresso en taza mediana.', 'Vaporizar leche con buena espuma a 70-80°.', 'Verter sobre el espresso.'],
   },
   {
-    nombre: 'Macchiato', emoji: '☕', cat: 'Café',
-    meta: '1 shot + toque de espuma',
-    ingredientes: [
-      { name: 'Espresso', amount: '1 shot (30 ml)' },
-      { name: 'Espuma de leche', amount: '1 cucharada' },
+    nombre: 'Vainilla Latte', emoji: '☕', cat: 'Café', meta: 'Caliente / Frío',
+    variantes: [
+      { modo: '☀️ Caliente', ingredientes: [
+        { name: 'Espresso', amount: '32-60 gr' },
+        { name: 'Jarabe de vainilla', amount: '30 gr' },
+        { name: 'Leche texturizada (70-80°)', amount: '250 gr' },
+      ]},
+      { modo: '🧊 Frío', ingredientes: [
+        { name: 'Espresso', amount: '32-60 gr' },
+        { name: 'Jarabe de vainilla', amount: '30 gr' },
+        { name: 'Leche texturizada (40-50°)', amount: '150 gr' },
+        { name: 'Hielo', amount: '200 gr' },
+      ]},
     ],
-    pasos: [
-      'Preparar espresso en taza pequeña.',
-      'Agregar una cucharada de espuma de leche encima.',
-    ],
-    tip: '💡 "Macchiato" significa manchado en italiano — es espresso apenas manchado de leche.'
+    pasos: ['Agregar jarabe de vainilla.', 'Extraer espresso encima.', 'Caliente: vaporizar leche a 70-80° y verter.', 'Frío: agregar hielo y leche a 40-50°.'],
   },
   {
-    nombre: 'Date Latte', emoji: '🌟', cat: 'Café',
-    meta: 'Firma Trueno · 360 ml',
-    ingredientes: [
-      { name: 'Espresso', amount: '1 shot (30 ml)' },
-      { name: 'Leche entera', amount: '280 ml' },
-      { name: 'Pasta de dátil', amount: '2 cucharadas' },
-      { name: 'Canela', amount: '1 pizca' },
+    nombre: 'Latte Caramelo', emoji: '☕', cat: 'Café', meta: 'Caliente / Frío',
+    variantes: [
+      { modo: '☀️ Caliente', ingredientes: [
+        { name: 'Espresso', amount: '36-60 ml' },
+        { name: 'Jarabe de caramelo', amount: '30 ml' },
+        { name: 'Leche texturizada (70-80°)', amount: '270 ml' },
+        { name: 'Cardamomo', amount: '.05 gr (una palmadita)' },
+      ]},
+      { modo: '🧊 Frío', ingredientes: [
+        { name: 'Espresso', amount: '36-60 ml' },
+        { name: 'Jarabe de caramelo', amount: '30 ml' },
+        { name: 'Leche texturizada (40-60°)', amount: '150 ml' },
+        { name: 'Hielo', amount: '200 gr' },
+        { name: 'Cardamomo', amount: '.05 gr (una palmadita)' },
+      ]},
     ],
-    pasos: [
-      'Disolver pasta de dátil en el espresso caliente.',
-      'Vaporizar leche entera con textura sedosa.',
-      'Verter leche sobre el espresso con dátil.',
-      'Decorar con pizca de canela encima.',
-    ],
-    tip: '🌟 Esta es la bebida firma de Trueno. Presentarla con cuidado — es nuestro diferenciador.'
+    pasos: ['Agregar jarabe de caramelo.', 'Extraer espresso.', 'Caliente: leche a 70-80°, espolvorear cardamomo.', 'Frío: agregar hielo, leche a 40-60°, cardamomo.'],
   },
   {
-    nombre: 'Cold Brew', emoji: '🧊', cat: 'Frías',
-    meta: 'Macerado en frío · 240 ml',
-    ingredientes: [
-      { name: 'Café molido grueso', amount: '80 g' },
-      { name: 'Agua fría filtrada', amount: '1 litro' },
-      { name: 'Hielo', amount: 'al gusto' },
+    nombre: 'Mocha', emoji: '☕', cat: 'Café', meta: 'Caliente / Frío',
+    variantes: [
+      { modo: '☀️ Caliente', ingredientes: [
+        { name: 'Espresso', amount: '32-60 gr' },
+        { name: 'Cacao en polvo', amount: '5 gr' },
+        { name: 'Canela', amount: '.1 gr' },
+        { name: 'Leche texturizada (70-80°)', amount: '250 ml' },
+      ]},
+      { modo: '🧊 Frío', ingredientes: [
+        { name: 'Espresso', amount: '32-60 gr' },
+        { name: 'Cacao en polvo', amount: '5 gr' },
+        { name: 'Canela', amount: '.1 gr' },
+        { name: 'Leche texturizada (40-50°)', amount: '150 ml' },
+        { name: 'Hielo', amount: '200 gr' },
+      ]},
     ],
-    pasos: [
-      'Mezclar café molido grueso con agua fría.',
-      'Refrigerar 12-18 horas tapado.',
-      'Filtrar con colador fino o manta.',
-      'Servir sobre hielo. Concentrado: diluir 1:1 con agua o leche.',
+    pasos: ['Disolver cacao y canela con el espresso.', 'Caliente: vaporizar leche a 70-80° y verter.', 'Frío: agregar hielo y leche fría.'],
+  },
+  // ══════════════════════ ALTERNATIVAS ══════════════════════
+  {
+    nombre: 'Matcha', emoji: '🍵', cat: 'Alternativas', meta: 'Sin café · Caliente / Frío',
+    variantes: [
+      { modo: '☀️ Caliente', ingredientes: [
+        { name: 'Matcha', amount: '10 gr' },
+        { name: 'Leche texturizada (70-80°)', amount: '300 gr' },
+      ]},
+      { modo: '🧊 Frío', ingredientes: [
+        { name: 'Matcha', amount: '15 gr' },
+        { name: 'Hielo', amount: '200 gr' },
+        { name: 'Leche texturizada (40-50°)', amount: '150 gr' },
+      ]},
     ],
-    tip: '💡 El cold brew se prepara un día antes. Verificar que haya en refrigerador al abrir.'
+    pasos: ['Disolver matcha con un poco de agua tibia antes de agregar la leche.', 'Caliente: vaporizar leche a 70-80° y verter.', 'Frío: licuar o agitar con hielo y leche.'],
+    tip: '💡 El matcha comercial se usa en frío. No hervir el agua — quema el matcha.',
   },
   {
-    nombre: 'Café frío (Iced Latte)', emoji: '🧊', cat: 'Frías',
-    meta: '1 shot + leche fría · 360 ml',
-    ingredientes: [
-      { name: 'Espresso', amount: '1 shot (30 ml)' },
-      { name: 'Leche entera fría', amount: '250 ml' },
-      { name: 'Hielo', amount: '1 taza' },
+    nombre: 'Masala Chai', emoji: '🍵', cat: 'Alternativas', meta: 'Sin café · Caliente / Frío',
+    variantes: [
+      { modo: '☀️ Caliente', ingredientes: [
+        { name: 'Concentrado de masala', amount: '60 gr' },
+        { name: 'Leche texturizada (70-80°)', amount: '250 gr' },
+        { name: 'Canela espolvoreada', amount: 'arriba' },
+      ]},
+      { modo: '🧊 Frío', ingredientes: [
+        { name: 'Concentrado de masala', amount: '60 gr' },
+        { name: 'Hielo', amount: '170 gr' },
+        { name: 'Leche texturizada (40-50°)', amount: '150 gr' },
+      ]},
     ],
-    pasos: [
-      'Llenar vaso con hielo.',
-      'Preparar espresso y dejar enfriar 30 segundos.',
-      'Verter leche fría sobre el hielo.',
-      'Agregar el espresso encima. Mezclar suavemente.',
-    ],
-    tip: '💡 Si el cliente pide dulce, agregar jarabe de vainilla o caramelo al gusto.'
+    pasos: ['Verter concentrado de masala.', 'Caliente: agregar leche vaporizada a 70-80°, espolvorear canela.', 'Frío: servir sobre hielo con leche fría.'],
   },
   {
-    nombre: 'Frappe de Café', emoji: '🧋', cat: 'Frappes',
-    meta: 'Licuado frío · 360 ml',
-    ingredientes: [
-      { name: 'Espresso o café frío', amount: '60 ml' },
-      { name: 'Leche', amount: '150 ml' },
-      { name: 'Hielo', amount: '1.5 tazas' },
-      { name: 'Jarabe simple', amount: '30 ml (al gusto)' },
+    nombre: 'Chai Vainilla', emoji: '🍵', cat: 'Alternativas', meta: 'Sin café · Caliente / Frío',
+    variantes: [
+      { modo: '☀️ Caliente', ingredientes: [
+        { name: 'Polvo de chai vainilla', amount: '30 gr' },
+        { name: 'Agua', amount: '30-50 ml' },
+        { name: 'Leche texturizada (70-80°)', amount: '250 ml' },
+      ]},
+      { modo: '🧊 Frío', ingredientes: [
+        { name: 'Polvo de chai vainilla', amount: '30 gr' },
+        { name: 'Hielo', amount: '200 gr' },
+        { name: 'Leche texturizada (40-50°)', amount: '150 gr' },
+      ]},
     ],
-    pasos: [
-      'Agregar todos los ingredientes en licuadora.',
-      'Licuar hasta obtener consistencia espesa y uniforme.',
-      'Servir en vaso frío. Decorar con crema si aplica.',
-    ],
-    tip: '💡 Para frappe de caramelo: agregar 30 ml de jarabe de caramelo. Para moka: 30 ml de salsa de chocolate.'
+    pasos: ['Disolver polvo en agua.', 'Caliente: agregar leche vaporizada a 70-80°.', 'Frío: servir sobre hielo con leche fría.'],
   },
   {
-    nombre: 'Frappe de Chocolate', emoji: '🧋', cat: 'Frappes',
-    meta: 'Licuado frío · 360 ml',
-    ingredientes: [
-      { name: 'Leche', amount: '180 ml' },
-      { name: 'Salsa de chocolate', amount: '40 ml' },
-      { name: 'Hielo', amount: '1.5 tazas' },
-      { name: 'Jarabe simple', amount: '20 ml' },
+    nombre: 'Taro', emoji: '🫐', cat: 'Alternativas', meta: 'Sin café · Caliente / Frío',
+    variantes: [
+      { modo: '☀️ Caliente', ingredientes: [
+        { name: 'Polvo de taro', amount: '30 gr' },
+        { name: 'Agua', amount: '30-50 ml' },
+        { name: 'Leche texturizada (70-80°)', amount: '250 ml' },
+      ]},
+      { modo: '🧊 Frío', ingredientes: [
+        { name: 'Polvo de taro', amount: '30 gr' },
+        { name: 'Hielo', amount: '200 gr' },
+        { name: 'Leche texturizada (40-50°)', amount: '150 gr' },
+      ]},
     ],
-    pasos: [
-      'Agregar todos los ingredientes en licuadora.',
-      'Licuar hasta textura espesa.',
-      'Servir decorado con hilo de chocolate encima.',
-    ],
-    tip: '💡 Sin café — ideal para quienes no toman cafeína.'
+    pasos: ['Disolver polvo de taro en agua.', 'Caliente: agregar leche vaporizada.', 'Frío: servir sobre hielo con leche fría.'],
   },
   {
-    nombre: 'Matcha Latte', emoji: '🍵', cat: 'Alternativas',
-    meta: 'Sin café · 300 ml',
+    nombre: 'Chocolate', emoji: '🍫', cat: 'Alternativas', meta: 'Sin café · Caliente / Frío',
+    variantes: [
+      { modo: '☀️ Caliente', ingredientes: [
+        { name: 'Chocolate en polvo', amount: '5 gr' },
+        { name: 'Canela', amount: '.1 gr' },
+        { name: 'Agua', amount: '50 ml' },
+        { name: 'Leche texturizada (70-80°)', amount: '300 gr' },
+      ]},
+      { modo: '🧊 Frío', ingredientes: [
+        { name: 'Chocolate en polvo', amount: '5 gr' },
+        { name: 'Canela', amount: '.1 gr' },
+        { name: 'Hielo', amount: '200 gr' },
+        { name: 'Leche texturizada (40-50°)', amount: '150 gr' },
+      ]},
+    ],
+    pasos: ['Disolver chocolate y canela en agua.', 'Caliente: agregar leche vaporizada a 70-80°.', 'Frío: licuar con hielo y leche fría.'],
+  },
+  // ══════════════════════ BEBIDAS FRÍAS ══════════════════════
+  {
+    nombre: 'Espresso Tonic', emoji: '🫧', cat: 'Frías', meta: 'Con espresso · Frío',
     ingredientes: [
-      { name: 'Polvo de matcha', amount: '2 cucharaditas (4 g)' },
-      { name: 'Agua caliente (80°C)', amount: '30 ml' },
-      { name: 'Leche vaporizada', amount: '250 ml' },
-      { name: 'Jarabe simple', amount: 'al gusto' },
+      { name: 'Espresso', amount: '32-60 gr' },
+      { name: 'Hielo', amount: '200 gr' },
+      { name: 'Agua tónica', amount: '150 gr' },
     ],
-    pasos: [
-      'Disolver el matcha en agua caliente con batidor de bambú en zig-zag. Sin grumos.',
-      'Vaporizar leche con textura sedosa.',
-      'Verter leche sobre el matcha disuelto.',
-      'Agregar jarabe si el cliente lo pide.',
-    ],
-    tip: '💡 El agua NO debe estar hirviendo (100°C) — quema el matcha y amarga. Usar 75-80°C.'
+    pasos: ['Agregar hielo en vaso.', 'Verter agua tónica.', 'Agregar espresso encima sin mezclar.'],
   },
   {
-    nombre: 'Chai Latte', emoji: '🍵', cat: 'Alternativas',
-    meta: 'Sin café · 300 ml',
+    nombre: 'Coldbrew Tonic', emoji: '🫧', cat: 'Frías', meta: 'Con coldbrew · Frío',
     ingredientes: [
-      { name: 'Concentrado de chai', amount: '60 ml' },
-      { name: 'Leche vaporizada', amount: '240 ml' },
+      { name: 'Coldbrew', amount: '80 ml' },
+      { name: 'Hielo', amount: '200 gr' },
+      { name: 'Agua tónica', amount: '120 ml' },
     ],
-    pasos: [
-      'Verter concentrado de chai en taza.',
-      'Vaporizar leche con microespuma.',
-      'Verter leche sobre el chai.',
-    ],
-    tip: '💡 Si el cliente quiere picante extra, agregar una pizca de canela o jengibre encima.'
+    pasos: ['Agregar hielo en vaso.', 'Verter agua tónica.', 'Agregar coldbrew encima.'],
   },
   {
-    nombre: 'Tisana / Té', emoji: '🌿', cat: 'Tisanas',
-    meta: 'Sin cafeína · 300 ml',
+    nombre: 'Limonade Coffee', emoji: '🍋', cat: 'Frías', meta: 'Con espresso · Frío',
     ingredientes: [
-      { name: 'Bolsa de té o tisana', amount: '1 bolsa' },
-      { name: 'Agua caliente (90°C)', amount: '280 ml' },
+      { name: 'Espresso', amount: '32-60 gr' },
+      { name: 'Limón', amount: '30 gr' },
+      { name: 'Jarabe', amount: '30 gr' },
+      { name: 'Hielo', amount: '200 gr' },
+      { name: 'Agua mineral', amount: '80 gr' },
     ],
-    pasos: [
-      'Calentar agua. NO hervir para tés delicados (verde, blanco, floral).',
-      'Colocar bolsa en taza y verter agua.',
-      'Dejar reposar 3-5 minutos según el tipo.',
-      'Retirar bolsa. Servir con miel o limón si el cliente pide.',
+    pasos: ['Mezclar limón con jarabe.', 'Agregar hielo y agua mineral.', 'Agregar espresso encima.'],
+  },
+  {
+    nombre: 'Fresa Menta', emoji: '🍓', cat: 'Frías', meta: 'Sin café · Frío',
+    ingredientes: [
+      { name: 'Jarabe de fresa hecho en casa', amount: '45 gr' },
+      { name: 'Concentrado de menta', amount: '30 gr' },
+      { name: 'Limón', amount: '½ oz' },
+      { name: 'Hielo', amount: '200 gr' },
+      { name: 'Agua mineral', amount: '90 gr' },
+      { name: 'Agua tónica', amount: '30 gr' },
     ],
-    tip: '💡 Tés negros: 95°C, 4-5 min. Tés verdes: 75-80°C, 2-3 min. Tisanas de hierbas: 90°C, 5 min.'
+    pasos: ['Mezclar jarabe de fresa, menta y limón.', 'Agregar hielo.', 'Completar con agua mineral y tónica.'],
+  },
+  {
+    nombre: 'Naranjita', emoji: '🍊', cat: 'Frías', meta: 'Sin café · Frío',
+    ingredientes: [
+      { name: 'Naranjita', amount: '45 ml' },
+      { name: 'Jarabe', amount: '30 gr' },
+      { name: 'Hielo', amount: '200 gr' },
+      { name: 'Agua mineral', amount: '90 gr' },
+      { name: 'Agua tónica', amount: '30 gr' },
+    ],
+    pasos: ['Mezclar naranjita con jarabe.', 'Agregar hielo.', 'Completar con agua mineral y tónica.'],
+  },
+  {
+    nombre: 'Naranjita Brew', emoji: '🍊', cat: 'Frías', meta: 'Con coldbrew · Frío',
+    ingredientes: [
+      { name: 'Coldbrew', amount: '60 ml' },
+      { name: 'Naranjita', amount: '45 ml' },
+      { name: 'Jarabe', amount: '30 gr' },
+      { name: 'Hielo', amount: '170 gr' },
+      { name: 'Agua mineral', amount: '60 gr' },
+      { name: 'Agua tónica', amount: '30 gr' },
+    ],
+    pasos: ['Mezclar naranjita con jarabe.', 'Agregar coldbrew.', 'Servir sobre hielo con agua mineral y tónica.'],
+  },
+  {
+    nombre: 'Blueberry', emoji: '🫐', cat: 'Frías', meta: 'Con coldbrew · Frío',
+    ingredientes: [
+      { name: 'Coldbrew', amount: '60 ml' },
+      { name: 'Limón', amount: '½ oz' },
+      { name: 'Hielo', amount: '170 gr' },
+      { name: 'Agua mineral', amount: '60 gr' },
+      { name: 'Agua tónica', amount: '30 gr' },
+    ],
+    pasos: ['Exprimir limón.', 'Agregar coldbrew y jarabe de blueberry.', 'Servir sobre hielo con agua mineral y tónica.'],
+  },
+  // ══════════════════════ FRAPPES ══════════════════════
+  {
+    nombre: 'Frappe Original', emoji: '🧋', cat: 'Frappes', meta: 'Con espresso · Licuado',
+    ingredientes: [
+      { name: 'Espresso', amount: '32-60 gr' },
+      { name: 'Base de vainilla', amount: '45 gr' },
+      { name: 'Hielo', amount: '200 gr' },
+      { name: 'Leche', amount: '150 gr' },
+    ],
+    pasos: ['Licuar todos los ingredientes hasta consistencia cremosa.', 'Servir en vaso frío.'],
+  },
+  {
+    nombre: 'Frappe Matcha', emoji: '🧋', cat: 'Frappes', meta: 'Sin café · Licuado',
+    ingredientes: [
+      { name: 'Matcha', amount: '15 gr' },
+      { name: 'Hielo', amount: '200 gr' },
+      { name: 'Leche', amount: '150 gr' },
+    ],
+    pasos: ['Licuar todos los ingredientes hasta consistencia cremosa.', 'Servir en vaso frío.'],
+  },
+  {
+    nombre: 'Frappe Taro', emoji: '🧋', cat: 'Frappes', meta: 'Con espresso · Licuado',
+    ingredientes: [
+      { name: 'Espresso', amount: '32-60 gr' },
+      { name: 'Taro', amount: '30 gr' },
+      { name: 'Hielo', amount: '200 gr' },
+      { name: 'Leche', amount: '150 gr' },
+    ],
+    pasos: ['Licuar todos los ingredientes hasta consistencia cremosa.', 'Servir en vaso frío.'],
+  },
+  {
+    nombre: 'Frappe Mocha', emoji: '🧋', cat: 'Frappes', meta: 'Con espresso · Licuado',
+    ingredientes: [
+      { name: 'Espresso', amount: '32-60 gr' },
+      { name: 'Mocha', amount: '30 gr' },
+      { name: 'Hielo', amount: '200 gr' },
+      { name: 'Leche', amount: '150 gr' },
+    ],
+    pasos: ['Licuar todos los ingredientes hasta consistencia cremosa.', 'Servir en vaso frío.'],
+  },
+  {
+    nombre: 'Frappe Caramelo', emoji: '🧋', cat: 'Frappes', meta: 'Con espresso · Licuado',
+    ingredientes: [
+      { name: 'Espresso', amount: '32-60 gr' },
+      { name: 'Jarabe de caramelo', amount: '30 gr' },
+      { name: 'Hielo', amount: '200 gr' },
+      { name: 'Leche', amount: '150 gr' },
+    ],
+    pasos: ['Licuar todos los ingredientes hasta consistencia cremosa.', 'Servir en vaso frío.'],
+  },
+  {
+    nombre: 'Frappe Oreo', emoji: '🧋', cat: 'Frappes', meta: 'Con espresso · Licuado',
+    ingredientes: [
+      { name: 'Espresso', amount: '32-60 gr' },
+      { name: 'Base de vainilla', amount: '30 gr' },
+      { name: 'Jarabe de chocolate', amount: '30 gr' },
+      { name: 'Galletas Oreo', amount: '5 piezas' },
+      { name: 'Hielo', amount: '200 gr' },
+      { name: 'Leche', amount: '150 gr' },
+      { name: 'Galleta de decoración', amount: '1 pieza' },
+    ],
+    pasos: ['Licuar Oreos con leche, base de vainilla, chocolate, espresso e hielo.', 'Servir en vaso frío.', 'Decorar con galleta encima.'],
+  },
+  {
+    nombre: 'Frappe Nutella', emoji: '🧋', cat: 'Frappes', meta: 'Con espresso · Licuado',
+    ingredientes: [
+      { name: 'Espresso', amount: '32-60 gr' },
+      { name: 'Nutella', amount: '30 gr' },
+      { name: 'Hielo', amount: '200 gr' },
+      { name: 'Leche', amount: '150 gr' },
+    ],
+    pasos: ['Licuar todos los ingredientes hasta consistencia cremosa.', 'Servir en vaso frío.'],
+  },
+  // ══════════════════════ TISANAS ══════════════════════
+  {
+    nombre: 'Tisana', emoji: '🌿', cat: 'Tisanas', meta: 'Sin cafeína · Caliente / Frío',
+    variantes: [
+      { modo: '☀️ Caliente', ingredientes: [
+        { name: 'Tisana', amount: '12 gr' },
+        { name: 'Agua caliente', amount: '250 gr' },
+      ]},
+      { modo: '🧊 Frío', ingredientes: [
+        { name: 'Tisana', amount: '12 gr' },
+        { name: 'Agua caliente (para macerar)', amount: '30 gr' },
+        { name: 'Hielo', amount: '200 gr' },
+        { name: 'Agua', amount: '150 gr' },
+      ]},
+    ],
+    pasos: ['Caliente: infusionar tisana en agua caliente.', 'Frío: macerar tisana en 30 gr de agua caliente por 2 minutos, luego agregar hielo y agua.'],
   },
 ];
 
@@ -507,13 +654,23 @@ function renderLista() {
         <div class="recipe-arrow">›</div>
       </div>
       <div class="recipe-body">
-        <div class="recipe-section-title">Ingredientes</div>
-        ${r.ingredientes.map(ing => `
-          <div class="ingredient">
-            <span class="name">${ing.name}</span>
-            <span class="amount">${ing.amount}</span>
-          </div>
-        `).join('')}
+        ${r.variantes ? r.variantes.map(v => `
+          <div class="recipe-section-title">${v.modo}</div>
+          ${v.ingredientes.map(ing => `
+            <div class="ingredient">
+              <span class="name">${ing.name}</span>
+              <span class="amount">${ing.amount}</span>
+            </div>
+          `).join('')}
+        `).join('') : `
+          <div class="recipe-section-title">Ingredientes</div>
+          ${(r.ingredientes||[]).map(ing => `
+            <div class="ingredient">
+              <span class="name">${ing.name}</span>
+              <span class="amount">${ing.amount}</span>
+            </div>
+          `).join('')}
+        `}
         <div class="recipe-section-title">Preparación</div>
         <div class="steps">
           ${r.pasos.map((p, pi) => `
