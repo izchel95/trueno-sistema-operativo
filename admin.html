@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Administración — Trueno ⚡</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 40px; }
+
+/* ── Login screen ── */
+.login-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
+.login-logo { font-size: 40px; font-weight: 800; margin-bottom: 6px; }
+.login-logo span { color: #f5c842; }
+.login-sub { font-size: 13px; color: #555; margin-bottom: 40px; }
+.login-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 360px; }
+.login-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.login-desc { font-size: 12px; color: #555; margin-bottom: 22px; }
+.field-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #555; display: block; margin-bottom: 6px; }
+.field-input { width: 100%; background: #0e0e0e; border: 1px solid #222; border-radius: 10px; color: #f0ede8; font-size: 15px; padding: 13px 14px; outline: none; font-family: inherit; margin-bottom: 12px; }
+.field-input:focus { border-color: #f5c842; }
+.btn-login { width: 100%; padding: 16px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 6px; }
+.login-error { background: #2a1a1a; border: 1px solid #5a2d2d; color: #cf6f6f; border-radius: 10px; padding: 10px 12px; font-size: 13px; margin-top: 10px; display: none; text-align: center; }
+.login-error.show { display: block; }
+.btn-back { display: inline-flex; align-items: center; padding: 8px 14px; background: transparent; border: 1px solid #333; border-radius: 10px; color: #555; font-size: 13px; text-decoration: none; margin-bottom: 28px; }
+
+/* ── App shell (post-login) ── */
+.app { display: none; }
+.app.visible { display: block; }
+
+header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #1e1e1e; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.menu-btn { display: inline-flex; align-items: center; padding: 8px 14px; background: #1a1600; border: 1px solid #f5c842; border-radius: 10px; color: #f5c842; font-size: 13px; font-weight: 700; text-decoration: none; flex-shrink: 0; }
+.logout-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; background: transparent; border: 1px solid #333; border-radius: 10px; color: #555; font-size: 12px; cursor: pointer; font-family: inherit; }
+.logo { font-size: 20px; font-weight: 700; }
+.logo span { color: #f5c842; }
+.logo-admin { font-size: 11px; background: #f5c842; color: #0e0e0e; padding: 2px 8px; border-radius: 20px; font-weight: 700; margin-left: 6px; vertical-align: middle; }
+
+.tabs { display: flex; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex-shrink: 0; padding: 10px 16px; font-size: 12px; color: #555; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
+.tab.active { color: #f5c842; border-bottom-color: #f5c842; font-weight: 600; }
+
+.panel { display: none; padding: 14px 16px 80px; }
+.panel.active { display: block; }
+
+/* ── Semáforo ── */
+.section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin: 16px 0 8px; }
+.inv-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.inv-card:active { background: #1a1a1a; }
+.inv-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.dot-green { background: #6fcf6f; box-shadow: 0 0 6px #6fcf6f66; }
+.dot-yellow { background: #f5c842; box-shadow: 0 0 6px #f5c84266; }
+.dot-red { background: #cf6f6f; box-shadow: 0 0 6px #cf6f6f66; }
+.inv-info { flex: 1; min-width: 0; }
+.inv-name { font-size: 14px; font-weight: 600; }
+.inv-cat { font-size: 11px; color: #555; margin-top: 2px; }
+.inv-right { text-align: right; flex-shrink: 0; }
+.inv-qty { font-size: 18px; font-weight: 800; }
+.inv-unit { font-size: 11px; color: #555; }
+.qty-green { color: #6fcf6f; }
+.qty-yellow { color: #f5c842; }
+.qty-red { color: #cf6f6f; }
+
+.kpi-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.kpi-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 12px; text-align: center; }
+.kpi-val { font-size: 22px; font-weight: 800; }
+.kpi-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 4px; }
+
+/* Edit modal */
+.bottom-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 400; display: none; align-items: flex-end; }
+.bottom-overlay.open { display: flex; }
+.stock-modal { background: #141414; border-radius: 20px 20px 0 0; padding: 24px 20px 36px; width: 100%; }
+.stock-modal-title { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+.stock-modal-sub { font-size: 12px; color: #555; margin-bottom: 20px; }
+.stock-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.stock-count { font-size: 52px; font-weight: 800; color: #f5c842; text-align: center; flex: 1; }
+.stock-btn { width: 60px; height: 60px; border-radius: 50%; border: none; font-size: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.s-minus { background: #2a1a1a; color: #cf6f6f; }
+.s-plus { background: #1a2a1a; color: #6fcf6f; }
+.stock-save { width: 100%; padding: 16px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 20px; }
+.stock-cancel { width: 100%; padding: 10px; background: transparent; border: none; color: #555; font-size: 13px; cursor: pointer; margin-top: 6px; font-family: inherit; }
+
+/* ── Consignación ventas ── */
+.venta-row { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 14px; margin-bottom: 8px; }
+.venta-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.venta-fecha { font-size: 11px; color: #555; }
+.venta-encargada { font-size: 12px; color: #888; margin-top: 2px; }
+.venta-total { font-size: 18px; font-weight: 800; color: #f5c842; white-space: nowrap; }
+.venta-pago { font-size: 11px; color: #555; text-align: right; }
+.venta-prods { margin-top: 10px; border-top: 1px solid #1a1a1a; padding-top: 8px; }
+.venta-prod-row { display: flex; justify-content: space-between; font-size: 12px; color: #888; padding: 3px 0; }
+
+.report-kpi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.report-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 14px; }
+.report-val { font-size: 24px; font-weight: 800; color: #f5c842; }
+.report-label { font-size: 11px; color: #555; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.filter-row { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.filter-btn { flex-shrink: 0; padding: 7px 14px; border-radius: 20px; border: 1px solid #2a2a2a; background: #141414; color: #555; font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+.filter-btn.active { background: #f5c842; color: #0e0e0e; border-color: #f5c842; font-weight: 600; }
+
+.empty { text-align: center; color: #444; padding: 40px 20px; font-size: 14px; }
+.toast { position: fixed; bottom: 32px; left: 16px; right: 16px; background: #1a2a1a; border: 1px solid #2d5a2d; color: #6fcf6f; padding: 14px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; z-index: 500; text-align: center; }
+.toast.show { display: block; }
+
+/* ── Historial inventario ── */
+.hist-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #1a1a1a; }
+.hist-row:last-child { border-bottom: none; }
+.hist-icon { font-size: 20px; flex-shrink: 0; }
+.hist-info { flex: 1; min-width: 0; }
+.hist-name { font-size: 13px; font-weight: 600; }
+.hist-meta { font-size: 11px; color: #555; margin-top: 2px; }
+.hist-delta { font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.delta-pos { color: #6fcf6f; }
+.delta-neg { color: #cf6f6f; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen" class="login-screen">
+  <div class="login-logo">⚡ <span>Trueno</span></div>
+  <div class="login-sub">Sistema Operativo</div>
+  <a class="btn-back" href="index.html">← Menú principal</a>
+  <div class="login-card">
+    <div class="login-title">Administración</div>
+    <div class="login-desc">Solo para uso de Izchel</div>
+    <label class="field-label">Usuario</label>
+    <input class="field-input" id="l-user" type="text" autocomplete="username" placeholder="Usuario">
+    <label class="field-label">Contraseña</label>
+    <input class="field-input" id="l-pass" type="password" autocomplete="current-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')intentarLogin()">
+    <button class="btn-login" onclick="intentarLogin()">Entrar</button>
+    <div class="login-error" id="l-error">Usuario o contraseña incorrectos</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app">
+  <header>
+    <div class="header-top">
+      <a class="menu-btn" href="index.html">← Menú</a>
+      <div class="logo">⚡ <span>Trueno</span><span class="logo-admin">Admin</span></div>
+      <button class="logout-btn" onclick="cerrarSesion()">🔒 Salir</button>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="setTab(0)">📦 Stock</div>
+      <div class="tab" onclick="setTab(1)">🎵 Ventas Consig.</div>
+      <div class="tab" onclick="setTab(2)">📋 Mov. Inventario</div>
+    </div>
+  </header>
+
+  <!-- STOCK -->
+  <div class="panel active" id="panel-0">
+    <div class="kpi-row" id="kpi-row"></div>
+    <div id="stock-list"></div>
+  </div>
+
+  <!-- VENTAS CONSIGNACIÓN -->
+  <div class="panel" id="panel-1">
+    <div class="report-kpi" id="report-kpi"></div>
+    <div class="filter-row" id="filter-row"></div>
+    <div id="ventas-list"></div>
+  </div>
+
+  <!-- MOVIMIENTOS INVENTARIO -->
+  <div class="panel" id="panel-2">
+    <div id="hist-list"></div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR STOCK -->
+<div class="bottom-overlay" id="edit-overlay" onclick="if(event.target===this)cerrarModal()">
+  <div class="stock-modal">
+    <div class="stock-modal-title" id="modal-nombre">—</div>
+    <div class="stock-modal-sub" id="modal-unit">—</div>
+    <div class="stock-row">
+      <button class="stock-btn s-minus" onclick="cambiarQty(-1)">−</button>
+      <div class="stock-count" id="modal-qty">0</div>
+      <button class="stock-btn s-plus" onclick="cambiarQty(1)">+</button>
+    </div>
+    <button class="stock-save" onclick="guardarQty()">Guardar</button>
+    <button class="stock-cancel" onclick="cerrarModal()">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Auth ──
+const CREDS = { user: 'izchelac', pass: 'IZ9595iz' }
+
+function intentarLogin() {
+  const u = document.getElementById('l-user').value.trim()
+  const p = document.getElementById('l-pass').value
+  if (u === CREDS.user && p === CREDS.pass) {
+    sessionStorage.setItem('trueno_admin', '1')
+    document.getElementById('login-screen').style.display = 'none'
+    document.getElementById('app').classList.add('visible')
+    initApp()
+  } else {
+    document.getElementById('l-error').classList.add('show')
+    document.getElementById('l-pass').value = ''
+  }
+}
+
+function cerrarSesion() {
+  sessionStorage.removeItem('trueno_admin')
+  window.location.href = 'index.html'
+}
+
+if (sessionStorage.getItem('trueno_admin') === '1') {
+  document.getElementById('login-screen').style.display = 'none'
+  document.getElementById('app').classList.add('visible')
+  document.addEventListener('DOMContentLoaded', initApp)
+} else {
+  document.addEventListener('DOMContentLoaded', ()=>{
+    document.getElementById('l-user').focus()
+  })
+}
+
+// ── Inventario ──
+const INSUMOS = [
+  ['Café en grano','Café','kg',1,3],
+  ['Leche entera','Lácteos','L',4,10],
+  ['Leche deslactosada','Lácteos','L',2,6],
+  ['Leche de avena','Lácteos','L',2,6],
+  ['Leche de almendras','Lácteos','L',1,4],
+  ['Leche de soya','Lácteos','L',1,4],
+  ['Crema para batir','Lácteos','L',1,3],
+  ['Jarabe de vainilla','Jarabes','bot',1,2],
+  ['Jarabe de caramelo','Jarabes','bot',1,2],
+  ['Jarabe de fresa','Jarabes','bot',1,2],
+  ['Jarabe de blueberry','Jarabes','bot',1,2],
+  ['Cacao en polvo','Jarabes','kg',0.5,1],
+  ['Canela','Jarabes','kg',0.2,0.5],
+  ['Dátiles','Insumos','kg',0.5,1],
+  ['Azúcar','Insumos','kg',1,3],
+  ['Hielo','Insumos','bolsas',2,5],
+  ['Agua purificada','Insumos','garrafones',2,4],
+  ['Vasos cartón 12 oz','Empaque','paq',1,3],
+  ['Vasos cartón 10 oz','Empaque','paq',1,3],
+  ['Vasos cartón 8 oz','Empaque','paq',1,2],
+  ['Vasos cartón 4 oz','Empaque','paq',1,2],
+  ['Vasos cristal 12 oz','Empaque','paq',1,2],
+  ['Tapaderas','Empaque','paq',2,4],
+  ['Mangas/Sleeves','Empaque','paq',1,3],
+  ['Popotes','Empaque','paq',1,3],
+  ['Palitos removedores','Empaque','paq',1,2],
+  ['Servilletas','Empaque','paq',2,5],
+]
+const K_INV = 'tc_inv_stock'
+const K_HIST = 'tc_inv_hist'
+let stock = {}, historial = [], editIdx = null, editQtyTemp = 0
+
+function loadInv() {
+  try { stock = JSON.parse(localStorage.getItem(K_INV)||'{}') } catch { stock={} }
+  try { historial = JSON.parse(localStorage.getItem(K_HIST)||'[]') } catch { historial=[] }
+  INSUMOS.forEach((ins,i) => { if (stock[i]===undefined) stock[i]=ins[4] })
+  saveInv()
+}
+
+function saveInv() {
+  localStorage.setItem(K_INV, JSON.stringify(stock))
+  localStorage.setItem(K_HIST, JSON.stringify(historial))
+}
+
+function sem(qty, min) {
+  if (qty <= 0) return 'red'
+  if (qty <= min) return 'yellow'
+  return 'green'
+}
+
+function renderStock() {
+  const cats = [...new Set(INSUMOS.map(r=>r[1]))]
+  const ok = INSUMOS.filter((_,i)=>sem(stock[i],INSUMOS[i][3])==='green').length
+  const bajo = INSUMOS.filter((_,i)=>sem(stock[i],INSUMOS[i][3])==='yellow').length
+  const agot = INSUMOS.filter((_,i)=>sem(stock[i],INSUMOS[i][3])==='red').length
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi-card"><div class="kpi-val qty-green">${ok}</div><div class="kpi-label">OK</div></div>
+    <div class="kpi-card"><div class="kpi-val qty-yellow">${bajo}</div><div class="kpi-label">Bajo</div></div>
+    <div class="kpi-card"><div class="kpi-val qty-red">${agot}</div><div class="kpi-label">Agotado</div></div>
+  `
+  let html = ''
+  cats.forEach(cat => {
+    html += `<div class="section-label">${cat}</div>`
+    INSUMOS.forEach((ins,i) => {
+      if (ins[1]!==cat) return
+      const s = sem(stock[i],ins[3])
+      html += `<div class="inv-card" onclick="abrirModal(${i})">
+        <div class="inv-dot dot-${s}"></div>
+        <div class="inv-info"><div class="inv-name">${ins[0]}</div><div class="inv-cat">Mínimo: ${ins[3]} ${ins[2]}</div></div>
+        <div class="inv-right"><div class="inv-qty qty-${s}">${stock[i]}</div><div class="inv-unit">${ins[2]}</div></div>
+      </div>`
+    })
+  })
+  document.getElementById('stock-list').innerHTML = html
+}
+
+function renderHistInv() {
+  const el = document.getElementById('hist-list')
+  if (!historial.length) { el.innerHTML='<div class="empty">Sin movimientos registrados</div>'; return }
+  el.innerHTML = [...historial].reverse().slice(0,200).map(h=>`
+    <div class="hist-row">
+      <div class="hist-icon">${h.delta>0?'📥':'📤'}</div>
+      <div class="hist-info">
+        <div class="hist-name">${h.nombre}</div>
+        <div class="hist-meta">${h.fecha} · ${h.notas||'Sin notas'}</div>
+      </div>
+      <div class="hist-delta ${h.delta>0?'delta-pos':'delta-neg'}">${h.delta>0?'+':''}${h.delta} ${h.unit}</div>
+    </div>`).join('')
+}
+
+function abrirModal(idx) {
+  editIdx = idx; editQtyTemp = stock[idx]||0
+  document.getElementById('modal-nombre').textContent = INSUMOS[idx][0]
+  document.getElementById('modal-unit').textContent = `Unidad: ${INSUMOS[idx][2]} · Mínimo: ${INSUMOS[idx][3]}`
+  document.getElementById('modal-qty').textContent = editQtyTemp
+  document.getElementById('edit-overlay').classList.add('open')
+}
+
+function cerrarModal() { document.getElementById('edit-overlay').classList.remove('open') }
+
+function cambiarQty(d) {
+  editQtyTemp = Math.max(0, editQtyTemp+d)
+  document.getElementById('modal-qty').textContent = editQtyTemp
+}
+
+function guardarQty() {
+  const old = stock[editIdx]||0
+  const delta = editQtyTemp - old
+  stock[editIdx] = editQtyTemp
+  if (delta!==0) historial.push({ nombre:INSUMOS[editIdx][0], unit:INSUMOS[editIdx][2], delta, notas:'Ajuste manual (admin)', fecha: new Date().toLocaleDateString('es-MX') })
+  saveInv(); cerrarModal(); renderStock(); renderHistInv()
+  showToast('✓ Stock actualizado')
+}
+
+// ── Ventas consignación ──
+let ventas = [], ventasFiltro = 'todo'
+
+function loadVentas() {
+  try { ventas = JSON.parse(localStorage.getItem('tc_consig_ventas')||'[]') } catch { ventas=[] }
+}
+
+function filtrarVentas() {
+  const ahora = new Date()
+  return ventas.filter(v => {
+    if (ventasFiltro === 'todo') return true
+    if (!v.fecha) return false
+    const partes = v.fecha.split('/')
+    if (partes.length < 3) return false
+    const fv = new Date(partes[2], partes[1]-1, partes[0])
+    if (ventasFiltro === 'hoy') {
+      return fv.toDateString() === ahora.toDateString()
+    }
+    if (ventasFiltro === 'semana') {
+      const diff = (ahora - fv) / 86400000
+      return diff <= 7
+    }
+    if (ventasFiltro === 'mes') {
+      return fv.getMonth()===ahora.getMonth() && fv.getFullYear()===ahora.getFullYear()
+    }
+    return true
+  })
+}
+
+function renderVentas() {
+  const filtradas = filtrarVentas()
+  const totalMXN = filtradas.reduce((s,v)=>s+(v.total||0),0)
+  const totalUt = filtradas.reduce((s,v)=>s+(v.utilidad||0),0)
+  document.getElementById('report-kpi').innerHTML = `
+    <div class="report-card"><div class="report-val">$${totalMXN.toLocaleString('es-MX')}</div><div class="report-label">Ventas (${filtradas.length})</div></div>
+    <div class="report-card"><div class="report-val">$${totalUt.toLocaleString('es-MX')}</div><div class="report-label">Utilidad Trueno</div></div>
+  `
+  const el = document.getElementById('ventas-list')
+  if (!filtradas.length) { el.innerHTML='<div class="empty">Sin ventas en este período</div>'; return }
+  el.innerHTML = [...filtradas].reverse().map(v=>`
+    <div class="venta-row">
+      <div class="venta-head">
+        <div>
+          <div class="venta-fecha">${v.fecha||'—'} · ${v.hora||''}</div>
+          <div class="venta-encargada">${v.encargada||'—'}</div>
+        </div>
+        <div>
+          <div class="venta-total">$${(v.total||0).toLocaleString('es-MX')}</div>
+          <div class="venta-pago">${v.forma_pago||''}</div>
+        </div>
+      </div>
+      ${v.items&&v.items.length?`<div class="venta-prods">${v.items.map(it=>`<div class="venta-prod-row"><span>${it.nombre||it.name}</span><span>$${(it.pv||it.precio||0).toLocaleString('es-MX')}</span></div>`).join('')}</div>`:''}
+    </div>`).join('')
+}
+
+function setFiltro(f, btn) {
+  ventasFiltro = f
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  renderVentas()
+}
+
+function buildFiltroRow() {
+  const opciones = [['todo','Todo'],['hoy','Hoy'],['semana','7 días'],['mes','Este mes']]
+  document.getElementById('filter-row').innerHTML = opciones.map(([f,l])=>
+    `<button class="filter-btn${f==='todo'?' active':''}" onclick="setFiltro('${f}',this)">${l}</button>`
+  ).join('')
+}
+
+// ── General ──
+function setTab(i) {
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j))
+  document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',i===j))
+  if (i===1) renderVentas()
+  if (i===2) renderHistInv()
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast')
+  t.textContent = msg; t.className='toast show'
+  setTimeout(()=>t.classList.remove('show'),3000)
+}
+
+function initApp() {
+  loadInv(); renderStock()
+  loadVentas(); buildFiltroRow()
+}
+</script>
+</body>
+</html>

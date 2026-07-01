@@ -23,6 +23,10 @@
   .logo { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
   .logo span { color: #f5c842; }
 
+  .header-row { display: flex; align-items: flex-start; justify-content: space-between; }
+  .admin-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; background: #141414; border: 1px solid #333; border-radius: 10px; color: #555; font-size: 12px; font-weight: 600; text-decoration: none; margin-top: 4px; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+  .admin-btn:active { background: #1a1a1a; }
+
   .fecha {
     font-size: 13px;
     color: #555;
@@ -131,8 +135,13 @@
 <body>
 
 <header>
-  <div class="logo">⚡ <span>Trueno</span></div>
-  <div class="fecha" id="fecha"></div>
+  <div class="header-row">
+    <div>
+      <div class="logo">⚡ <span>Trueno</span></div>
+      <div class="fecha" id="fecha"></div>
+    </div>
+    <a class="admin-btn" href="admin.html">🔐 Administración</a>
+  </div>
   <div class="saludo" id="saludo"></div>
   <div class="sub">¿Qué vamos a hacer hoy?</div>
 </header>

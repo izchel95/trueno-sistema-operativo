@@ -24,11 +24,9 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
 
 .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin: 16px 0 8px; }
 
-/* Semáforo cards */
-.inv-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.inv-card:active { background: #1a1a1a; }
+/* Alertas */
+.inv-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
 .inv-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-.dot-green { background: #6fcf6f; box-shadow: 0 0 6px #6fcf6f66; }
 .dot-yellow { background: #f5c842; box-shadow: 0 0 6px #f5c84266; }
 .dot-red { background: #cf6f6f; box-shadow: 0 0 6px #cf6f6f66; }
 .inv-info { flex: 1; min-width: 0; }
@@ -37,23 +35,8 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
 .inv-right { text-align: right; flex-shrink: 0; }
 .inv-qty { font-size: 18px; font-weight: 800; }
 .inv-unit { font-size: 11px; color: #555; }
-.qty-green { color: #6fcf6f; }
 .qty-yellow { color: #f5c842; }
 .qty-red { color: #cf6f6f; }
-
-/* Editar stock modal */
-.bottom-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 400; display: none; align-items: flex-end; }
-.bottom-overlay.open { display: flex; }
-.stock-modal { background: #141414; border-radius: 20px 20px 0 0; padding: 24px 20px 36px; width: 100%; }
-.stock-modal-title { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
-.stock-modal-sub { font-size: 12px; color: #555; margin-bottom: 20px; }
-.stock-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.stock-count { font-size: 52px; font-weight: 800; color: #f5c842; text-align: center; flex: 1; }
-.stock-btn { width: 60px; height: 60px; border-radius: 50%; border: none; font-size: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.s-minus { background: #2a1a1a; color: #cf6f6f; }
-.s-plus { background: #1a2a1a; color: #6fcf6f; }
-.stock-save { width: 100%; padding: 16px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 20px; }
-.stock-cancel { width: 100%; padding: 10px; background: transparent; border: none; color: #555; font-size: 13px; cursor: pointer; margin-top: 6px; font-family: inherit; }
 
 /* Entrada form */
 .form-field { margin-bottom: 12px; }
@@ -74,10 +57,6 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
 .delta-neg { color: #cf6f6f; }
 
 .empty { text-align: center; color: #444; padding: 40px 20px; font-size: 14px; }
-.kpi-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-.kpi-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 12px; text-align: center; }
-.kpi-val { font-size: 22px; font-weight: 800; }
-.kpi-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 4px; }
 .toast { position: fixed; bottom: 32px; left: 16px; right: 16px; background: #1a2a1a; border: 1px solid #2d5a2d; color: #6fcf6f; padding: 14px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; z-index: 500; text-align: center; }
 .toast.show { display: block; }
 </style>
@@ -91,21 +70,14 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
     <div style="width:60px"></div>
   </div>
   <div class="tabs">
-    <div class="tab active" onclick="setTab(0)">📦 General</div>
-    <div class="tab" onclick="setTab(1)">➕ Entrada</div>
-    <div class="tab" onclick="setTab(2)">🚨 Alertas</div>
-    <div class="tab" onclick="setTab(3)">📋 Historial</div>
+    <div class="tab active" onclick="setTab(0)">➕ Entrada</div>
+    <div class="tab" onclick="setTab(1)">🚨 Alertas</div>
+    <div class="tab" onclick="setTab(2)">📋 Historial</div>
   </div>
 </header>
 
-<!-- General -->
-<div class="panel active" id="panel-0">
-  <div class="kpi-row" id="kpi-row"></div>
-  <div id="general-list"></div>
-</div>
-
 <!-- Entrada -->
-<div class="panel" id="panel-1">
+<div class="panel active" id="panel-0">
   <div class="section-label">Registrar entrada de mercancía</div>
   <div class="form-field">
     <label>Producto</label>
@@ -123,35 +95,19 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
 </div>
 
 <!-- Alertas -->
-<div class="panel" id="panel-2">
+<div class="panel" id="panel-1">
   <div id="alertas-list"></div>
 </div>
 
 <!-- Historial -->
-<div class="panel" id="panel-3">
+<div class="panel" id="panel-2">
   <div id="hist-list"></div>
-</div>
-
-<!-- Modal editar stock -->
-<div class="bottom-overlay" id="edit-overlay" onclick="if(event.target===this)cerrarModal()">
-  <div class="stock-modal">
-    <div class="stock-modal-title" id="modal-nombre">—</div>
-    <div class="stock-modal-sub" id="modal-unit">—</div>
-    <div class="stock-row">
-      <button class="stock-btn s-minus" onclick="cambiarQty(-1)">−</button>
-      <div class="stock-count" id="modal-qty">0</div>
-      <button class="stock-btn s-plus" onclick="cambiarQty(1)">+</button>
-    </div>
-    <button class="stock-save" onclick="guardarQty()">Guardar</button>
-    <button class="stock-cancel" onclick="cerrarModal()">Cancelar</button>
-  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 const INSUMOS = [
-  // [nombre, categoría, unidad, mínimo, inicial]
   ['Café en grano','Café','kg',1,3],
   ['Leche entera','Lácteos','L',4,10],
   ['Leche deslactosada','Lácteos','L',2,6],
@@ -183,15 +139,11 @@ const INSUMOS = [
 
 const K_INV = 'tc_inv_stock'
 const K_HIST = 'tc_inv_hist'
-
-let stock = {}
-let historial = []
-let editIdx = null, editQtyTemp = 0
+let stock = {}, historial = []
 
 function load() {
   try { stock = JSON.parse(localStorage.getItem(K_INV)||'{}') } catch { stock={} }
   try { historial = JSON.parse(localStorage.getItem(K_HIST)||'[]') } catch { historial=[] }
-  // seed
   INSUMOS.forEach((ins,i) => { if (stock[i]===undefined) stock[i]=ins[4] })
   save()
 }
@@ -201,55 +153,22 @@ function save() {
   localStorage.setItem(K_HIST, JSON.stringify(historial))
 }
 
-function semaforo(qty, min) {
+function sem(qty, min) {
   if (qty <= 0) return 'red'
   if (qty <= min) return 'yellow'
   return 'green'
 }
 
-function renderGeneral() {
-  const cats = [...new Set(INSUMOS.map(r=>r[1]))]
-  let html = ''
-  const total = INSUMOS.length
-  const ok = INSUMOS.filter((r,i)=>semaforo(stock[i],r[3])==='green').length
-  const bajo = INSUMOS.filter((r,i)=>semaforo(stock[i],r[3])==='yellow').length
-  const agot = INSUMOS.filter((r,i)=>semaforo(stock[i],r[3])==='red').length
-  document.getElementById('kpi-row').innerHTML = `
-    <div class="kpi-card"><div class="kpi-val qty-green">${ok}</div><div class="kpi-label">OK</div></div>
-    <div class="kpi-card"><div class="kpi-val qty-yellow">${bajo}</div><div class="kpi-label">Bajo</div></div>
-    <div class="kpi-card"><div class="kpi-val qty-red">${agot}</div><div class="kpi-label">Agotado</div></div>
-  `
-  cats.forEach(cat => {
-    html += `<div class="section-label">${cat}</div>`
-    INSUMOS.forEach((ins,i) => {
-      if (ins[1]!==cat) return
-      const s = semaforo(stock[i],ins[3])
-      html += `<div class="inv-card" onclick="abrirModal(${i})">
-        <div class="inv-dot dot-${s}"></div>
-        <div class="inv-info">
-          <div class="inv-name">${ins[0]}</div>
-          <div class="inv-cat">Mínimo: ${ins[3]} ${ins[2]}</div>
-        </div>
-        <div class="inv-right">
-          <div class="inv-qty qty-${s}">${stock[i]}</div>
-          <div class="inv-unit">${ins[2]}</div>
-        </div>
-      </div>`
-    })
-  })
-  document.getElementById('general-list').innerHTML = html
-}
-
 function renderAlertas() {
-  const items = INSUMOS.map((ins,i)=>({...{nombre:ins[0],cat:ins[1],unit:ins[2],min:ins[3]},idx:i,qty:stock[i]}))
-    .filter(x=>semaforo(x.qty,x.min)!=='green')
+  const items = INSUMOS.map((ins,i)=>({nombre:ins[0],cat:ins[1],unit:ins[2],min:ins[3],idx:i,qty:stock[i]}))
+    .filter(x=>sem(x.qty,x.min)!=='green')
     .sort((a,b)=>a.qty-b.qty)
   const el = document.getElementById('alertas-list')
   if (!items.length) { el.innerHTML='<div class="empty">✅ Todo el inventario está OK</div>'; return }
   el.innerHTML = `<div class="section-label">${items.length} producto${items.length!==1?'s':''} con stock bajo</div>`
     + items.map(x=>{
-      const s = semaforo(x.qty,x.min)
-      return `<div class="inv-card" onclick="abrirModal(${x.idx})">
+      const s = sem(x.qty,x.min)
+      return `<div class="inv-card">
         <div class="inv-dot dot-${s}"></div>
         <div class="inv-info">
           <div class="inv-name">${x.nombre}</div>
@@ -266,8 +185,7 @@ function renderAlertas() {
 function renderHistorial() {
   const el = document.getElementById('hist-list')
   if (!historial.length) { el.innerHTML='<div class="empty">Sin movimientos registrados</div>'; return }
-  const sorted = [...historial].reverse().slice(0,100)
-  el.innerHTML = sorted.map(h=>`
+  el.innerHTML = [...historial].reverse().slice(0,100).map(h=>`
     <div class="hist-row">
       <div class="hist-icon">${h.delta>0?'📥':'📤'}</div>
       <div class="hist-info">
@@ -279,8 +197,8 @@ function renderHistorial() {
 }
 
 function populateEntradaSelect() {
-  const sel = document.getElementById('entrada-prod')
-  sel.innerHTML = INSUMOS.map((ins,i)=>`<option value="${i}">${ins[0]} (${ins[1]})</option>`).join('')
+  document.getElementById('entrada-prod').innerHTML =
+    INSUMOS.map((ins,i)=>`<option value="${i}">${ins[0]} (${ins[1]})</option>`).join('')
 }
 
 function registrarEntrada() {
@@ -297,39 +215,11 @@ function registrarEntrada() {
   showToast(`✓ +${qty} ${ins[2]} de ${ins[0]}`)
 }
 
-function abrirModal(idx) {
-  editIdx = idx
-  editQtyTemp = stock[idx]||0
-  const ins = INSUMOS[idx]
-  document.getElementById('modal-nombre').textContent = ins[0]
-  document.getElementById('modal-unit').textContent = `Unidad: ${ins[2]} · Mínimo: ${ins[3]}`
-  document.getElementById('modal-qty').textContent = editQtyTemp
-  document.getElementById('edit-overlay').classList.add('open')
-}
-
-function cerrarModal() { document.getElementById('edit-overlay').classList.remove('open') }
-
-function cambiarQty(d) {
-  editQtyTemp = Math.max(0, editQtyTemp+d)
-  document.getElementById('modal-qty').textContent = editQtyTemp
-}
-
-function guardarQty() {
-  const old = stock[editIdx]||0
-  const delta = editQtyTemp - old
-  stock[editIdx] = editQtyTemp
-  if (delta!==0) historial.push({ nombre:INSUMOS[editIdx][0], unit:INSUMOS[editIdx][2], delta, notas:'Ajuste manual', fecha: new Date().toLocaleDateString('es-MX') })
-  save(); cerrarModal(); renderAll()
-  showToast('✓ Stock actualizado')
-}
-
-function renderAll() { renderGeneral(); renderAlertas(); renderHistorial() }
-
 function setTab(i) {
   document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j))
   document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',i===j))
-  if (i===2) renderAlertas()
-  if (i===3) renderHistorial()
+  if (i===1) renderAlertas()
+  if (i===2) renderHistorial()
 }
 
 function showToast(msg) {
@@ -338,7 +228,7 @@ function showToast(msg) {
   setTimeout(()=>t.classList.remove('show'),3000)
 }
 
-load(); renderGeneral(); populateEntradaSelect()
+load(); populateEntradaSelect()
 </script>
 </body>
 </html>
