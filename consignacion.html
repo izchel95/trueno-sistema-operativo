@@ -180,6 +180,36 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
 .qty-input { flex: 1; background: #141414; border: 1px solid #333; border-radius: 10px; color: #f5c842; font-size: 24px; font-weight: 800; padding: 10px 14px; outline: none; font-family: inherit; text-align: center; }
 .qty-input:focus { border-color: #f5c842; }
 
+/* ── Carrito ── */
+.cart-bar { position:fixed; bottom:0; left:0; right:0; padding:12px 16px; background:#0e0e0e; border-top:1px solid #1a1a1a; z-index:5; display:none; }
+.cart-bar.visible { display:block; }
+.cart-bar-inner { display:flex; align-items:center; gap:12px; background:#f5c842; border-radius:14px; padding:14px 18px; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.cart-count-badge { background:#0e0e0e; color:#f5c842; font-size:12px; font-weight:800; border-radius:20px; padding:4px 12px; flex-shrink:0; white-space:nowrap; }
+.cart-total-bar { flex:1; font-size:20px; font-weight:800; color:#0e0e0e; }
+.cart-cta { font-size:13px; font-weight:700; color:#0e0e0e; opacity:0.7; flex-shrink:0; }
+.cart-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:350; display:none; align-items:flex-end; }
+.cart-overlay.open { display:flex; }
+.cart-sheet { background:#141414; border-radius:20px 20px 0 0; padding:20px 20px 32px; width:100%; max-height:82vh; overflow-y:auto; }
+.cart-item { display:flex; align-items:center; gap:10px; padding:11px 0; border-bottom:1px solid #1a1a1a; }
+.cart-item:last-of-type { border-bottom:none; }
+.cart-item-info { flex:1; min-width:0; }
+.cart-item-name { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cart-item-sub { font-size:11px; color:#555; margin-top:2px; }
+.cart-item-price { font-size:14px; font-weight:700; color:#f5c842; flex-shrink:0; margin-left:6px; }
+.cart-qty-btns { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.cq-btn { width:28px; height:28px; border-radius:50%; border:none; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:800; }
+.cq-minus { background:#2a1a1a; color:#cf6f6f; }
+.cq-plus { background:#1a2a1a; color:#6fcf6f; }
+.cq-num { font-size:15px; font-weight:800; min-width:22px; text-align:center; color:#f0ede8; }
+.cart-footer { border-top:1px solid #2a2a2a; margin-top:14px; padding-top:14px; }
+.cart-total-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.cart-total-label { font-size:13px; color:#555; }
+.cart-grand-total { font-size:26px; font-weight:800; color:#f5c842; }
+.btn-registrar-cart { width:100%; padding:16px; background:#f5c842; color:#0e0e0e; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; }
+.btn-registrar-cart:disabled { opacity:0.4; cursor:not-allowed; }
+.btn-seguir-cart { width:100%; padding:11px; background:transparent; border:none; color:#555; font-size:14px; cursor:pointer; margin-top:8px; font-family:inherit; }
+.prod-in-cart-badge { background:#f5c842; color:#0e0e0e; font-size:10px; font-weight:800; border-radius:8px; padding:2px 7px; margin-left:4px; }
+
 /* ── Period pills ── */
 .period-pills { display:flex; gap:6px; margin-bottom:12px; }
 .period-pill { flex:1; padding:8px 4px; border:1px solid #2a2a2a; border-radius:10px; background:#141414; color:#666; font-size:13px; font-weight:600; cursor:pointer; text-align:center; transition:all 0.15s; }
@@ -293,21 +323,39 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
       <button class="enc-btn" onclick="setVendedor('Daniel',this)">Daniel</button>
       <button class="enc-btn" onclick="setVendedor('Izchel',this)">Izchel</button>
     </div>
-    <div class="selected-card" id="sel-card">
-      <div class="sel-title" id="sel-titulo">—</div>
-      <div class="sel-sub" id="sel-sub">—</div>
-      <div class="sel-pv" id="sel-pv">—</div>
-    </div>
-    <div class="section-label">Selecciona el producto</div>
+    <div class="section-label">Toca un producto para agregarlo</div>
     <div class="search-wrap">
       <span style="color:#444;font-size:16px">🔍</span>
       <input type="search" id="venta-search" placeholder="Buscar..." oninput="renderVentaList()">
     </div>
     <div class="filter-row" id="venta-tipo-filters"></div>
     <div id="venta-list"></div>
-    <div style="height:80px"></div>
-    <div class="submit-bar">
-      <button class="submit-btn" id="btn-vender" onclick="registrarVenta()" disabled>Registrar venta</button>
+    <div style="height:90px"></div>
+  </div>
+</div>
+
+<!-- ═══ CART BAR ═══ -->
+<div class="cart-bar" id="cart-bar">
+  <div class="cart-bar-inner" onclick="abrirCarrito()">
+    <div class="cart-count-badge" id="cart-count-badge">0 artículos</div>
+    <div class="cart-total-bar" id="cart-total-bar">$0</div>
+    <div class="cart-cta">Ver carrito →</div>
+  </div>
+</div>
+
+<!-- ═══ CART OVERLAY ═══ -->
+<div class="cart-overlay" id="cart-overlay" onclick="if(event.target===this)cerrarCarrito()">
+  <div class="cart-sheet">
+    <div style="font-size:18px;font-weight:800;margin-bottom:4px">🛒 Carrito</div>
+    <div style="font-size:12px;color:#555;margin-bottom:16px" id="cart-vendedor-label"></div>
+    <div id="cart-items-list"></div>
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <div class="cart-total-label" id="cart-piezas-label">0 piezas</div>
+        <div class="cart-grand-total" id="cart-grand-total">$0</div>
+      </div>
+      <button class="btn-registrar-cart" id="btn-registrar-cart" onclick="registrarCarrito()">Registrar venta</button>
+      <button class="btn-seguir-cart" onclick="cerrarCarrito()">← Seguir agregando</button>
     </div>
   </div>
 </div>
@@ -833,17 +881,25 @@ const BASE_CATALOG = [
   ['Van Morrison','The Best Of Van Morrison',null,150,100,15,'CD','Discos'],
   ['Infamous Stiffs','Kill For The Sound',null,150,100,15,'CD','Discos'],
   ['Athlete Tourist','Athlete Tourist',null,150,100,15,'CD','Discos'],
+  // ── Velas ──
+  ['Vaso Blossom',null,null,290,199,30,'VASO','Velas'],
+  ['Vaso Arco',null,null,290,199,30,'VASO','Velas'],
+  ['Vela matcha',null,null,349,239,36,'VELA','Velas'],
+  ['Vela café',null,null,349,239,36,'VELA','Velas'],
+  ['Vela morning','Scent Collection',null,380,260,40,'VELA','Velas'],
+  ['Vela afternoon','Scent Collection',null,380,260,40,'VELA','Velas'],
+  ['Vela evening','Scent Collection',null,380,260,40,'VELA','Velas'],
 ]
 
-// [nombre, sub, desc, pv, pp, ut, tipo, cat]
+// [nombre, sub, desc, pv, pp, ut, tipo, cat, initStock?]
 const BASE = BASE_CATALOG.map((r,i) => ({
-  id:'b'+i, nombre:r[0], sub:r[1], desc:r[2], pv:r[3], pp:r[4], ut:r[5], tipo:r[6], cat:r[7], custom:false
+  id:'b'+i, nombre:r[0], sub:r[1], desc:r[2], pv:r[3], pp:r[4], ut:r[5], tipo:r[6], cat:r[7], initStock:r[8]??1, custom:false
 }))
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let stock = {}, ventas = [], customProds = [], pendingImport = []
 let cats = [] // [{name, icon}]
-let vendedor = '', selectedProd = null
+let vendedor = '', cart = []
 let activeCat = null      // which category is open
 let catFilter = 'TODOS', ventaFilter = 'TODOS'
 let invCat = null, invTipo = 'TODOS'
@@ -852,7 +908,7 @@ let stockModalId = null, stockTemp = 0
 let semanaOffset = 0
 let importHasStock = false // whether uploaded file had stock column
 
-const K = { stock:'tc_consig_stock', ventas:'tc_consig_ventas', custom:'tc_consig_custom', cats:'tc_consig_cats', seeded:'tc_consig_seeded' }
+const K = { stock:'tc_consig_stock', ventas:'tc_consig_ventas', custom:'tc_consig_custom', cats:'tc_consig_cats', seeded:'tc_consig_seeded', seeded2:'tc_consig_seeded2' }
 
 function getAllProducts() { return [...BASE, ...customProds] }
 function getCatProducts(cat) { return getAllProducts().filter(p=>p.cat===cat) }
@@ -862,6 +918,7 @@ function getStock(id) { return stock[id] ?? 0 }
 function loadCats() {
   try { cats = JSON.parse(localStorage.getItem(K.cats)||'[]') } catch { cats=[] }
   if (!cats.find(c=>c.name==='Discos')) cats.unshift({name:'Discos', icon:'🎵'})
+  if (!cats.find(c=>c.name==='Velas')) cats.push({name:'Velas', icon:'🕯️'})
 }
 function saveCats() { localStorage.setItem(K.cats, JSON.stringify(cats)) }
 
@@ -924,8 +981,17 @@ function deleteProductCloud(id) { sb.from('consig_products').delete().eq('id',id
 // ─── Seed base stock once ─────────────────────────────────────────────────────
 function seedBaseStock() {
   if (localStorage.getItem(K.seeded)) return
-  BASE.forEach(p => { if (stock[p.id] === undefined) { stock[p.id]=1; pushStock(p.id,1) } })
+  BASE.filter(p=>p.cat==='Discos').forEach(p => { if (stock[p.id] === undefined) { stock[p.id]=1; pushStock(p.id,1) } })
   localStorage.setItem(K.seeded, '1')
+  saveLocal()
+}
+
+function seedVelas() {
+  if (localStorage.getItem(K.seeded2)) return
+  BASE.filter(p=>p.cat==='Velas').forEach(p => {
+    if (stock[p.id] === undefined) { stock[p.id]=p.initStock; pushStock(p.id,p.initStock) }
+  })
+  localStorage.setItem(K.seeded2, '1')
   saveLocal()
 }
 
@@ -949,7 +1015,8 @@ function renderCatHome() {
 
 function openCat(name) {
   activeCat = name
-  catFilter = 'TODOS'; ventaFilter = 'TODOS'; selectedProd = null; vendedor = ''
+  cart = []; vendedor = ''
+  catFilter = 'TODOS'; ventaFilter = 'TODOS'
   document.getElementById('cat-home').style.display = 'none'
   document.getElementById('cat-view').style.display = 'block'
   document.getElementById('cat-tabs').style.display = 'block'
@@ -992,6 +1059,7 @@ function setTab(t) {
   document.querySelectorAll('#cat-tabs .tab').forEach((el,i)=>el.classList.toggle('active',['catalogo','vender'][i]===t))
   document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'))
   document.getElementById('panel-'+t).classList.add('active')
+  updateCartBar()
 }
 
 // ─── Catalog (worker) ─────────────────────────────────────────────────────────
@@ -1026,11 +1094,45 @@ function renderCatalogo() {
   }).join('')
 }
 
-// ─── Vender ───────────────────────────────────────────────────────────────────
+// ─── Vender / Carrito ─────────────────────────────────────────────────────────
 function setVendedor(n,btn) {
   vendedor=n
   document.querySelectorAll('#panel-vender .enc-btn').forEach(b=>b.classList.remove('active'))
-  btn.classList.add('active'); checkBtn()
+  btn.classList.add('active')
+  updateCartBar()
+}
+
+function cartQty(id) { const e=cart.find(x=>x.id===id); return e?e.qty:0 }
+
+function addToCart(id) {
+  const p = getAllProducts().find(x=>x.id===id)
+  if (!p) return
+  const avail = getStock(p.id) - cartQty(p.id)
+  if (avail<=0) { showToast('Sin stock suficiente','err'); return }
+  const e = cart.find(x=>x.id===id)
+  if (e) e.qty++; else cart.push({id, qty:1, p})
+  updateCartBar(); renderVentaList()
+}
+
+function removeFromCart(id) {
+  const e = cart.find(x=>x.id===id)
+  if (!e) return
+  e.qty--
+  if (e.qty<=0) cart = cart.filter(x=>x.id!==id)
+  updateCartBar(); renderVentaList()
+}
+
+function updateCartBar() {
+  const bar = document.getElementById('cart-bar')
+  const total = cart.reduce((s,e)=>s+e.p.pv*e.qty,0)
+  const pzas = cart.reduce((s,e)=>s+e.qty,0)
+  document.getElementById('cart-count-badge').textContent = pzas===1?'1 artículo':`${pzas} artículos`
+  document.getElementById('cart-total-bar').textContent = `$${total.toLocaleString('es-MX')}`
+  if (cart.length>0 && document.getElementById('panel-vender').classList.contains('active')) {
+    bar.classList.add('visible')
+  } else {
+    bar.classList.remove('visible')
+  }
 }
 
 function renderVentaList() {
@@ -1044,62 +1146,88 @@ function renderVentaList() {
   if (!list.length) { el.innerHTML='<div class="empty">Sin resultados</div>'; return }
   el.innerHTML = list.map(p => {
     const s = getStock(p.id)
-    const isSel = selectedProd?.id===p.id
-    return `<div class="product-card${isSel?' selected':''}${s===0?' out-of-stock':''}" onclick="${s>0?`selectProd('${p.id}')`:''}" >
+    const inCart = cartQty(p.id)
+    const avail = s - inCart
+    const oos = avail<=0
+    return `<div class="product-card${oos?' out-of-stock':''}" onclick="${!oos?`addToCart('${p.id}')`:''}" style="cursor:${oos?'not-allowed':'pointer'}">
       <div class="prod-emoji">${getProdEmoji(p)}</div>
       <div class="prod-info">
-        <div class="prod-name">${p.nombre}</div>
+        <div class="prod-name">${p.nombre}${inCart>0?`<span class="prod-in-cart-badge">+${inCart}</span>`:''}</div>
         ${p.sub?`<div class="prod-sub">${p.sub}</div>`:''}
         ${p.desc?`<div class="prod-desc">${p.desc}</div>`:''}
-        <span class="stock-badge ${s===0?'stock-zero':s<=2?'stock-low':'stock-ok'}">${s===0?'Sin stock':s+' pza'}</span>
+        <span class="stock-badge ${s===0?'stock-zero':avail<=1?'stock-low':'stock-ok'}">${s===0?'Sin stock':avail+' disponible'+(avail!==1?'s':'')}</span>
       </div>
       <div class="prod-right"><div class="prod-precio">$${p.pv.toLocaleString('es-MX')}</div></div>
     </div>`
   }).join('')
 }
 
-function selectProd(id) {
-  selectedProd = getAllProducts().find(p=>p.id===id)
-  const c = document.getElementById('sel-card')
-  c.classList.add('visible')
-  document.getElementById('sel-titulo').textContent = selectedProd.nombre + (selectedProd.sub?` — ${selectedProd.sub}`:'')
-  document.getElementById('sel-sub').textContent = selectedProd.desc||selectedProd.tipo||''
-  document.getElementById('sel-pv').textContent = `$${selectedProd.pv.toLocaleString('es-MX')}`
-  renderVentaList(); checkBtn()
+function abrirCarrito() {
+  if (cart.length===0) return
+  const sheet = document.getElementById('cart-items-list')
+  const total = cart.reduce((s,e)=>s+e.p.pv*e.qty,0)
+  const pzas = cart.reduce((s,e)=>s+e.qty,0)
+  document.getElementById('cart-vendedor-label').textContent = vendedor ? `Vendedor: ${vendedor}` : '⚠️ Selecciona quién vende'
+  document.getElementById('cart-piezas-label').textContent = `${pzas} pieza${pzas!==1?'s':''}`
+  document.getElementById('cart-grand-total').textContent = `$${total.toLocaleString('es-MX')}`
+  document.getElementById('btn-registrar-cart').disabled = !vendedor
+  sheet.innerHTML = cart.map(e=>`
+    <div class="cart-item">
+      <div class="prod-emoji" style="font-size:20px">${getProdEmoji(e.p)}</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${e.p.nombre}${e.p.sub?` — ${e.p.sub}`:''}</div>
+        <div class="cart-item-sub">$${e.p.pv.toLocaleString('es-MX')} c/u</div>
+      </div>
+      <div class="cart-qty-btns">
+        <button class="cq-btn cq-minus" onclick="removeFromCart('${e.id}');abrirCarrito()">−</button>
+        <div class="cq-num">${e.qty}</div>
+        <button class="cq-btn cq-plus" onclick="addToCart('${e.id}');abrirCarrito()">+</button>
+      </div>
+      <div class="cart-item-price">$${(e.p.pv*e.qty).toLocaleString('es-MX')}</div>
+    </div>`).join('')
+  document.getElementById('cart-overlay').classList.add('open')
 }
 
-function checkBtn() { document.getElementById('btn-vender').disabled = !selectedProd||!vendedor }
+function cerrarCarrito() {
+  document.getElementById('cart-overlay').classList.remove('open')
+}
 
-async function registrarVenta() {
-  if (!selectedProd||!vendedor) return
-  const btn = document.getElementById('btn-vender')
+async function registrarCarrito() {
+  if (!cart.length||!vendedor) return
+  const btn = document.getElementById('btn-registrar-cart')
   btn.disabled=true; btn.textContent='Registrando...'
-  const v = {
-    id: Date.now().toString(),
-    fecha: new Date().toLocaleDateString('es-MX'),
-    prod_id: selectedProd.id,
-    nombre: selectedProd.nombre,
-    sub: selectedProd.sub||'',
-    tipo: selectedProd.tipo||'',
-    cat: selectedProd.cat,
-    precio_venta: selectedProd.pv,
-    precio_proveedor: selectedProd.pp||0,
-    utilidad: selectedProd.ut||0,
-    vendedor,
-    ts: new Date().toISOString()
+  const now = new Date()
+  const fecha = now.toLocaleDateString('es-MX')
+  const ts = now.toISOString()
+  const totalVenta = cart.reduce((s,e)=>s+e.p.pv*e.qty,0)
+  const totalPzas = cart.reduce((s,e)=>s+e.qty,0)
+  let resumen = []
+  for (const e of cart) {
+    for (let i=0;i<e.qty;i++) {
+      const v = {
+        id: Date.now().toString()+Math.random().toString(36).slice(2),
+        fecha, prod_id:e.id, nombre:e.p.nombre, sub:e.p.sub||'',
+        tipo:e.p.tipo||'', cat:e.p.cat,
+        precio_venta:e.p.pv, precio_proveedor:e.p.pp||0, utilidad:e.p.ut||0,
+        vendedor, ts
+      }
+      ventas.push(v); pushVenta(v)
+    }
+    stock[e.id] = Math.max(0, getStock(e.id)-e.qty)
+    pushStock(e.id, stock[e.id])
+    resumen.push(`${e.qty>1?e.qty+'× ':''}${e.p.nombre}${e.p.sub?' — '+e.p.sub:''}`)
+    const ns = stock[e.id]
+    if (ns===0) tg(`⚠️ <b>STOCK AGOTADO</b> — ${e.p.nombre}`)
+    else if (ns<=2) tg(`⚡ Stock bajo: ${e.p.nombre} — ${ns} pza restante${ns!==1?'s':''}`)
   }
-  ventas.push(v)
-  stock[selectedProd.id] = Math.max(0, getStock(selectedProd.id)-1)
-  saveLocal(); pushVenta(v); pushStock(selectedProd.id, stock[selectedProd.id])
-  const newStock = stock[selectedProd.id]
-  const stockAlert = newStock===0 ? `\n⚠️ <b>STOCK AGOTADO</b> — quedan 0 piezas` : newStock<=2 ? `\n⚡ Stock bajo: ${newStock} pza restante${newStock!==1?'s':''}` : ''
-  tg(`💸 <b>Venta registrada</b>\n🎵 ${v.nombre}${v.sub?' — '+v.sub:''}\n💰 $${v.precio_venta.toLocaleString('es-MX')}\n👤 ${v.vendedor}\n📅 ${new Date().toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}${stockAlert}`)
-  selectedProd=null; vendedor=''
-  document.getElementById('sel-card').classList.remove('visible')
+  saveLocal()
+  tg(`💸 <b>${totalPzas} venta${totalPzas!==1?'s':''} registrada${totalPzas!==1?'s':''}</b>\n${resumen.map(r=>`• ${r}`).join('\n')}\n💰 Total: $${totalVenta.toLocaleString('es-MX')}\n👤 ${vendedor}\n📅 ${now.toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
+  cart=[]; vendedor=''
   document.querySelectorAll('#panel-vender .enc-btn').forEach(b=>b.classList.remove('active'))
-  document.getElementById('venta-search').value=''; renderVentaList()
-  btn.disabled=true; btn.textContent='Registrar venta'
-  showToast('✓ Venta registrada')
+  document.getElementById('venta-search').value=''
+  cerrarCarrito(); updateCartBar(); renderVentaList()
+  btn.disabled=false; btn.textContent='Registrar venta'
+  showToast(`✓ ${totalPzas} venta${totalPzas!==1?'s':''} registrada${totalPzas!==1?'s':''}`)
 }
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
@@ -1676,7 +1804,7 @@ function showToast(msg,err=false) {
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 loadLocal(); loadCats()
-seedBaseStock()
+seedBaseStock(); seedVelas()
 renderCatHome()
 updateCatSelects()
 syncFromCloud().then(()=>{ renderCatHome() })
