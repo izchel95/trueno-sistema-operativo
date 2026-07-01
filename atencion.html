@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Atención — Trueno ⚡</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 40px; }
+
+header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #1e1e1e; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.menu-btn { display: inline-flex; align-items: center; padding: 8px 14px; background: #1a1600; border: 1px solid #f5c842; border-radius: 10px; color: #f5c842; font-size: 13px; font-weight: 700; text-decoration: none; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+.logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.logo span { color: #f5c842; }
+
+.tabs { display: flex; overflow-x: auto; scrollbar-width: none; gap: 0; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex-shrink: 0; padding: 10px 14px; font-size: 12px; color: #555; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
+.tab.active { color: #f5c842; border-bottom-color: #f5c842; font-weight: 600; }
+
+.panel { display: none; padding: 20px 16px; }
+.panel.active { display: block; }
+
+.card { background: #141414; border: 1px solid #1e1e1e; border-radius: 16px; padding: 20px; margin-bottom: 12px; }
+.card-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+.card-sub { font-size: 12px; color: #555; margin-bottom: 14px; }
+
+.script-box { background: #0e0e0e; border-left: 3px solid #f5c842; border-radius: 0 10px 10px 0; padding: 14px 16px; margin-bottom: 10px; }
+.script-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #f5c842; margin-bottom: 6px; }
+.script-text { font-size: 14px; color: #f0ede8; line-height: 1.65; font-style: italic; }
+
+.step-list { list-style: none; }
+.step-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1a1a1a; align-items: flex-start; }
+.step-item:last-child { border-bottom: none; }
+.step-num { width: 28px; height: 28px; background: #f5c842; color: #0e0e0e; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+.step-body { flex: 1; }
+.step-title { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.step-desc { font-size: 13px; color: #888; line-height: 1.5; }
+
+.tip { background: #1a1600; border: 1px solid #3a2e00; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: #a88a00; margin-top: 12px; line-height: 1.5; }
+
+.hear-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; margin-bottom: 10px; overflow: hidden; }
+.hear-header { display: flex; align-items: center; gap: 12px; padding: 16px; }
+.hear-letter { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; flex-shrink: 0; }
+.hear-info { flex: 1; }
+.hear-word { font-size: 15px; font-weight: 800; }
+.hear-mean { font-size: 12px; color: #555; margin-top: 1px; }
+.hear-body { padding: 0 16px 16px; }
+.hear-body p { font-size: 13px; color: #888; line-height: 1.6; margin-bottom: 8px; }
+.hear-body p:last-child { margin-bottom: 0; }
+
+.badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+.badge-gold { background: #1a1600; color: #f5c842; border: 1px solid #3a2e00; }
+.badge-green { background: #1a2a1a; color: #6fcf6f; border: 1px solid #2d5a2d; }
+
+.favecard-box { background: #141414; border: 1px solid #1e1e1e; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 12px; }
+.favecard-icon { font-size: 48px; margin-bottom: 12px; }
+.favecard-title { font-size: 18px; font-weight: 800; color: #f5c842; margin-bottom: 6px; }
+.favecard-desc { font-size: 13px; color: #888; line-height: 1.6; }
+
+.qr-box { background: #141414; border: 2px dashed #333; border-radius: 14px; padding: 28px 20px; text-align: center; margin-bottom: 12px; }
+.qr-icon { font-size: 40px; margin-bottom: 10px; }
+.qr-text { font-size: 14px; font-weight: 700; color: #f0ede8; margin-bottom: 4px; }
+.qr-sub { font-size: 12px; color: #555; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <a class="menu-btn" href="index.html">← Menú</a>
+    <div class="logo">⚡ <span>Trueno</span></div>
+    <div style="width:60px"></div>
+  </div>
+  <div class="tabs" id="tabs">
+    <div class="tab active" onclick="setTab(0)">👋 Bienvenida</div>
+    <div class="tab" onclick="setTab(1)">☕ Date Latte</div>
+    <div class="tab" onclick="setTab(2)">⬆️ Upsell</div>
+    <div class="tab" onclick="setTab(3)">🃏 FaveCard</div>
+    <div class="tab" onclick="setTab(4)">⭐ Reseña</div>
+    <div class="tab" onclick="setTab(5)">🤝 Quejas</div>
+  </div>
+</header>
+
+<!-- Bienvenida -->
+<div class="panel active" id="panel-0">
+  <div class="card">
+    <div class="card-title">Guión de bienvenida</div>
+    <div class="card-sub">Primeras palabras al entrar el cliente — deben sentirse bienvenidos, no como interrumpidos</div>
+    <div class="script-box">
+      <div class="script-label">Al llegar</div>
+      <div class="script-text">"¡Hola! Bienvenido a Trueno, ¿cómo estás? ¿Ya conoces nuestro menú o te puedo ayudar con algo?"</div>
+    </div>
+    <div class="script-box">
+      <div class="script-label">Si el cliente está indeciso</div>
+      <div class="script-text">"Si quieres algo especial de la casa, te recomiendo nuestro Date Latte — es nuestra bebida firma, hecha con dátiles, sin azúcar refinada. ¿Te cuento más?"</div>
+    </div>
+    <div class="script-box">
+      <div class="script-label">Al entregar la bebida</div>
+      <div class="script-text">"Aquí está tu [bebida]. ¡Que lo disfrutes! Si necesitas algo más, con confianza."</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Lo más importante</div>
+    <ul class="step-list">
+      <li class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Contacto visual + sonrisa real</div>
+          <div class="step-desc">No saludar de espaldas ni mientras se hace otra cosa. El cliente debe sentir que fue visto.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Usar su nombre (si lo sabe)</div>
+          <div class="step-desc">Si ya es cliente frecuente o dio el nombre al pedir, usarlo al entregar la orden marca la diferencia.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Sin prisa visible</div>
+          <div class="step-desc">Aunque haya cola, nunca hacer sentir al cliente que está siendo apresurado o es un estorbo.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- Date Latte -->
+<div class="panel" id="panel-1">
+  <div class="card">
+    <div class="badge badge-gold">⭐ Bebida firma de Trueno</div>
+    <div class="card-title">Cómo presentar el Date Latte</div>
+    <div class="card-sub">No es solo una bebida — es nuestra historia. Presentarla con orgullo.</div>
+    <div class="script-box">
+      <div class="script-label">Pitch corto (15 segundos)</div>
+      <div class="script-text">"Es nuestro latte especial de la casa, endulzado con pasta de dátil en lugar de azúcar. Natural, sin refinados, y tiene un sabor un poco caramelizado que es muy diferente a cualquier otro latte."</div>
+    </div>
+    <div class="script-box">
+      <div class="script-label">Si el cliente pregunta qué es un dátil</div>
+      <div class="script-text">"Es una fruta del desierto — muy dulce de forma natural, con caramelo y vainilla. Nada artificial. Los usamos para endulzar sin azúcar procesada."</div>
+    </div>
+    <div class="script-box">
+      <div class="script-label">Si el cliente quiere algo dulce</div>
+      <div class="script-text">"Entonces definitivamente el Date Latte. Es dulce pero no empalagoso, y te vas a sentir bien después de tomarlo."</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Puntos clave para recordar</div>
+    <ul class="step-list">
+      <li class="step-item">
+        <div class="step-num">☑</div>
+        <div class="step-body">
+          <div class="step-title">Sin azúcar refinada</div>
+          <div class="step-desc">Endulzado 100% con pasta de dátil. No lleva jarabe ni azúcar de caña.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">☑</div>
+        <div class="step-body">
+          <div class="step-title">Sabor caramelizado natural</div>
+          <div class="step-desc">El dátil da un toque de caramelo y vainilla sin necesidad de ningún jarabe.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">☑</div>
+        <div class="step-body">
+          <div class="step-title">Va caliente o frío</div>
+          <div class="step-desc">Se puede pedir como latte caliente o sobre hielo. El sabor es igual de bueno en ambos.</div>
+        </div>
+      </li>
+    </ul>
+    <div class="tip">💡 Si el cliente ya lo conoce, pregunta: "¿Cómo te fue la última vez? ¿Con o sin hielo hoy?" — hace que se sientan como regulares aunque no lo sean.</div>
+  </div>
+</div>
+
+<!-- Upsell -->
+<div class="panel" id="panel-2">
+  <div class="card">
+    <div class="card-title">Protocolo de upsell</div>
+    <div class="card-sub">Sugerir de forma natural, no como vendedor — como alguien que genuinamente quiere que el cliente disfrute más</div>
+    <div class="script-box">
+      <div class="script-label">Sugerir bebida premium</div>
+      <div class="script-text">"¿Has probado nuestro Date Latte? Es el favorito de la casa — si quieres algo diferente al americano de siempre, te lo recomiendo mucho."</div>
+    </div>
+    <div class="script-box">
+      <div class="script-label">Sugerir cambio de leche</div>
+      <div class="script-text">"¿Lo quieres con leche de avena? Queda muy bien con el espresso y es la que más nos piden."</div>
+    </div>
+    <div class="script-box">
+      <div class="script-label">Si piden algo simple</div>
+      <div class="script-text">"Perfecto. ¿Lo quieres con doble shot? Por si quieres más cafeína hoy."</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Reglas de oro del upsell</div>
+    <ul class="step-list">
+      <li class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Una sola sugerencia por cliente</div>
+          <div class="step-desc">Si el cliente dice "no gracias", se acepta de inmediato sin insistir. Nada de hacer sentir presión.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Sugerir algo que tiene sentido</div>
+          <div class="step-desc">Si piden algo dulce → Date Latte. Si piden algo frío → cold brew. Leer al cliente antes de sugerir.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Nunca mencionar el precio al sugerir</div>
+          <div class="step-desc">"Te recomiendo X" suena a consejo de amigo. "X cuesta solo $X más" suena a venta agresiva.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- FaveCard -->
+<div class="panel" id="panel-3">
+  <div class="favecard-box">
+    <div class="favecard-icon">🃏</div>
+    <div class="favecard-title">FaveCard</div>
+    <div class="favecard-desc">Programa de lealtad digital de Trueno. No es tarjeta física de sellos — es digital.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Cómo explicarlo</div>
+    <div class="script-box">
+      <div class="script-label">Si el cliente no lo conoce</div>
+      <div class="script-text">"¿Conoces nuestra FaveCard? Es nuestro programa de lealtad — es digital, no tienes que cargar tarjeta. Cada visita acumulas puntos y los puedes usar en bebidas. ¿Te apuntas?"</div>
+    </div>
+    <div class="script-box">
+      <div class="script-label">Si pregunta cómo funciona</div>
+      <div class="script-text">"Es muy fácil — te registras en el link que te damos, y cada vez que vengas escaneamos tu código. Los puntos se acumulan solos."</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Puntos importantes</div>
+    <ul class="step-list">
+      <li class="step-item">
+        <div class="step-num">☑</div>
+        <div class="step-body">
+          <div class="step-title">100% digital</div>
+          <div class="step-desc">Sin tarjeta física. El cliente accede desde su teléfono.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">☑</div>
+        <div class="step-body">
+          <div class="step-title">Ofrecerla a todos los clientes nuevos</div>
+          <div class="step-desc">Especialmente cuando el cliente parece ser de Cabo (no turista de paso).</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">☑</div>
+        <div class="step-body">
+          <div class="step-title">No forzar</div>
+          <div class="step-desc">Si dicen "no gracias" o "ya la tengo", adelante con la orden.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- Reseña -->
+<div class="panel" id="panel-4">
+  <div class="card">
+    <div class="card-title">Cómo pedir una reseña de Google</div>
+    <div class="card-sub">El mejor momento es cuando el cliente ya terminó su bebida y está satisfecho — no al pedir ni al pagar</div>
+    <div class="script-box">
+      <div class="script-label">Momento ideal: al despedirse</div>
+      <div class="script-text">"Me da mucho gusto que te haya gustado. Si tienes un momento, nos ayudaría muchísimo que nos dejaras una reseña en Google — ¿te puedo mandar el link o mostrarte el código QR?"</div>
+    </div>
+    <div class="script-box">
+      <div class="script-label">Si el cliente tiene prisa</div>
+      <div class="script-text">"No te quito tiempo — solo si tienes un momento libre después. Gracias de todas formas, ¡que tengas buen día!"</div>
+    </div>
+  </div>
+  <div class="qr-box">
+    <div class="qr-icon">📱</div>
+    <div class="qr-text">Código QR de reseña Google</div>
+    <div class="qr-sub">Pedir a Izchel el QR impreso para tenerlo en la barra</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Reglas</div>
+    <ul class="step-list">
+      <li class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Solo a clientes claramente satisfechos</div>
+          <div class="step-desc">Si hubo algún problema o el cliente no parece muy contento, NO pedir reseña en ese momento.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Nunca decir "5 estrellas"</div>
+          <div class="step-desc">Pedirles que dejen una reseña honesta. No dirigir la calificación — Google puede penalizar eso.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Una vez por visita, máximo</div>
+          <div class="step-desc">Si ya lo mencionaste y dijeron "después", no vuelvas a insistir esa visita.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- Quejas HEAR -->
+<div class="panel" id="panel-5">
+  <div class="card">
+    <div class="card-title">Protocolo HEAR para quejas</div>
+    <div class="card-sub">Cuando un cliente está molesto o insatisfecho, seguir estos 4 pasos en orden</div>
+  </div>
+
+  <div class="hear-card">
+    <div class="hear-header">
+      <div class="hear-letter" style="background:#1a1600;color:#f5c842">H</div>
+      <div class="hear-info">
+        <div class="hear-word">Hear — Escuchar</div>
+        <div class="hear-mean">Dejar hablar sin interrumpir</div>
+      </div>
+    </div>
+    <div class="hear-body">
+      <p>Dejar que el cliente exprese su queja completa sin interrumpir, defenderse ni explicar. Solo escuchar.</p>
+      <p><strong style="color:#f0ede8">Lenguaje corporal:</strong> contacto visual, asentir, postura abierta. No cruzar los brazos.</p>
+    </div>
+  </div>
+
+  <div class="hear-card">
+    <div class="hear-header">
+      <div class="hear-letter" style="background:#1a2a1a;color:#6fcf6f">E</div>
+      <div class="hear-info">
+        <div class="hear-word">Empathize — Empatizar</div>
+        <div class="hear-mean">Validar cómo se siente, sin admitir culpa automáticamente</div>
+      </div>
+    </div>
+    <div class="hear-body">
+      <p><em style="color:#888">"Entiendo perfectamente tu molestia — si me pasara lo mismo, yo también estaría frustrado/a."</em></p>
+      <p><em style="color:#888">"Tienes razón en esperar eso, lo siento mucho."</em></p>
+      <p><strong style="color:#f0ede8">Nota:</strong> Empatizar no es admitir que fue error de Trueno. Es reconocer el sentimiento del cliente.</p>
+    </div>
+  </div>
+
+  <div class="hear-card">
+    <div class="hear-header">
+      <div class="hear-letter" style="background:#0f2233;color:#6fa6cf">A</div>
+      <div class="hear-info">
+        <div class="hear-word">Act — Actuar</div>
+        <div class="hear-mean">Ofrecer una solución concreta e inmediata</div>
+      </div>
+    </div>
+    <div class="hear-body">
+      <p><em style="color:#888">"Déjame prepararte otra de inmediato."</em></p>
+      <p><em style="color:#888">"Te voy a hacer una nueva sin costo, dame dos minutos."</em></p>
+      <p><strong style="color:#f0ede8">Si no puedes decidir solo:</strong> "Dame un momento, voy a hablar con mi encargada para darte la mejor solución."</p>
+    </div>
+  </div>
+
+  <div class="hear-card">
+    <div class="hear-header">
+      <div class="hear-letter" style="background:#2a1a1a;color:#cf6f6f">R</div>
+      <div class="hear-info">
+        <div class="hear-word">Resolve — Resolver</div>
+        <div class="hear-mean">Confirmar que el cliente quedó satisfecho</div>
+      </div>
+    </div>
+    <div class="hear-body">
+      <p>Después de la solución: <em style="color:#888">"¿Quedó mejor así? ¿Hay algo más en lo que te pueda ayudar?"</em></p>
+      <p><strong style="color:#f0ede8">Al final:</strong> "Gracias por decírmelo — de verdad nos ayuda a mejorar."</p>
+    </div>
+  </div>
+
+  <div class="tip">⚠️ Si el cliente está agresivo o la situación se sale de control, avisar a Izchel de inmediato. No escalar por tu cuenta.</div>
+</div>
+
+<script>
+function setTab(i) {
+  document.querySelectorAll('.tab').forEach((t,j) => t.classList.toggle('active', i===j))
+  document.querySelectorAll('.panel').forEach((p,j) => p.classList.toggle('active', i===j))
+}
+</script>
+</body>
+</html>

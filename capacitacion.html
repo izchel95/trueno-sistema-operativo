@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Capacitación — Trueno ⚡</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 40px; }
+
+header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #1e1e1e; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.menu-btn { display: inline-flex; align-items: center; padding: 8px 14px; background: #1a1600; border: 1px solid #f5c842; border-radius: 10px; color: #f5c842; font-size: 13px; font-weight: 700; text-decoration: none; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+.logo { font-size: 22px; font-weight: 700; }
+.logo span { color: #f5c842; }
+
+.tabs { display: flex; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex-shrink: 0; padding: 10px 14px; font-size: 12px; color: #555; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
+.tab.active { color: #f5c842; border-bottom-color: #f5c842; font-weight: 600; }
+
+.panel { display: none; padding: 16px 16px 80px; }
+.panel.active { display: block; }
+
+.section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin: 16px 0 8px; }
+
+.card { background: #141414; border: 1px solid #1e1e1e; border-radius: 16px; padding: 18px; margin-bottom: 10px; }
+.card-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+.card-sub { font-size: 12px; color: #555; margin-bottom: 14px; line-height: 1.5; }
+
+.step-list { list-style: none; }
+.step-item { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid #1a1a1a; align-items: flex-start; }
+.step-item:last-child { border-bottom: none; }
+.step-num { width: 26px; height: 26px; background: #f5c842; color: #0e0e0e; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+.step-body { flex: 1; }
+.step-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.step-desc { font-size: 12px; color: #888; line-height: 1.5; }
+
+.tip { background: #1a1600; border: 1px solid #3a2e00; border-radius: 10px; padding: 11px 13px; font-size: 12px; color: #a88a00; margin-top: 12px; line-height: 1.5; }
+
+/* Fichas de bebidas */
+.bebida-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; margin-bottom: 8px; overflow: hidden; cursor: pointer; }
+.bebida-card.open { border-color: #f5c842; }
+.bebida-header { display: flex; align-items: center; gap: 12px; padding: 14px; }
+.bebida-emoji { font-size: 26px; flex-shrink: 0; }
+.bebida-info { flex: 1; }
+.bebida-name { font-size: 14px; font-weight: 700; }
+.bebida-tag { font-size: 11px; color: #555; margin-top: 2px; }
+.bebida-arrow { font-size: 16px; color: #333; transition: transform 0.2s; }
+.bebida-card.open .bebida-arrow { transform: rotate(90deg); color: #f5c842; }
+.bebida-body { display: none; padding: 0 14px 14px; border-top: 1px solid #1e1e1e; }
+.bebida-card.open .bebida-body { display: block; }
+.bebida-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #111; font-size: 13px; }
+.bebida-row:last-child { border-bottom: none; }
+.bebida-ing { color: #ccc; }
+.bebida-amt { color: #f5c842; font-weight: 600; font-size: 12px; }
+.bebida-note { font-size: 12px; color: #666; font-style: italic; margin-top: 8px; line-height: 1.4; }
+
+/* Quiz */
+.quiz-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 16px; padding: 20px; margin-bottom: 10px; }
+.quiz-q { font-size: 15px; font-weight: 700; margin-bottom: 14px; line-height: 1.4; }
+.quiz-opt { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1px solid #2a2a2a; border-radius: 10px; margin-bottom: 8px; cursor: pointer; font-size: 13px; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+.quiz-opt:last-child { margin-bottom: 0; }
+.quiz-opt.correct { background: #1a2a1a; border-color: #2d5a2d; color: #6fcf6f; }
+.quiz-opt.wrong { background: #2a1a1a; border-color: #5a2d2d; color: #cf6f6f; }
+.quiz-opt.reveal-correct { background: #1a2a1a; border-color: #2d5a2d; color: #6fcf6f; }
+.quiz-letter { width: 26px; height: 26px; border-radius: 8px; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.quiz-explain { background: #0e0e0e; border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #888; margin-top: 10px; display: none; line-height: 1.5; }
+.quiz-explain.show { display: block; }
+.quiz-score { background: #1a1600; border: 1px solid #3a2e00; border-radius: 14px; padding: 20px; text-align: center; margin-bottom: 10px; }
+.quiz-score-num { font-size: 48px; font-weight: 800; color: #f5c842; }
+.quiz-score-label { font-size: 14px; color: #888; margin-top: 4px; }
+.btn-reset { width: 100%; padding: 14px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+
+/* Protocolo */
+.proto-item { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid #1a1a1a; align-items: flex-start; }
+.proto-item:last-child { border-bottom: none; }
+.proto-icon { font-size: 24px; flex-shrink: 0; margin-top: 1px; }
+.proto-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.proto-desc { font-size: 13px; color: #888; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <a class="menu-btn" href="index.html">← Menú</a>
+    <div class="logo">⚡ <span>Trueno</span></div>
+    <div style="width:60px"></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="setTab(0)">🌟 Onboarding</div>
+    <div class="tab" onclick="setTab(1)">☕ Bebidas</div>
+    <div class="tab" onclick="setTab(2)">📋 Protocolos</div>
+    <div class="tab" onclick="setTab(3)">🧠 Quiz</div>
+  </div>
+</header>
+
+<!-- ONBOARDING -->
+<div class="panel active" id="panel-0">
+  <div class="card">
+    <div class="card-title">¡Bienvenida a Trueno ⚡</div>
+    <div class="card-sub">Esta guía es para que te sientas lista antes de tu primer turno. Léela con calma, pregunta todo lo que quieras.</div>
+    <ul class="step-list">
+      <li class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">¿Qué es Trueno?</div>
+          <div class="step-desc">Somos una cafetería independiente en Cabo San Lucas. No somos cadena — cada bebida la hacemos con intención y con buena materia prima.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Nuestra bebida firma: Date Latte</div>
+          <div class="step-desc">Latte endulzado con pasta de dátil, sin azúcar refinada. Es lo primero que debes aprender a preparar y a presentar con orgullo.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Cómo usamos el sistema</div>
+          <div class="step-desc">Cada turno: Apertura al llegar, Corte al cerrar, Cierre para el checklist de limpieza. Todo desde el celular con esta app.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">Calibración del espresso</div>
+          <div class="step-desc">Si cambias la molienda o el gramaje, regístralo en Calibración. Es clave para mantener consistencia entre turnos.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-title">Atención al cliente</div>
+          <div class="step-desc">Revisa el módulo de Atención — tiene los guiones de bienvenida, upsell, FaveCard y cómo manejar quejas con el protocolo HEAR.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title">Tu primer semana</div>
+    <ul class="step-list">
+      <li class="step-item">
+        <div class="step-num">D1</div>
+        <div class="step-body">
+          <div class="step-title">Día 1 — Observar</div>
+          <div class="step-desc">Sombrea a una barista experimentada. Observa el flujo, los equipos y cómo se atiende.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">D2</div>
+        <div class="step-body">
+          <div class="step-title">Día 2 — Bebidas básicas</div>
+          <div class="step-desc">Practica espresso, americano y latte. Aprende a usar la máquina y el vaporizador.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">D3</div>
+        <div class="step-body">
+          <div class="step-title">Día 3 — Menú completo</div>
+          <div class="step-desc">Practica todas las bebidas del recetario. Usa la app como referencia cuando no recuerdes.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">D4</div>
+        <div class="step-body">
+          <div class="step-title">Día 4 — Atención al cliente</div>
+          <div class="step-desc">Practica el guión de bienvenida, el pitch del Date Latte y ofrecer la FaveCard.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">D5</div>
+        <div class="step-body">
+          <div class="step-title">Día 5 — Turno solo supervisado</div>
+          <div class="step-desc">Turno completo con supervisión de Izchel. Haz el quiz de capacitación al final del día.</div>
+        </div>
+      </li>
+    </ul>
+    <div class="tip">💡 No hay preguntas tontas. Siempre es mejor preguntar que adivinar — sobre todo con la máquina de espresso.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Reglas de la barra</div>
+    <ul class="step-list">
+      <li class="step-item">
+        <div class="proto-icon">🧼</div>
+        <div class="step-body">
+          <div class="step-title">Limpieza continua</div>
+          <div class="step-desc">La barra debe estar limpia en todo momento, no solo al cierre. Si hay tiempo libre, se limpia.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="proto-icon">📵</div>
+        <div class="step-body">
+          <div class="step-title">Celular guardado durante servicio</div>
+          <div class="step-desc">El celular personal se usa en descansos, no durante la atención. Para el sistema operativo sí está permitido.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="proto-icon">🗣️</div>
+        <div class="step-body">
+          <div class="step-title">Si no sabes algo, pregunta</div>
+          <div class="step-desc">Nunca adivines un precio, un ingrediente o un procedimiento. Pregunta o usa el recetario.</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="proto-icon">⚠️</div>
+        <div class="step-body">
+          <div class="step-title">Cualquier problema → avisar a Izchel</div>
+          <div class="step-desc">Cliente difícil, equipo con falla, accidente, error en cobro — siempre avisar de inmediato.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- BEBIDAS -->
+<div class="panel" id="panel-1">
+  <div class="section-label">Café</div>
+  <div id="bebidas-cafe"></div>
+  <div class="section-label">Alternativas</div>
+  <div id="bebidas-alt"></div>
+  <div class="section-label">Bebidas Frías</div>
+  <div id="bebidas-frias"></div>
+  <div class="section-label">Frappes</div>
+  <div id="bebidas-frappes"></div>
+</div>
+
+<!-- PROTOCOLOS -->
+<div class="panel" id="panel-2">
+  <div class="card">
+    <div class="card-title">Apertura del día</div>
+    <div class="card-sub">Antes de abrir al público</div>
+    <ul class="step-list">
+      <li class="step-item"><div class="step-num">1</div><div class="step-body"><div class="step-title">Revisar la app de Apertura</div><div class="step-desc">Completar el checklist de 28 puntos y registrar el fondo de caja.</div></div></li>
+      <li class="step-item"><div class="step-num">2</div><div class="step-body"><div class="step-title">Encender y purgar la máquina</div><div class="step-desc">Dejar calentar la máquina de espresso al menos 20 minutos antes de servir.</div></div></li>
+      <li class="step-item"><div class="step-num">3</div><div class="step-body"><div class="step-title">Calibrar el espresso</div><div class="step-desc">Preparar un shot de prueba y registrar en Calibración si se hicieron ajustes.</div></div></li>
+      <li class="step-item"><div class="step-num">4</div><div class="step-body"><div class="step-title">Verificar insumos</div><div class="step-desc">Revisar inventario: leche, jarabes, vasos. Si algo está bajo, avisarle a Izchel antes de abrir.</div></div></li>
+      <li class="step-item"><div class="step-num">5</div><div class="step-body"><div class="step-title">Limpiar la barra</div><div class="step-desc">Superficie limpia, equipo en su lugar, portafiltros limpio y seco.</div></div></li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title">Cierre del día</div>
+    <div class="card-sub">Antes de salir</div>
+    <ul class="step-list">
+      <li class="step-item"><div class="step-num">1</div><div class="step-body"><div class="step-title">Corte de caja</div><div class="step-desc">Contar efectivo por denominación, registrar ventas del día en la app de Corte.</div></div></li>
+      <li class="step-item"><div class="step-num">2</div><div class="step-body"><div class="step-title">Limpiar máquina de espresso</div><div class="step-desc">Purgar, limpiar portafiltros, limpiar vaporizador con paño húmedo.</div></div></li>
+      <li class="step-item"><div class="step-num">3</div><div class="step-body"><div class="step-title">Limpiar licuadora y equipo</div><div class="step-desc">Lavar completamente. Sin residuos de leche ni jarabe.</div></div></li>
+      <li class="step-item"><div class="step-num">4</div><div class="step-body"><div class="step-title">Refrigerador y insumos</div><div class="step-desc">Tapar leche abierta, guardar jarabes, verificar que el coldbrew esté tapado.</div></div></li>
+      <li class="step-item"><div class="step-num">5</div><div class="step-body"><div class="step-title">Checklist de cierre en la app</div><div class="step-desc">Completar todos los puntos del checklist de limpieza y seguridad.</div></div></li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title">Preparación del espresso</div>
+    <div class="card-sub">El foundation de todo</div>
+    <ul class="step-list">
+      <li class="step-item"><div class="step-num">1</div><div class="step-body"><div class="step-title">Pesar el café</div><div class="step-desc">18 gr estándar. Si se ajusta, registrarlo en Calibración.</div></div></li>
+      <li class="step-item"><div class="step-num">2</div><div class="step-body"><div class="step-title">Moler al momento</div><div class="step-desc">No moler con anticipación — el café molido pierde aroma rápido.</div></div></li>
+      <li class="step-item"><div class="step-num">3</div><div class="step-body"><div class="step-title">Distribuir y tampar</div><div class="step-desc">Distribuir parejo antes de tampar. Tampado uniforme — no inclinado.</div></div></li>
+      <li class="step-item"><div class="step-num">4</div><div class="step-body"><div class="step-title">Extraer: 25-35 segundos</div><div class="step-desc">Objetivo: 32-60 gr de espresso. Si sale muy rápido → moler más fino. Si tarda mucho → más grueso.</div></div></li>
+    </ul>
+    <div class="tip">💡 Temperatura del agua ideal: 92-94°C. El espresso bien extraído se ve dorado con crema caramelada.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Vaporizar leche</div>
+    <ul class="step-list">
+      <li class="step-item"><div class="step-num">1</div><div class="step-body"><div class="step-title">Jarra fría y limpia</div><div class="step-desc">Siempre empezar con jarra fría — la leche se texturiza mejor.</div></div></li>
+      <li class="step-item"><div class="step-num">2</div><div class="step-body"><div class="step-title">Purgar el vaporizador</div><div class="step-desc">1-2 segundos antes de meter la jarra para eliminar el agua condensada.</div></div></li>
+      <li class="step-item"><div class="step-num">3</div><div class="step-body"><div class="step-title">Posición de la lanza</div><div class="step-desc">Ligeramente sumergida, inclinada para crear espiral. Primero incorporar aire (silbido bajo), luego calentar.</div></div></li>
+      <li class="step-item"><div class="step-num">4</div><div class="step-body"><div class="step-title">Temperatura</div><div class="step-desc">Latte caliente: 70-80°C. Bebidas frías: 40-50°C. Cortado: 60-70°C.</div></div></li>
+    </ul>
+    <div class="tip">💡 Si la leche hace ruido de burbujas grandes, la lanza está muy afuera. Si no hace ruido, está muy adentro. El sonido ideal es como papel rasgándose suavemente.</div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="panel" id="panel-3">
+  <div class="quiz-score" id="quiz-score" style="display:none">
+    <div class="quiz-score-num" id="score-num">0/0</div>
+    <div class="quiz-score-label" id="score-label">—</div>
+    <button class="btn-reset" onclick="resetQuiz()" style="margin-top:14px">Volver a intentar</button>
+  </div>
+  <div id="quiz-container"></div>
+</div>
+
+<script>
+// ── BEBIDAS (resumen rápido para la ficha) ──
+const BEBIDAS = [
+  { emoji:'☕', nombre:'Espresso', tag:'Café · Solo', cat:'cafe', ing:[['Espresso','32-60 gr']] },
+  { emoji:'☕', nombre:'Cortado', tag:'Café · Caliente', cat:'cafe', ing:[['Espresso','32-60 gr'],['Leche texturizada (60-70°)','60 ml']] },
+  { emoji:'☕', nombre:'Americano', tag:'Café · Cal/Frío', cat:'cafe', ing:[['Espresso','32-60 gr'],['Agua caliente','200 ml'],['Agua tibia','100 ml'],['+ Hielo si es frío','100 gr']] },
+  { emoji:'☕', nombre:'Latte', tag:'Café · Cal/Frío', cat:'cafe', ing:[['Espresso','32-60 gr'],['Leche texturizada','300 ml cal / 150 ml frío']] },
+  { emoji:'☕', nombre:'Cappuccino', tag:'Café · Caliente', cat:'cafe', ing:[['Espresso','32-60 gr'],['Leche texturizada (70-80°)','250 ml']] },
+  { emoji:'☕', nombre:'Vainilla Latte', tag:'Café · Cal/Frío', cat:'cafe', ing:[['Espresso','32-60 gr'],['Jarabe de vainilla','30 gr'],['Leche texturizada','250 gr cal / 150 gr frío'],['+ Hielo si es frío','200 gr']] },
+  { emoji:'☕', nombre:'Latte Caramelo', tag:'Café · Cal/Frío', cat:'cafe', ing:[['Espresso','36-60 ml'],['Jarabe de caramelo','30 ml'],['Leche texturizada','270 ml cal / 150 ml frío'],['Cardamomo','palmadita'],['+ Hielo si es frío','200 gr']] },
+  { emoji:'☕', nombre:'Mocha', tag:'Café · Cal/Frío', cat:'cafe', ing:[['Espresso','32-60 gr'],['Cacao en polvo','5 gr'],['Canela','.1 gr'],['Leche texturizada','250 ml cal / 150 ml frío'],['+ Hielo si es frío','200 gr']] },
+  { emoji:'🍵', nombre:'Matcha', tag:'Alternativa · Cal/Frío', cat:'alt', ing:[['Matcha','10 gr cal / 15 gr frío'],['Leche texturizada','300 gr cal / 150 gr frío'],['+ Hielo si es frío','200 gr']] },
+  { emoji:'🍵', nombre:'Masala Chai', tag:'Alternativa · Cal/Frío', cat:'alt', ing:[['Concentrado de masala','60 gr'],['Leche texturizada','250 gr cal / 150 gr frío'],['+ Hielo si es frío','170 gr'],['Canela espolvoreada','arriba (caliente)']] },
+  { emoji:'🍵', nombre:'Chai Vainilla', tag:'Alternativa · Cal/Frío', cat:'alt', ing:[['Polvo de chai vainilla','30 gr'],['Agua','30-50 ml'],['Leche texturizada','250 ml cal / 150 gr frío'],['+ Hielo si es frío','200 gr']] },
+  { emoji:'🫐', nombre:'Taro', tag:'Alternativa · Cal/Frío', cat:'alt', ing:[['Polvo de taro','30 gr'],['Agua','30-50 ml'],['Leche texturizada','250 ml cal / 150 gr frío'],['+ Hielo si es frío','200 gr']] },
+  { emoji:'🍫', nombre:'Chocolate', tag:'Alternativa · Cal/Frío', cat:'alt', ing:[['Chocolate en polvo','5 gr'],['Canela','.1 gr'],['Agua','50 ml'],['Leche texturizada','300 gr cal / 150 gr frío'],['+ Hielo si es frío','200 gr']] },
+  { emoji:'🫧', nombre:'Espresso Tonic', tag:'Fría · Con espresso', cat:'frias', ing:[['Espresso','32-60 gr'],['Hielo','200 gr'],['Agua tónica','150 gr']] },
+  { emoji:'🫧', nombre:'Coldbrew Tonic', tag:'Fría · Sin espresso', cat:'frias', ing:[['Coldbrew','80 ml'],['Hielo','200 gr'],['Agua tónica','120 ml']] },
+  { emoji:'🍋', nombre:'Limonade Coffee', tag:'Fría · Con espresso', cat:'frias', ing:[['Espresso','32-60 gr'],['Limón','30 gr'],['Jarabe','30 gr'],['Hielo','200 gr'],['Agua mineral','80 gr']] },
+  { emoji:'🍓', nombre:'Fresa Menta', tag:'Fría · Sin café', cat:'frias', ing:[['Jarabe de fresa (hecho en casa)','45 gr'],['Concentrado de menta','30 gr'],['Limón','½ oz'],['Hielo','200 gr'],['Agua mineral','90 gr'],['Tónica','30 gr']] },
+  { emoji:'🍊', nombre:'Naranjita', tag:'Fría · Sin café', cat:'frias', ing:[['Naranjita','45 ml'],['Jarabe','30 gr'],['Hielo','200 gr'],['Agua mineral','90 gr'],['Tónica','30 gr']] },
+  { emoji:'🍊', nombre:'Naranjita Brew', tag:'Fría · Con coldbrew', cat:'frias', ing:[['Coldbrew','60 ml'],['Naranjita','45 ml'],['Jarabe','30 gr'],['Hielo','170 gr'],['Agua mineral','60 gr'],['Tónica','30 gr']] },
+  { emoji:'🫐', nombre:'Blueberry', tag:'Fría · Con coldbrew', cat:'frias', ing:[['Coldbrew','60 ml'],['Limón','½ oz'],['Hielo','170 gr'],['Agua mineral','60 gr'],['Tónica','30 gr']] },
+  { emoji:'🧋', nombre:'Frappe Original', tag:'Frappe · Con espresso', cat:'frappes', ing:[['Espresso','32-60 gr'],['Base de vainilla','45 gr'],['Hielo','200 gr'],['Leche','150 gr']] },
+  { emoji:'🧋', nombre:'Frappe Matcha', tag:'Frappe · Sin café', cat:'frappes', ing:[['Matcha','15 gr'],['Hielo','200 gr'],['Leche','150 gr']] },
+  { emoji:'🧋', nombre:'Frappe Taro', tag:'Frappe · Con espresso', cat:'frappes', ing:[['Espresso','32-60 gr'],['Taro','30 gr'],['Hielo','200 gr'],['Leche','150 gr']] },
+  { emoji:'🧋', nombre:'Frappe Mocha', tag:'Frappe · Con espresso', cat:'frappes', ing:[['Espresso','32-60 gr'],['Mocha','30 gr'],['Hielo','200 gr'],['Leche','150 gr']] },
+  { emoji:'🧋', nombre:'Frappe Caramelo', tag:'Frappe · Con espresso', cat:'frappes', ing:[['Espresso','32-60 gr'],['Jarabe de caramelo','30 gr'],['Hielo','200 gr'],['Leche','150 gr']] },
+  { emoji:'🧋', nombre:'Frappe Oreo', tag:'Frappe · Con espresso', cat:'frappes', ing:[['Espresso','32-60 gr'],['Base de vainilla','30 gr'],['Jarabe de chocolate','30 gr'],['Galletas Oreo','5 pzas'],['Hielo','200 gr'],['Leche','150 gr'],['Galleta decoración','1 pza']] },
+  { emoji:'🧋', nombre:'Frappe Nutella', tag:'Frappe · Con espresso', cat:'frappes', ing:[['Espresso','32-60 gr'],['Nutella','30 gr'],['Hielo','200 gr'],['Leche','150 gr']] },
+  { emoji:'🌿', nombre:'Tisana', tag:'Sin cafeína · Cal/Frío', cat:'frappes', ing:[['Tisana','12 gr'],['Agua caliente','250 gr cal'],['o macerar 30 gr agua + hielo 200 gr + agua 150 gr','(frío)']] },
+]
+
+function renderBebidas() {
+  const cats = { cafe:'bebidas-cafe', alt:'bebidas-alt', frias:'bebidas-frias', frappes:'bebidas-frappes' }
+  Object.keys(cats).forEach(cat => {
+    document.getElementById(cats[cat]).innerHTML = BEBIDAS.filter(b=>b.cat===cat).map((b,i)=>`
+      <div class="bebida-card" id="bc-${cat}-${i}" onclick="toggleBebida('bc-${cat}-${i}')">
+        <div class="bebida-header">
+          <div class="bebida-emoji">${b.emoji}</div>
+          <div class="bebida-info">
+            <div class="bebida-name">${b.nombre}</div>
+            <div class="bebida-tag">${b.tag}</div>
+          </div>
+          <div class="bebida-arrow">›</div>
+        </div>
+        <div class="bebida-body">
+          ${b.ing.map(([ing,amt])=>`<div class="bebida-row"><span class="bebida-ing">${ing}</span><span class="bebida-amt">${amt}</span></div>`).join('')}
+        </div>
+      </div>`).join('')
+  })
+}
+
+function toggleBebida(id) {
+  document.getElementById(id).classList.toggle('open')
+}
+
+// ── QUIZ ──
+const PREGUNTAS = [
+  { q:'¿Cuántos gramos es el gramaje estándar del espresso en Trueno?', opts:['15 gr','18 gr','20 gr','22 gr'], correct:1, explain:'El estándar en Trueno es 18 gr. Si se ajusta, debe registrarse en Calibración.' },
+  { q:'¿A qué temperatura se texturiza la leche para un latte caliente?', opts:['50-60°C','60-70°C','70-80°C','85-90°C'], correct:2, explain:'Para latte caliente: 70-80°C. Para bebidas frías: 40-50°C. Para cortado: 60-70°C.' },
+  { q:'¿Cuál es la bebida firma de Trueno?', opts:['Cappuccino especial','Date Latte','Matcha latte','Cold brew tonic'], correct:1, explain:'El Date Latte es nuestra bebida firma — endulzada con pasta de dátil, sin azúcar refinada.' },
+  { q:'¿Qué significa FaveCard?', opts:['Una tarjeta de descuento física','El programa de lealtad digital de Trueno','Una tarjeta de crédito exclusiva','Un método de pago'], correct:1, explain:'FaveCard es el programa de lealtad digital de Trueno. No es tarjeta física — es 100% digital.' },
+  { q:'Si el espresso sale en menos de 20 segundos, ¿qué debes hacer?', opts:['Aumentar la temperatura del agua','Moler más grueso','Moler más fino','Aumentar el gramaje'], correct:2, explain:'Si sale muy rápido (<20 seg), la molienda está muy gruesa — hay que moler más fino.' },
+  { q:'¿Qué es el protocolo HEAR?', opts:['Un protocolo de limpieza de la máquina','El protocolo de manejo de quejas de clientes','Un protocolo de apertura del café','La forma de pedir reseñas de Google'], correct:1, explain:'HEAR = Hear (Escuchar), Empathize (Empatizar), Act (Actuar), Resolve (Resolver). Se usa con clientes insatisfechos.' },
+  { q:'¿Cuánto jarabe de fresa lleva la Fresa Menta?', opts:['30 gr','40 gr','45 gr','60 gr'], correct:2, explain:'La Fresa Menta lleva 45 gr de jarabe de fresa hecho en casa, además de 30 gr de concentrado de menta y ½ oz de limón.' },
+  { q:'¿Cuál es el tiempo ideal de extracción del espresso?', opts:['10-15 segundos','15-20 segundos','25-35 segundos','40-50 segundos'], correct:2, explain:'El espresso debe extraerse entre 25 y 35 segundos para un resultado balanceado.' },
+  { q:'Si un cliente está molesto, ¿cuál es el primer paso del protocolo HEAR?', opts:['Explicar qué pasó','Ofrecer solución inmediata','Escuchar sin interrumpir','Llamar a Izchel'], correct:2, explain:'El primer paso es ESCUCHAR — dejar que el cliente exprese su queja completa sin interrumpir ni defenderse.' },
+  { q:'¿Cuánto matcha lleva el Frappe Matcha?', opts:['10 gr','12 gr','15 gr','20 gr'], correct:2, explain:'El Frappe Matcha lleva 15 gr de matcha, 200 gr de hielo y 150 gr de leche. No lleva espresso.' },
+]
+
+let answered = []
+
+function renderQuiz() {
+  answered = new Array(PREGUNTAS.length).fill(null)
+  document.getElementById('quiz-score').style.display = 'none'
+  document.getElementById('quiz-container').innerHTML = PREGUNTAS.map((p,qi)=>`
+    <div class="quiz-card" id="qcard-${qi}">
+      <div class="quiz-q">${qi+1}. ${p.q}</div>
+      ${p.opts.map((o,oi)=>`
+        <div class="quiz-opt" id="qopt-${qi}-${oi}" onclick="responder(${qi},${oi})">
+          <div class="quiz-letter">${['A','B','C','D'][oi]}</div>
+          <div>${o}</div>
+        </div>`).join('')}
+      <div class="quiz-explain" id="qexp-${qi}">${p.explain}</div>
+    </div>`).join('')
+}
+
+function responder(qi, oi) {
+  if (answered[qi]!==null) return
+  answered[qi] = oi
+  const p = PREGUNTAS[qi]
+  p.opts.forEach((_,i)=>{
+    const el = document.getElementById(`qopt-${qi}-${i}`)
+    if (i===oi) el.classList.add(oi===p.correct?'correct':'wrong')
+    else if (i===p.correct) el.classList.add('reveal-correct')
+  })
+  document.getElementById(`qexp-${qi}`).classList.add('show')
+  if (answered.every(a=>a!==null)) mostrarScore()
+}
+
+function mostrarScore() {
+  const correct = answered.filter((a,i)=>a===PREGUNTAS[i].correct).length
+  const total = PREGUNTAS.length
+  const pct = Math.round(correct/total*100)
+  const label = pct>=90?'¡Excelente! Lista para el turno 🌟':pct>=70?'Muy bien — repasa los que fallaste 💪':'Sigue practicando — vuelve a intentarlo 📚'
+  document.getElementById('score-num').textContent = `${correct}/${total}`
+  document.getElementById('score-label').textContent = label
+  document.getElementById('quiz-score').style.display = 'block'
+  document.getElementById('quiz-score').scrollIntoView({behavior:'smooth'})
+}
+
+function resetQuiz() {
+  renderQuiz()
+  window.scrollTo({top:0,behavior:'smooth'})
+}
+
+function setTab(i) {
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j))
+  document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',i===j))
+}
+
+renderBebidas()
+renderQuiz()
+</script>
+</body>
+</html>

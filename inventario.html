@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Inventario — Trueno ⚡</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 40px; }
+
+header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #1e1e1e; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.menu-btn { display: inline-flex; align-items: center; padding: 8px 14px; background: #1a1600; border: 1px solid #f5c842; border-radius: 10px; color: #f5c842; font-size: 13px; font-weight: 700; text-decoration: none; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+.logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.logo span { color: #f5c842; }
+
+.tabs { display: flex; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex-shrink: 0; padding: 10px 16px; font-size: 13px; color: #555; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
+.tab.active { color: #f5c842; border-bottom-color: #f5c842; font-weight: 600; }
+
+.panel { display: none; padding: 14px 16px 80px; }
+.panel.active { display: block; }
+
+.section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin: 16px 0 8px; }
+
+/* Semáforo cards */
+.inv-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.inv-card:active { background: #1a1a1a; }
+.inv-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.dot-green { background: #6fcf6f; box-shadow: 0 0 6px #6fcf6f66; }
+.dot-yellow { background: #f5c842; box-shadow: 0 0 6px #f5c84266; }
+.dot-red { background: #cf6f6f; box-shadow: 0 0 6px #cf6f6f66; }
+.inv-info { flex: 1; min-width: 0; }
+.inv-name { font-size: 14px; font-weight: 600; }
+.inv-cat { font-size: 11px; color: #555; margin-top: 2px; }
+.inv-right { text-align: right; flex-shrink: 0; }
+.inv-qty { font-size: 18px; font-weight: 800; }
+.inv-unit { font-size: 11px; color: #555; }
+.qty-green { color: #6fcf6f; }
+.qty-yellow { color: #f5c842; }
+.qty-red { color: #cf6f6f; }
+
+/* Editar stock modal */
+.bottom-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 400; display: none; align-items: flex-end; }
+.bottom-overlay.open { display: flex; }
+.stock-modal { background: #141414; border-radius: 20px 20px 0 0; padding: 24px 20px 36px; width: 100%; }
+.stock-modal-title { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+.stock-modal-sub { font-size: 12px; color: #555; margin-bottom: 20px; }
+.stock-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.stock-count { font-size: 52px; font-weight: 800; color: #f5c842; text-align: center; flex: 1; }
+.stock-btn { width: 60px; height: 60px; border-radius: 50%; border: none; font-size: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.s-minus { background: #2a1a1a; color: #cf6f6f; }
+.s-plus { background: #1a2a1a; color: #6fcf6f; }
+.stock-save { width: 100%; padding: 16px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 20px; }
+.stock-cancel { width: 100%; padding: 10px; background: transparent; border: none; color: #555; font-size: 13px; cursor: pointer; margin-top: 6px; font-family: inherit; }
+
+/* Entrada form */
+.form-field { margin-bottom: 12px; }
+.form-field label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+.form-input, .form-select { width: 100%; background: #141414; border: 1px solid #222; border-radius: 10px; color: #f0ede8; font-size: 15px; padding: 12px 14px; outline: none; font-family: inherit; appearance: none; }
+.form-input:focus, .form-select:focus { border-color: #f5c842; }
+.btn-submit { width: 100%; padding: 16px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 4px; }
+
+/* Historial */
+.hist-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #1a1a1a; }
+.hist-row:last-child { border-bottom: none; }
+.hist-icon { font-size: 20px; flex-shrink: 0; }
+.hist-info { flex: 1; min-width: 0; }
+.hist-name { font-size: 13px; font-weight: 600; }
+.hist-meta { font-size: 11px; color: #555; margin-top: 2px; }
+.hist-delta { font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.delta-pos { color: #6fcf6f; }
+.delta-neg { color: #cf6f6f; }
+
+.empty { text-align: center; color: #444; padding: 40px 20px; font-size: 14px; }
+.kpi-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.kpi-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 12px; text-align: center; }
+.kpi-val { font-size: 22px; font-weight: 800; }
+.kpi-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 4px; }
+.toast { position: fixed; bottom: 32px; left: 16px; right: 16px; background: #1a2a1a; border: 1px solid #2d5a2d; color: #6fcf6f; padding: 14px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; z-index: 500; text-align: center; }
+.toast.show { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <a class="menu-btn" href="index.html">← Menú</a>
+    <div class="logo">⚡ <span>Trueno</span></div>
+    <div style="width:60px"></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="setTab(0)">📦 General</div>
+    <div class="tab" onclick="setTab(1)">➕ Entrada</div>
+    <div class="tab" onclick="setTab(2)">🚨 Alertas</div>
+    <div class="tab" onclick="setTab(3)">📋 Historial</div>
+  </div>
+</header>
+
+<!-- General -->
+<div class="panel active" id="panel-0">
+  <div class="kpi-row" id="kpi-row"></div>
+  <div id="general-list"></div>
+</div>
+
+<!-- Entrada -->
+<div class="panel" id="panel-1">
+  <div class="section-label">Registrar entrada de mercancía</div>
+  <div class="form-field">
+    <label>Producto</label>
+    <select class="form-select" id="entrada-prod"></select>
+  </div>
+  <div class="form-field">
+    <label>Cantidad que entró</label>
+    <input class="form-input" type="number" id="entrada-qty" min="1" placeholder="Ej: 10">
+  </div>
+  <div class="form-field">
+    <label>Notas (opcional)</label>
+    <input class="form-input" type="text" id="entrada-notas" placeholder="Proveedor, lote, etc.">
+  </div>
+  <button class="btn-submit" onclick="registrarEntrada()">Registrar entrada</button>
+</div>
+
+<!-- Alertas -->
+<div class="panel" id="panel-2">
+  <div id="alertas-list"></div>
+</div>
+
+<!-- Historial -->
+<div class="panel" id="panel-3">
+  <div id="hist-list"></div>
+</div>
+
+<!-- Modal editar stock -->
+<div class="bottom-overlay" id="edit-overlay" onclick="if(event.target===this)cerrarModal()">
+  <div class="stock-modal">
+    <div class="stock-modal-title" id="modal-nombre">—</div>
+    <div class="stock-modal-sub" id="modal-unit">—</div>
+    <div class="stock-row">
+      <button class="stock-btn s-minus" onclick="cambiarQty(-1)">−</button>
+      <div class="stock-count" id="modal-qty">0</div>
+      <button class="stock-btn s-plus" onclick="cambiarQty(1)">+</button>
+    </div>
+    <button class="stock-save" onclick="guardarQty()">Guardar</button>
+    <button class="stock-cancel" onclick="cerrarModal()">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const INSUMOS = [
+  // [nombre, categoría, unidad, mínimo, inicial]
+  ['Café en grano','Café','kg',1,3],
+  ['Leche entera','Lácteos','L',4,10],
+  ['Leche deslactosada','Lácteos','L',2,6],
+  ['Leche de avena','Lácteos','L',2,6],
+  ['Leche de almendras','Lácteos','L',1,4],
+  ['Leche de soya','Lácteos','L',1,4],
+  ['Crema para batir','Lácteos','L',1,3],
+  ['Jarabe de vainilla','Jarabes','bot',1,2],
+  ['Jarabe de caramelo','Jarabes','bot',1,2],
+  ['Jarabe de fresa','Jarabes','bot',1,2],
+  ['Jarabe de blueberry','Jarabes','bot',1,2],
+  ['Cacao en polvo','Jarabes','kg',0.5,1],
+  ['Canela','Jarabes','kg',0.2,0.5],
+  ['Dátiles','Insumos','kg',0.5,1],
+  ['Azúcar','Insumos','kg',1,3],
+  ['Hielo','Insumos','bolsas',2,5],
+  ['Agua purificada','Insumos','garrafones',2,4],
+  ['Vasos cartón 12 oz','Empaque','paq',1,3],
+  ['Vasos cartón 10 oz','Empaque','paq',1,3],
+  ['Vasos cartón 8 oz','Empaque','paq',1,2],
+  ['Vasos cartón 4 oz','Empaque','paq',1,2],
+  ['Vasos cristal 12 oz','Empaque','paq',1,2],
+  ['Tapaderas','Empaque','paq',2,4],
+  ['Mangas/Sleeves','Empaque','paq',1,3],
+  ['Popotes','Empaque','paq',1,3],
+  ['Palitos removedores','Empaque','paq',1,2],
+  ['Servilletas','Empaque','paq',2,5],
+]
+
+const K_INV = 'tc_inv_stock'
+const K_HIST = 'tc_inv_hist'
+
+let stock = {}
+let historial = []
+let editIdx = null, editQtyTemp = 0
+
+function load() {
+  try { stock = JSON.parse(localStorage.getItem(K_INV)||'{}') } catch { stock={} }
+  try { historial = JSON.parse(localStorage.getItem(K_HIST)||'[]') } catch { historial=[] }
+  // seed
+  INSUMOS.forEach((ins,i) => { if (stock[i]===undefined) stock[i]=ins[4] })
+  save()
+}
+
+function save() {
+  localStorage.setItem(K_INV, JSON.stringify(stock))
+  localStorage.setItem(K_HIST, JSON.stringify(historial))
+}
+
+function semaforo(qty, min) {
+  if (qty <= 0) return 'red'
+  if (qty <= min) return 'yellow'
+  return 'green'
+}
+
+function renderGeneral() {
+  const cats = [...new Set(INSUMOS.map(r=>r[1]))]
+  let html = ''
+  const total = INSUMOS.length
+  const ok = INSUMOS.filter((r,i)=>semaforo(stock[i],r[3])==='green').length
+  const bajo = INSUMOS.filter((r,i)=>semaforo(stock[i],r[3])==='yellow').length
+  const agot = INSUMOS.filter((r,i)=>semaforo(stock[i],r[3])==='red').length
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi-card"><div class="kpi-val qty-green">${ok}</div><div class="kpi-label">OK</div></div>
+    <div class="kpi-card"><div class="kpi-val qty-yellow">${bajo}</div><div class="kpi-label">Bajo</div></div>
+    <div class="kpi-card"><div class="kpi-val qty-red">${agot}</div><div class="kpi-label">Agotado</div></div>
+  `
+  cats.forEach(cat => {
+    html += `<div class="section-label">${cat}</div>`
+    INSUMOS.forEach((ins,i) => {
+      if (ins[1]!==cat) return
+      const s = semaforo(stock[i],ins[3])
+      html += `<div class="inv-card" onclick="abrirModal(${i})">
+        <div class="inv-dot dot-${s}"></div>
+        <div class="inv-info">
+          <div class="inv-name">${ins[0]}</div>
+          <div class="inv-cat">Mínimo: ${ins[3]} ${ins[2]}</div>
+        </div>
+        <div class="inv-right">
+          <div class="inv-qty qty-${s}">${stock[i]}</div>
+          <div class="inv-unit">${ins[2]}</div>
+        </div>
+      </div>`
+    })
+  })
+  document.getElementById('general-list').innerHTML = html
+}
+
+function renderAlertas() {
+  const items = INSUMOS.map((ins,i)=>({...{nombre:ins[0],cat:ins[1],unit:ins[2],min:ins[3]},idx:i,qty:stock[i]}))
+    .filter(x=>semaforo(x.qty,x.min)!=='green')
+    .sort((a,b)=>a.qty-b.qty)
+  const el = document.getElementById('alertas-list')
+  if (!items.length) { el.innerHTML='<div class="empty">✅ Todo el inventario está OK</div>'; return }
+  el.innerHTML = `<div class="section-label">${items.length} producto${items.length!==1?'s':''} con stock bajo</div>`
+    + items.map(x=>{
+      const s = semaforo(x.qty,x.min)
+      return `<div class="inv-card" onclick="abrirModal(${x.idx})">
+        <div class="inv-dot dot-${s}"></div>
+        <div class="inv-info">
+          <div class="inv-name">${x.nombre}</div>
+          <div class="inv-cat">${x.cat} · Mínimo: ${x.min} ${x.unit}</div>
+        </div>
+        <div class="inv-right">
+          <div class="inv-qty qty-${s}">${x.qty}</div>
+          <div class="inv-unit">${x.unit}</div>
+        </div>
+      </div>`
+    }).join('')
+}
+
+function renderHistorial() {
+  const el = document.getElementById('hist-list')
+  if (!historial.length) { el.innerHTML='<div class="empty">Sin movimientos registrados</div>'; return }
+  const sorted = [...historial].reverse().slice(0,100)
+  el.innerHTML = sorted.map(h=>`
+    <div class="hist-row">
+      <div class="hist-icon">${h.delta>0?'📥':'📤'}</div>
+      <div class="hist-info">
+        <div class="hist-name">${h.nombre}</div>
+        <div class="hist-meta">${h.fecha} · ${h.notas||'Sin notas'}</div>
+      </div>
+      <div class="hist-delta ${h.delta>0?'delta-pos':'delta-neg'}">${h.delta>0?'+':''}${h.delta} ${h.unit}</div>
+    </div>`).join('')
+}
+
+function populateEntradaSelect() {
+  const sel = document.getElementById('entrada-prod')
+  sel.innerHTML = INSUMOS.map((ins,i)=>`<option value="${i}">${ins[0]} (${ins[1]})</option>`).join('')
+}
+
+function registrarEntrada() {
+  const idx = parseInt(document.getElementById('entrada-prod').value)
+  const qty = parseFloat(document.getElementById('entrada-qty').value)
+  const notas = document.getElementById('entrada-notas').value.trim()
+  if (!qty||qty<=0) { showToast('Ingresa una cantidad válida'); return }
+  const ins = INSUMOS[idx]
+  stock[idx] = (stock[idx]||0) + qty
+  historial.push({ nombre:ins[0], unit:ins[2], delta:qty, notas, fecha: new Date().toLocaleDateString('es-MX') })
+  save()
+  document.getElementById('entrada-qty').value = ''
+  document.getElementById('entrada-notas').value = ''
+  showToast(`✓ +${qty} ${ins[2]} de ${ins[0]}`)
+}
+
+function abrirModal(idx) {
+  editIdx = idx
+  editQtyTemp = stock[idx]||0
+  const ins = INSUMOS[idx]
+  document.getElementById('modal-nombre').textContent = ins[0]
+  document.getElementById('modal-unit').textContent = `Unidad: ${ins[2]} · Mínimo: ${ins[3]}`
+  document.getElementById('modal-qty').textContent = editQtyTemp
+  document.getElementById('edit-overlay').classList.add('open')
+}
+
+function cerrarModal() { document.getElementById('edit-overlay').classList.remove('open') }
+
+function cambiarQty(d) {
+  editQtyTemp = Math.max(0, editQtyTemp+d)
+  document.getElementById('modal-qty').textContent = editQtyTemp
+}
+
+function guardarQty() {
+  const old = stock[editIdx]||0
+  const delta = editQtyTemp - old
+  stock[editIdx] = editQtyTemp
+  if (delta!==0) historial.push({ nombre:INSUMOS[editIdx][0], unit:INSUMOS[editIdx][2], delta, notas:'Ajuste manual', fecha: new Date().toLocaleDateString('es-MX') })
+  save(); cerrarModal(); renderAll()
+  showToast('✓ Stock actualizado')
+}
+
+function renderAll() { renderGeneral(); renderAlertas(); renderHistorial() }
+
+function setTab(i) {
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j))
+  document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',i===j))
+  if (i===2) renderAlertas()
+  if (i===3) renderHistorial()
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast')
+  t.textContent = msg; t.className='toast show'
+  setTimeout(()=>t.classList.remove('show'),3000)
+}
+
+load(); renderGeneral(); populateEntradaSelect()
+</script>
+</body>
+</html>
