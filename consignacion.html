@@ -209,6 +209,24 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
 .btn-registrar-cart:disabled { opacity:0.4; cursor:not-allowed; }
 .btn-seguir-cart { width:100%; padding:11px; background:transparent; border:none; color:#555; font-size:14px; cursor:pointer; margin-top:8px; font-family:inherit; }
 .prod-in-cart-badge { background:#f5c842; color:#0e0e0e; font-size:10px; font-weight:800; border-radius:8px; padding:2px 7px; margin-left:4px; }
+/* ── Pago ── */
+.pago-section { margin-top:14px; border-top:1px solid #2a2a2a; padding-top:14px; }
+.pago-label { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#444; margin-bottom:8px; }
+.pago-btns { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px; }
+.pago-btn { padding:12px 6px; border:1px solid #2a2a2a; border-radius:12px; background:#141414; color:#888; font-size:12px; font-weight:600; cursor:pointer; text-align:center; transition:all 0.15s; font-family:inherit; line-height:1.3; }
+.pago-btn.active { background:#f5c842; color:#0e0e0e; border-color:#f5c842; }
+.pago-dividir-box { background:#141414; border:1px solid #2a2a2a; border-radius:12px; padding:14px; display:none; }
+.pago-dividir-box.visible { display:block; }
+.pago-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.pago-row:last-child { margin-bottom:0; }
+.pago-row-icon { font-size:18px; flex-shrink:0; }
+.pago-row-label { font-size:13px; color:#888; flex:1; }
+.pago-row-input { background:#0e0e0e; border:1px solid #333; border-radius:10px; color:#f5c842; font-size:18px; font-weight:800; padding:8px 12px; outline:none; font-family:inherit; text-align:right; width:130px; flex-shrink:0; }
+.pago-row-input:focus { border-color:#f5c842; }
+.pago-row-val { font-size:18px; font-weight:800; color:#f0ede8; text-align:right; width:130px; flex-shrink:0; }
+.pago-hint { font-size:11px; color:#555; text-align:center; margin-top:8px; }
+.pago-error { font-size:12px; color:#cf6f6f; text-align:center; margin-top:6px; display:none; }
+.pago-error.show { display:block; }
 
 /* ── Period pills ── */
 .period-pills { display:flex; gap:6px; margin-bottom:12px; }
@@ -283,7 +301,7 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
 <!-- ═══ WORKER HEADER ═══ -->
 <header id="main-header">
   <div class="header-top">
-    <a class="menu-btn" href="index.html">← Menú</a>
+    <a class="menu-btn" id="menu-btn" href="#" onclick="handleMenuBtn(event)">← Menú</a>
     <div class="logo">⚡ <span>Trueno</span></div>
     <button onclick="openAdminLogin()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#444;flex-shrink:0" title="Admin">🔐</button>
   </div>
@@ -354,6 +372,31 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
         <div class="cart-total-label" id="cart-piezas-label">0 piezas</div>
         <div class="cart-grand-total" id="cart-grand-total">$0</div>
       </div>
+
+      <!-- Forma de pago -->
+      <div class="pago-section">
+        <div class="pago-label">Forma de pago</div>
+        <div class="pago-btns">
+          <button class="pago-btn" id="pago-btn-efectivo" onclick="setPago('efectivo')">💵<br>Efectivo</button>
+          <button class="pago-btn" id="pago-btn-tarjeta" onclick="setPago('tarjeta')">💳<br>Tarjeta</button>
+          <button class="pago-btn" id="pago-btn-dividir" onclick="setPago('dividir')">⚡<br>Dividir</button>
+        </div>
+        <div class="pago-dividir-box" id="pago-dividir-box">
+          <div class="pago-row">
+            <div class="pago-row-icon">💵</div>
+            <div class="pago-row-label">Efectivo</div>
+            <input class="pago-row-input" id="pago-efec-input" type="number" min="0" placeholder="$0" oninput="calcDividir()">
+          </div>
+          <div class="pago-row">
+            <div class="pago-row-icon">💳</div>
+            <div class="pago-row-label">Tarjeta</div>
+            <div class="pago-row-val" id="pago-tarj-val">$0</div>
+          </div>
+          <div class="pago-hint">Ingresa lo que paga en efectivo, el resto va a tarjeta</div>
+          <div class="pago-error" id="pago-error">El efectivo no puede ser mayor al total</div>
+        </div>
+      </div>
+
       <button class="btn-registrar-cart" id="btn-registrar-cart" onclick="registrarCarrito()">Registrar venta</button>
       <button class="btn-seguir-cart" onclick="cerrarCarrito()">← Seguir agregando</button>
     </div>
@@ -900,6 +943,7 @@ const BASE = BASE_CATALOG.map((r,i) => ({
 let stock = {}, ventas = [], customProds = [], pendingImport = []
 let cats = [] // [{name, icon}]
 let vendedor = '', cart = []
+let formaPago = null, pagoEfectivo = 0
 let activeCat = null      // which category is open
 let catFilter = 'TODOS', ventaFilter = 'TODOS'
 let invCat = null, invTipo = 'TODOS'
@@ -1013,17 +1057,23 @@ function renderCatHome() {
   grid.innerHTML = cards.join('')
 }
 
+function handleMenuBtn(e) {
+  e.preventDefault()
+  if (activeCat) goHome(); else window.location.href = 'index.html'
+}
+
 function openCat(name) {
   activeCat = name
-  cart = []; vendedor = ''
   catFilter = 'TODOS'; ventaFilter = 'TODOS'
   document.getElementById('cat-home').style.display = 'none'
   document.getElementById('cat-view').style.display = 'block'
   document.getElementById('cat-tabs').style.display = 'block'
+  document.getElementById('menu-btn').textContent = '← Consignación'
   setTab('catalogo')
   buildTipoFilters()
   renderCatalogo()
   renderVentaList()
+  updateCartBar()
 }
 
 function goHome() {
@@ -1031,6 +1081,8 @@ function goHome() {
   document.getElementById('cat-home').style.display = 'block'
   document.getElementById('cat-view').style.display = 'none'
   document.getElementById('cat-tabs').style.display = 'none'
+  document.getElementById('menu-btn').textContent = '← Menú'
+  updateCartBar()
 }
 
 function buildTipoFilters() {
@@ -1128,11 +1180,8 @@ function updateCartBar() {
   const pzas = cart.reduce((s,e)=>s+e.qty,0)
   document.getElementById('cart-count-badge').textContent = pzas===1?'1 artículo':`${pzas} artículos`
   document.getElementById('cart-total-bar').textContent = `$${total.toLocaleString('es-MX')}`
-  if (cart.length>0 && document.getElementById('panel-vender').classList.contains('active')) {
-    bar.classList.add('visible')
-  } else {
-    bar.classList.remove('visible')
-  }
+  if (cart.length>0) bar.classList.add('visible')
+  else bar.classList.remove('visible')
 }
 
 function renderVentaList() {
@@ -1164,19 +1213,17 @@ function renderVentaList() {
 
 function abrirCarrito() {
   if (cart.length===0) return
-  const sheet = document.getElementById('cart-items-list')
   const total = cart.reduce((s,e)=>s+e.p.pv*e.qty,0)
   const pzas = cart.reduce((s,e)=>s+e.qty,0)
-  document.getElementById('cart-vendedor-label').textContent = vendedor ? `Vendedor: ${vendedor}` : '⚠️ Selecciona quién vende'
+  document.getElementById('cart-vendedor-label').textContent = vendedor ? `Vendedor: ${vendedor}` : '⚠️ Selecciona quién vende en la pestaña Vender'
   document.getElementById('cart-piezas-label').textContent = `${pzas} pieza${pzas!==1?'s':''}`
   document.getElementById('cart-grand-total').textContent = `$${total.toLocaleString('es-MX')}`
-  document.getElementById('btn-registrar-cart').disabled = !vendedor
-  sheet.innerHTML = cart.map(e=>`
+  document.getElementById('cart-items-list').innerHTML = cart.map(e=>`
     <div class="cart-item">
       <div class="prod-emoji" style="font-size:20px">${getProdEmoji(e.p)}</div>
       <div class="cart-item-info">
         <div class="cart-item-name">${e.p.nombre}${e.p.sub?` — ${e.p.sub}`:''}</div>
-        <div class="cart-item-sub">$${e.p.pv.toLocaleString('es-MX')} c/u</div>
+        <div class="cart-item-sub">$${e.p.pv.toLocaleString('es-MX')} c/u · ${e.p.cat}</div>
       </div>
       <div class="cart-qty-btns">
         <button class="cq-btn cq-minus" onclick="removeFromCart('${e.id}');abrirCarrito()">−</button>
@@ -1185,7 +1232,49 @@ function abrirCarrito() {
       </div>
       <div class="cart-item-price">$${(e.p.pv*e.qty).toLocaleString('es-MX')}</div>
     </div>`).join('')
+  // Reset pago UI
+  formaPago = null; pagoEfectivo = 0
+  document.querySelectorAll('.pago-btn').forEach(b=>b.classList.remove('active'))
+  document.getElementById('pago-dividir-box').classList.remove('visible')
+  document.getElementById('pago-efec-input').value = ''
+  document.getElementById('pago-tarj-val').textContent = '$0'
+  document.getElementById('pago-error').classList.remove('show')
+  document.getElementById('btn-registrar-cart').disabled = true
   document.getElementById('cart-overlay').classList.add('open')
+}
+
+function setPago(tipo) {
+  formaPago = tipo
+  document.querySelectorAll('.pago-btn').forEach(b=>b.classList.remove('active'))
+  document.getElementById('pago-btn-'+tipo).classList.add('active')
+  const divBox = document.getElementById('pago-dividir-box')
+  if (tipo==='dividir') {
+    divBox.classList.add('visible')
+    document.getElementById('pago-efec-input').value = ''
+    document.getElementById('pago-tarj-val').textContent = '$0'
+    document.getElementById('pago-error').classList.remove('show')
+    document.getElementById('btn-registrar-cart').disabled = true
+  } else {
+    divBox.classList.remove('visible')
+    document.getElementById('btn-registrar-cart').disabled = !vendedor
+  }
+}
+
+function calcDividir() {
+  const total = cart.reduce((s,e)=>s+e.p.pv*e.qty,0)
+  const efec = parseFloat(document.getElementById('pago-efec-input').value)||0
+  pagoEfectivo = efec
+  const tarj = total - efec
+  const errEl = document.getElementById('pago-error')
+  if (efec > total || efec < 0) {
+    errEl.classList.add('show')
+    document.getElementById('pago-tarj-val').textContent = '$—'
+    document.getElementById('btn-registrar-cart').disabled = true
+  } else {
+    errEl.classList.remove('show')
+    document.getElementById('pago-tarj-val').textContent = `$${tarj.toLocaleString('es-MX')}`
+    document.getElementById('btn-registrar-cart').disabled = !vendedor
+  }
 }
 
 function cerrarCarrito() {
@@ -1193,7 +1282,7 @@ function cerrarCarrito() {
 }
 
 async function registrarCarrito() {
-  if (!cart.length||!vendedor) return
+  if (!cart.length||!vendedor||!formaPago) return
   const btn = document.getElementById('btn-registrar-cart')
   btn.disabled=true; btn.textContent='Registrando...'
   const now = new Date()
@@ -1201,6 +1290,8 @@ async function registrarCarrito() {
   const ts = now.toISOString()
   const totalVenta = cart.reduce((s,e)=>s+e.p.pv*e.qty,0)
   const totalPzas = cart.reduce((s,e)=>s+e.qty,0)
+  const pagoTarjeta = formaPago==='dividir' ? totalVenta-pagoEfectivo : (formaPago==='tarjeta'?totalVenta:0)
+  const pagoEfec = formaPago==='dividir' ? pagoEfectivo : (formaPago==='efectivo'?totalVenta:0)
   let resumen = []
   for (const e of cart) {
     for (let i=0;i<e.qty;i++) {
@@ -1209,7 +1300,7 @@ async function registrarCarrito() {
         fecha, prod_id:e.id, nombre:e.p.nombre, sub:e.p.sub||'',
         tipo:e.p.tipo||'', cat:e.p.cat,
         precio_venta:e.p.pv, precio_proveedor:e.p.pp||0, utilidad:e.p.ut||0,
-        vendedor, ts
+        vendedor, forma_pago:formaPago, ts
       }
       ventas.push(v); pushVenta(v)
     }
@@ -1221,8 +1312,11 @@ async function registrarCarrito() {
     else if (ns<=2) tg(`⚡ Stock bajo: ${e.p.nombre} — ${ns} pza restante${ns!==1?'s':''}`)
   }
   saveLocal()
-  tg(`💸 <b>${totalPzas} venta${totalPzas!==1?'s':''} registrada${totalPzas!==1?'s':''}</b>\n${resumen.map(r=>`• ${r}`).join('\n')}\n💰 Total: $${totalVenta.toLocaleString('es-MX')}\n👤 ${vendedor}\n📅 ${now.toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
-  cart=[]; vendedor=''
+  const pagoLinea = formaPago==='efectivo' ? `💵 Efectivo: $${totalVenta.toLocaleString('es-MX')}`
+    : formaPago==='tarjeta' ? `💳 Tarjeta: $${totalVenta.toLocaleString('es-MX')}`
+    : `💵 Efectivo: $${pagoEfec.toLocaleString('es-MX')} · 💳 Tarjeta: $${pagoTarjeta.toLocaleString('es-MX')}`
+  tg(`💸 <b>${totalPzas} venta${totalPzas!==1?'s':''} registrada${totalPzas!==1?'s':''}</b>\n${resumen.map(r=>`• ${r}`).join('\n')}\n💰 Total: $${totalVenta.toLocaleString('es-MX')}\n${pagoLinea}\n👤 ${vendedor}\n📅 ${now.toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
+  cart=[]; vendedor=''; formaPago=null; pagoEfectivo=0
   document.querySelectorAll('#panel-vender .enc-btn').forEach(b=>b.classList.remove('active'))
   document.getElementById('venta-search').value=''
   cerrarCarrito(); updateCartBar(); renderVentaList()
@@ -1811,12 +1905,5 @@ syncFromCloud().then(()=>{ renderCatHome() })
 tg(`👀 <b>Consignación abierta</b>\n📅 ${new Date().toLocaleString('es-MX',{weekday:'long',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
 </script>
 
-<!-- Back button from category view to home -->
-<script>
-// Override header back button behavior depending on view state
-document.querySelector('a[href="index.html"]').addEventListener('click', function(e) {
-  if (activeCat) { e.preventDefault(); goHome() }
-})
-</script>
 </body>
 </html>
