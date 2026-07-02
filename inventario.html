@@ -201,6 +201,22 @@ function populateEntradaSelect() {
     INSUMOS.map((ins,i)=>`<option value="${i}">${ins[0]} (${ins[1]})</option>`).join('')
 }
 
+// Debounce para resumen Telegram de inventario
+let _invBatch = []
+let _invTimer = null
+function _flushInvTelegram() {
+  if (!_invBatch.length) return
+  const lineas = _invBatch.map(e => `• +${e.qty} ${e.unit} ${e.nombre}${e.notas?' ('+e.notas+')':''}`).join('\n')
+  const fecha = new Date().toLocaleDateString('es-MX')
+  fetch(`https://api.telegram.org/bot8765854864:AAEuMxt5p264TL3LPHbQI89S6uqqyIEnQd8/sendMessage`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ chat_id:'8309237078', parse_mode:'HTML',
+      text:`📦 <b>Entradas de inventario</b> · ${fecha}\n\n${lineas}`
+    })
+  }).catch(()=>{})
+  _invBatch = []
+}
+
 function registrarEntrada() {
   const idx = parseInt(document.getElementById('entrada-prod').value)
   const qty = parseFloat(document.getElementById('entrada-qty').value)
@@ -218,6 +234,11 @@ function registrarEntrada() {
     method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ tipo:'inventario_entrada', row:[_fecha, _hora, ins[0], ins[1], qty, ins[2], notas||'', stock[idx]] })
   }).catch(()=>{})
+
+  // Acumular para Telegram — envía resumen 60s después de la última entrada
+  _invBatch.push({ nombre:ins[0], unit:ins[2], qty, notas })
+  clearTimeout(_invTimer)
+  _invTimer = setTimeout(_flushInvTelegram, 60000)
 
   document.getElementById('entrada-qty').value = ''
   document.getElementById('entrada-notas').value = ''

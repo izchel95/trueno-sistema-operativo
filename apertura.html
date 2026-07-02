@@ -506,6 +506,14 @@
         ts: new Date().toISOString()
       }).then().catch(() => {})
 
+      // Telegram
+      fetch(`https://api.telegram.org/bot8765854864:AAEuMxt5p264TL3LPHbQI89S6uqqyIEnQd8/sendMessage`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ chat_id:'8309237078', parse_mode:'HTML',
+          text:`☀️ <b>Apertura registrada</b>\n👤 ${encargadaStr} · ${hoy.toLocaleDateString('es-MX')}\n✅ ${checked}/${TOTAL} ítems · ${estado}\n💵 Fondo: $${row[row.length-2]}${row[row.length-1]?'\n📝 '+row[row.length-1]:''}`
+        })
+      }).catch(()=>{})
+
       document.getElementById('form-view').style.display = 'none';
       document.getElementById('success-screen').style.display = 'flex';
     } catch (e) {

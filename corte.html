@@ -647,6 +647,14 @@
         ts: new Date().toISOString()
       }).then().catch(() => {})
 
+      // Telegram
+      fetch(`https://api.telegram.org/bot8765854864:AAEuMxt5p264TL3LPHbQI89S6uqqyIEnQd8/sendMessage`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ chat_id:'8309237078', parse_mode:'HTML',
+          text:`💰 <b>Corte de caja</b>\n👤 ${encargada} · ${hoy.toLocaleDateString('es-MX')}\n\n💵 Ventas: $${fmt(ventas)}\n🎁 Propinas: $${fmt(propinas)}\n📤 Gastos: $${fmt(totalGastos)}${detalleGastos.length?'\n   '+detalleGastos.join('\n   '):''}\n\n<b>Neto: $${fmt(neto)}</b>\n${diff===0?'✅ Cuadra':'⚠️ Diferencia: $'+fmt(Math.abs(diff))}`
+        })
+      }).catch(()=>{})
+
       document.getElementById('neto-final').textContent = fmt(neto);
       document.getElementById('form-view').style.display = 'none';
       document.getElementById('success-screen').style.display = 'flex';
