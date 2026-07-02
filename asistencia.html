@@ -276,6 +276,12 @@ function showToast(msg) {
           datos: { tipo_registro: r.tipo, hora: r.hora, foto: null },
           ts: r.ts
         }).then().catch(() => {})
+
+        // Google Sheets
+        fetch('https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec', {
+          method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ tipo:'asistencia', row:[r.fecha, r.hora, r.nombre, r.tipo] })
+        }).catch(()=>{})
       }
     } catch(e) {}
   }

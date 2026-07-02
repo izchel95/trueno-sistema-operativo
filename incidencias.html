@@ -197,6 +197,14 @@ function guardar() {
     body: JSON.stringify({ chat_id: '8309237078', text: msg, parse_mode: 'Markdown' })
   }).catch(()=>{})
 
+  // Google Sheets
+  const _fecha = new Date().toLocaleDateString('es-MX')
+  const _hora  = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})
+  fetch('https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec', {
+    method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ tipo:'incidencia', row:[_fecha, _hora, tipo||'—', sev||'—', quien, desc, acc||''] })
+  }).catch(()=>{})
+
   // Reset form
   document.getElementById('descripcion').value = ''
   document.getElementById('accion').value = ''

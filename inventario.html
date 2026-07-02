@@ -208,8 +208,17 @@ function registrarEntrada() {
   if (!qty||qty<=0) { showToast('Ingresa una cantidad válida'); return }
   const ins = INSUMOS[idx]
   stock[idx] = (stock[idx]||0) + qty
-  historial.push({ nombre:ins[0], unit:ins[2], delta:qty, notas, fecha: new Date().toLocaleDateString('es-MX') })
+  const _fecha = new Date().toLocaleDateString('es-MX')
+  const _hora  = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})
+  historial.push({ nombre:ins[0], unit:ins[2], delta:qty, notas, fecha: _fecha })
   save()
+
+  // Google Sheets
+  fetch('https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec', {
+    method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ tipo:'inventario_entrada', row:[_fecha, _hora, ins[0], ins[1], qty, ins[2], notas||'', stock[idx]] })
+  }).catch(()=>{})
+
   document.getElementById('entrada-qty').value = ''
   document.getElementById('entrada-notas').value = ''
   showToast(`✓ +${qty} ${ins[2]} de ${ins[0]}`)

@@ -190,6 +190,7 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
       <div class="tab" onclick="setTab(2)">📋 Inventario</div>
       <div class="tab" onclick="setTab(3)">🕐 Asistencia</div>
       <div class="tab" onclick="setTab(4)">☕ Calibraciones</div>
+      <div class="tab" onclick="setTab(5)">📧 Reporte</div>
     </div>
   </header>
 
@@ -225,6 +226,16 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
   <div class="panel" id="panel-4">
     <div class="filter-row" id="calib-filter-row"></div>
     <div id="calib-content"><div class="empty">Cargando...</div></div>
+  </div>
+
+  <!-- REPORTE SEMANAL -->
+  <div class="panel" id="panel-5">
+    <div class="section-label" style="margin-top:4px">Período</div>
+    <div class="filter-row" id="rep-sem-filtros"></div>
+    <div id="rep-sem-preview" style="margin-top:4px"></div>
+    <button id="btn-email-report" onclick="enviarReporteSemanal()" style="width:100%;padding:16px;background:#f5c842;color:#0e0e0e;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;margin-top:16px">📧 Enviar reporte por email</button>
+    <div style="font-size:11px;color:#444;text-align:center;margin-top:8px">Se envía a izchelac@hotmail.com</div>
+    <div id="rep-sem-status" style="margin-top:10px"></div>
   </div>
 </div>
 
@@ -510,6 +521,7 @@ function setTab(i) {
   if (i===2) renderHistInv()
   if (i===3) renderAsistencia()
   if (i===4) renderCalibraciones()
+  if (i===5) renderReporteSemanal()
 }
 
 // ── Asistencia ──────────────────────────────────────────────────────────────
@@ -761,7 +773,134 @@ function initApp() {
   loadInv(); renderStock()
   buildAsistFiltros()
   buildCalibFiltros()
+  initRepSem()
 }
+
+// ── Reporte semanal ──────────────────────────────────────────────────────────
+const GAS = 'https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec'
+let repSemFiltro = 'semana'
+let _repSemData = null
+
+function buildRepSemFiltros() {
+  const opts = [['semana','Esta semana'],['mes','Este mes'],['anio','Este año']]
+  document.getElementById('rep-sem-filtros').innerHTML = opts.map(([f,l]) =>
+    `<button class="filter-btn${f===repSemFiltro?' active':''}" onclick="setRepSemFiltro('${f}',this)">${l}</button>`
+  ).join('')
+}
+
+function setRepSemFiltro(f, btn) {
+  repSemFiltro = f
+  document.querySelectorAll('#rep-sem-filtros .filter-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  renderReporteSemanal()
+}
+
+async function renderReporteSemanal() {
+  buildRepSemFiltros()
+  const el = document.getElementById('rep-sem-preview')
+  el.innerHTML = '<div class="empty">Cargando datos...</div>'
+
+  const ahora = new Date()
+  const desde = new Date()
+  if (repSemFiltro === 'semana') desde.setDate(ahora.getDate() - 7)
+  else if (repSemFiltro === 'mes') desde.setDate(1)
+  else if (repSemFiltro === 'anio') { desde.setMonth(0); desde.setDate(1) }
+  const desdeISO = desde.toISOString()
+
+  try {
+    const [rCortes, rCalib, rAsist, rIncid] = await Promise.all([
+      _sb.from('trueno_registros').select('encargada,datos,ts').eq('tipo','corte').gte('ts',desdeISO).order('ts',{ascending:false}),
+      _sb.from('calibraciones').select('encargada,gramaje,molienda,tiempo_extraccion,cantidad_extraida,ts').gte('ts',desdeISO).order('ts',{ascending:false}),
+      _sb.from('trueno_registros').select('encargada,datos,ts').eq('tipo','asistencia').gte('ts',desdeISO).order('ts',{ascending:false}),
+      Promise.resolve({ data: (() => { try { return JSON.parse(localStorage.getItem('tc_incidencias')||'[]').filter(i => new Date(i.ts) >= desde) } catch { return [] } })() })
+    ])
+
+    const cortes = rCortes.data || []
+    const calibs = rCalib.data || []
+    const asists = rAsist.data || []
+    const incids = rIncid.data || []
+
+    // Calcular totales de cortes
+    const netoTotal = cortes.reduce((s,c) => s + (c.datos?.neto||0), 0)
+    const ventasTotal = cortes.reduce((s,c) => s + (c.datos?.ventas||0), 0)
+
+    // Ventas consig localStorage
+    let consigVentas = []
+    try { consigVentas = JSON.parse(localStorage.getItem('tc_consig_ventas')||'[]').filter(v => v.ts && new Date(v.ts) >= desde) } catch {}
+    const consigTotal = consigVentas.reduce((s,v) => s+(v.precio_venta||0), 0)
+    const consigUt = consigVentas.reduce((s,v) => s+(v.utilidad||0), 0)
+
+    // Asistencia: horas por persona
+    const asistMap = {}
+    asists.forEach(r => {
+      const nom = r.encargada
+      if (!asistMap[nom]) asistMap[nom] = []
+      asistMap[nom].push({ tipo: r.datos?.tipo_registro, ts: r.ts })
+    })
+    const asistRows = Object.entries(asistMap).map(([nom, regs]) => {
+      const sorted = [...regs].sort((a,b)=>new Date(a.ts)-new Date(b.ts))
+      let hrs = 0, entrada = null
+      sorted.forEach(r => {
+        if (r.tipo==='entrada') entrada = r.ts
+        else if (r.tipo==='salida' && entrada) { hrs += (new Date(r.ts)-new Date(entrada))/3600000; entrada=null }
+      })
+      return `${nom}: ${Math.floor(hrs)}h ${Math.round((hrs%1)*60)}m`
+    }).join(' · ') || 'Sin registros'
+
+    const incidAltas = incids.filter(i=>i.sev==='Alta').length
+    const calibOk = calibs.filter(c => c.tiempo_extraccion>=25&&c.tiempo_extraccion<=32).length
+
+    _repSemData = { cortes, calibs, asists, incids, consigVentas, netoTotal, ventasTotal, consigTotal, consigUt, asistRows, incidAltas, calibOk, desde: desde.toLocaleDateString('es-MX'), hasta: ahora.toLocaleDateString('es-MX') }
+
+    el.innerHTML = `
+      <div class="report-kpi" style="margin-bottom:8px">
+        <div class="report-card"><div class="report-val">$${ventasTotal.toLocaleString('es-MX')}</div><div class="report-label">Ventas café (${cortes.length} cortes)</div></div>
+        <div class="report-card"><div class="report-val">$${netoTotal.toLocaleString('es-MX')}</div><div class="report-label">Neto café</div></div>
+        <div class="report-card"><div class="report-val">$${consigTotal.toLocaleString('es-MX')}</div><div class="report-label">Ventas consig. (${consigVentas.length})</div></div>
+        <div class="report-card"><div class="report-val">$${consigUt.toLocaleString('es-MX')}</div><div class="report-label">Utilidad consig.</div></div>
+      </div>
+      <div style="background:#141414;border:1px solid #1e1e1e;border-radius:12px;padding:12px;font-size:12px;color:#888;line-height:1.8">
+        ☕ Calibraciones: ${calibs.length} (${calibOk} en rango)<br>
+        🕐 Asistencia: ${asistRows}<br>
+        ⚠️ Incidencias: ${incids.length} total · ${incidAltas} alta${incidAltas!==1?'s':''}
+      </div>`
+  } catch(e) {
+    el.innerHTML = '<div class="empty">Error cargando datos — verifica conexión</div>'
+  }
+}
+
+async function enviarReporteSemanal() {
+  if (!_repSemData) { showToast('Carga primero el reporte'); return }
+  const btn = document.getElementById('btn-email-report')
+  btn.disabled = true; btn.textContent = 'Enviando...'
+  const status = document.getElementById('rep-sem-status')
+  try {
+    await fetch(GAS, {
+      method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        tipo: 'reporte_semanal_email',
+        email: 'izchelac@hotmail.com',
+        periodo: `${_repSemData.desde} – ${_repSemData.hasta}`,
+        ventas_cafe: _repSemData.ventasTotal,
+        neto_cafe: _repSemData.netoTotal,
+        cortes: _repSemData.cortes.length,
+        consig_ventas: _repSemData.consigTotal,
+        consig_utilidad: _repSemData.consigUt,
+        calibraciones: _repSemData.calibs.length,
+        calibraciones_ok: _repSemData.calibOk,
+        asistencia: _repSemData.asistRows,
+        incidencias: _repSemData.incids.length,
+        incidencias_altas: _repSemData.incidAltas
+      })
+    })
+    status.innerHTML = '<div style="background:#0a2a0a;border:1px solid #2d5a2d;color:#6fcf6f;border-radius:10px;padding:12px;font-size:13px;text-align:center">✓ Reporte enviado a izchelac@hotmail.com<br><span style="font-size:11px;color:#555;margin-top:4px;display:block">Necesitas activar el handler en Google Apps Script — ver instrucciones en el HANDOFF</span></div>'
+  } catch(e) {
+    status.innerHTML = '<div class="empty">Error al enviar</div>'
+  }
+  btn.disabled = false; btn.textContent = '📧 Enviar reporte por email'
+}
+
+function initRepSem() { buildRepSemFiltros() }
 
 // ── Calibraciones ────────────────────────────────────────────────────────────
 let calibFiltro = 'semana'

@@ -1375,6 +1375,22 @@ async function registrarCarrito() {
     : formaPago==='tarjeta' ? `💳 Tarjeta: $${totalVenta.toLocaleString('es-MX')}`
     : `💵 Efectivo: $${pagoEfec.toLocaleString('es-MX')} · 💳 Tarjeta: $${pagoTarjeta.toLocaleString('es-MX')}`
   tg(`💸 <b>${totalPzas} venta${totalPzas!==1?'s':''} registrada${totalPzas!==1?'s':''}</b>\n${resumen.map(r=>`• ${r}`).join('\n')}\n💰 Total: $${totalVenta.toLocaleString('es-MX')}\n${pagoLinea}\n👤 ${vendedor}\n📅 ${now.toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
+
+  // Google Sheets — una fila por carrito
+  fetch('https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec', {
+    method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ tipo:'consig_venta', row:[
+      fecha,
+      now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
+      vendedor,
+      resumen.join(' | '),
+      totalPzas,
+      totalVenta,
+      cart.reduce((s,e)=>s+(e.p.ut||0)*e.qty,0),
+      formaPago
+    ]})
+  }).catch(()=>{})
+
   cart=[]; vendedor=''; formaPago=null; pagoEfectivo=0
   document.querySelectorAll('#panel-vender .enc-btn').forEach(b=>b.classList.remove('active'))
   document.getElementById('venta-search').value=''
