@@ -470,12 +470,16 @@
 
     document.getElementById('rev-cards').innerHTML = cards;
     document.getElementById('form-view').style.display = 'none';
-    document.getElementById('review-screen').style.display = 'flex';
+    const rs = document.getElementById('review-screen');
+    rs.style.display = 'flex';
+    rs.style.flexDirection = 'column';
+    window.scrollTo(0, 0);
   }
 
   function volverARevisar() {
     document.getElementById('review-screen').style.display = 'none';
     document.getElementById('form-view').style.display = 'block';
+    window.scrollTo(0, 0);
   }
 
   async function enviar() {
