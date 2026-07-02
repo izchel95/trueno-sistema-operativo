@@ -506,8 +506,8 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
     <!-- Top productos -->
     <div class="section-label">🏆 Top productos</div>
     <div id="rep-top-prods"></div>
-    <!-- Mejor vendedor -->
-    <div class="section-label">👤 Mejor vendedor</div>
+    <!-- Por colaborador -->
+    <div class="section-label">👥 Ventas por colaborador</div>
     <div id="rep-mejor-vendedor"></div>
     <!-- Ventas list -->
     <div class="section-label">Ventas del período</div>
@@ -1603,14 +1603,27 @@ function renderReporte() {
       +`</tbody></table></div>`
   }
 
-  // Mejor vendedor
+  // Por colaborador — tabla completa
   const vendMap={}
-  vs.forEach(v=>{ if(!vendMap[v.vendedor]) vendMap[v.vendedor]={cnt:0,rev:0}; vendMap[v.vendedor].cnt++; vendMap[v.vendedor].rev+=v.precio_venta })
-  const vends=Object.entries(vendMap).sort((a,b)=>b[1].cnt-a[1].cnt)
+  vs.forEach(v=>{
+    const nom=v.vendedor||'—'
+    if(!vendMap[nom]) vendMap[nom]={cnt:0,rev:0,ut:0}
+    vendMap[nom].cnt++; vendMap[nom].rev+=v.precio_venta; vendMap[nom].ut+=(v.utilidad||0)
+  })
+  const vends=Object.entries(vendMap).sort((a,b)=>b[1].rev-a[1].rev)
   const mvEl=document.getElementById('rep-mejor-vendedor')
   if(!vends.length){ mvEl.innerHTML='<div class="empty" style="padding:10px">Sin datos</div>' }
   else {
-    mvEl.innerHTML=vends.map((([nom,d],i)=>`<div class="comp-card">${i===0?'🏆':'👤'} <div style="flex:1;margin-left:8px"><div class="comp-val">${nom}</div><div class="comp-label">${d.cnt} pieza${d.cnt!==1?'s':''} · $${d.rev.toLocaleString('es-MX')}</div></div></div>`)).join('')
+    const medals=['🥇','🥈','🥉','4️⃣','5️⃣']
+    mvEl.innerHTML=`<div class="section-box" style="padding:10px"><table class="top-table">
+      <thead><tr><th></th><th>Colaborador</th><th class="top-cnt">Pzas</th><th class="top-rev">Total</th><th class="top-rev" style="color:#6fcf6f">Trueno</th></tr></thead>
+      <tbody>`+vends.map(([nom,d],i)=>`<tr>
+        <td class="top-rank">${medals[i]||'·'}</td>
+        <td><div class="top-name">${nom}</div></td>
+        <td class="top-cnt">${d.cnt}</td>
+        <td class="top-rev">$${d.rev.toLocaleString('es-MX')}</td>
+        <td class="top-rev" style="color:#6fcf6f">$${d.ut.toLocaleString('es-MX')}</td>
+      </tr>`).join('')+`</tbody></table></div>`
   }
 
   // Lista ventas

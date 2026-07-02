@@ -215,6 +215,7 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
 
   <!-- ASISTENCIA -->
   <div class="panel" id="panel-3">
+    <div class="filter-row" id="asist-persona-row" style="margin-bottom:8px"></div>
     <div class="filter-row" id="asist-filter-row"></div>
     <div class="report-kpi" id="asist-kpi"></div>
     <div id="asist-content"></div>
@@ -513,15 +514,27 @@ function setTab(i) {
 
 // ── Asistencia ──────────────────────────────────────────────────────────────
 let asistFiltro = 'dia'
+let asistPersona = 'todos'
 
-const TURNO_MAÑANA_CORTE = 14 * 60 + 30  // 14:30 en minutos
-const TURNO_TARDE_CORTE  = 22 * 60 + 20  // 22:20 en minutos
+const TURNO_MAÑANA_CORTE = 14 * 60 + 30
+const TURNO_TARDE_CORTE  = 22 * 60 + 20
 
 function buildAsistFiltros() {
-  const opciones = [['dia','Hoy'],['semana','7 días'],['mes','Este mes'],['anio','Este año']]
-  document.getElementById('asist-filter-row').innerHTML = opciones.map(([f,l]) =>
+  const personas = [['todos','Todos'], ['Melanie','Melanie'], ['Daniela','Daniela'], ['Daniel','Daniel'], ['Izchel','Izchel']]
+  document.getElementById('asist-persona-row').innerHTML = personas.map(([v,l]) =>
+    `<button class="filter-btn${v==='todos'?' active':''}" onclick="setAsistPersona('${v}',this)">${l}</button>`
+  ).join('')
+  const fechas = [['dia','Hoy'],['semana','7 días'],['mes','Este mes'],['anio','Este año']]
+  document.getElementById('asist-filter-row').innerHTML = fechas.map(([f,l]) =>
     `<button class="filter-btn${f==='dia'?' active':''}" onclick="setAsistFiltro('${f}',this)">${l}</button>`
   ).join('')
+}
+
+function setAsistPersona(p, btn) {
+  asistPersona = p
+  document.querySelectorAll('#asist-persona-row .filter-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  renderAsistencia()
 }
 
 function setAsistFiltro(f, btn) {
@@ -608,36 +621,54 @@ async function renderAsistencia() {
   } catch {
     try { todos = JSON.parse(localStorage.getItem('tc_asistencia') || '[]') } catch {}
   }
-  const filtrados = filtrarAsist(todos)
+  // Filtrar por período y por persona seleccionada
+  const filtradosFecha = filtrarAsist(todos)
+  const filtrados = asistPersona === 'todos'
+    ? filtradosFecha
+    : filtradosFecha.filter(r => r.nombre === asistPersona)
 
-  // KPIs globales
-  const personas = [...new Set(todos.map(r => r.nombre))]
+  // KPIs: calcular sobre todos (período completo, sin filtro de persona) para mostrar resumen global
+  const todosEnPeriodo = filtradosFecha
+  const porPersonaGlobal = {}
+  todosEnPeriodo.forEach(r => {
+    if (!porPersonaGlobal[r.nombre]) porPersonaGlobal[r.nombre] = []
+    porPersonaGlobal[r.nombre].push(r)
+  })
   let totalHrsGlobal = 0
   const hrsXPersona = {}
-  personas.forEach(p => { hrsXPersona[p] = 0 })
+  Object.entries(porPersonaGlobal).forEach(([nombre, regs]) => {
+    hrsXPersona[nombre] = 0
+    paresTurno(regs).forEach(p => {
+      if (p.salida) {
+        const h = calcHoras(p.entrada.ts, p.salida.ts)
+        if (h) { totalHrsGlobal += h.total; hrsXPersona[nombre] += h.total }
+      }
+    })
+  })
 
-  // Agrupar por persona → calcular horas
+  // Agrupar registros visibles por persona
   const porPersona = {}
   filtrados.forEach(r => {
     if (!porPersona[r.nombre]) porPersona[r.nombre] = []
     porPersona[r.nombre].push(r)
   })
 
-  Object.entries(porPersona).forEach(([nombre, regs]) => {
-    const pares = paresTurno(regs)
-    pares.forEach(p => {
-      if (p.salida) {
-        const h = calcHoras(p.entrada.ts, p.salida.ts)
-        if (h) { totalHrsGlobal += h.total; hrsXPersona[nombre] = (hrsXPersona[nombre] || 0) + h.total }
-      }
-    })
-  })
-
-  const totalPersonasActivas = Object.keys(porPersona).length
-  document.getElementById('asist-kpi').innerHTML = `
-    <div class="report-card"><div class="report-val">${totalPersonasActivas}</div><div class="report-label">Personas en periodo</div></div>
-    <div class="report-card"><div class="report-val">${Math.floor(totalHrsGlobal)}h ${Math.round((totalHrsGlobal % 1)*60)}m</div><div class="report-label">Horas trabajadas totales</div></div>
-  `
+  // KPI: si hay persona seleccionada muestra sus horas; si es todos muestra resumen
+  const kpiEl = document.getElementById('asist-kpi')
+  if (asistPersona !== 'todos') {
+    const hrs = hrsXPersona[asistPersona] || 0
+    const turnos = paresTurno(filtrados).length
+    kpiEl.innerHTML = `
+      <div class="report-card"><div class="report-val">${turnos}</div><div class="report-label">Turnos en período</div></div>
+      <div class="report-card"><div class="report-val">${Math.floor(hrs)}h ${Math.round((hrs%1)*60)}m</div><div class="report-label">Horas trabajadas</div></div>
+    `
+  } else {
+    const totalPersonasActivas = Object.keys(porPersonaGlobal).length
+    kpiEl.innerHTML = `
+      <div class="report-card"><div class="report-val">${totalPersonasActivas}</div><div class="report-label">Personas en período</div></div>
+      <div class="report-card"><div class="report-val">${Math.floor(totalHrsGlobal)}h ${Math.round((totalHrsGlobal%1)*60)}m</div><div class="report-label">Horas totales</div></div>
+    `
+  }
 
   const el = document.getElementById('asist-content')
   if (!Object.keys(porPersona).length) {
