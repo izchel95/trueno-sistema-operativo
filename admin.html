@@ -138,6 +138,23 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
 .t-horas.sin { color: #cf6f6f; }
 .turno-tag { font-size: 10px; color: #444; margin-top: 4px; }
 .asist-empty { text-align: center; color: #444; padding: 40px 20px; font-size: 14px; }
+
+/* ── Calibraciones ── */
+.calib-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 13px; margin-bottom: 8px; }
+.calib-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.calib-quien { font-size: 13px; font-weight: 700; }
+.calib-ts { font-size: 11px; color: #555; margin-top: 2px; }
+.calib-result { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.calib-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+.cb-ok { background: #0a2a0a; color: #6fcf6f; }
+.cb-warn { background: #2a1a00; color: #f5c842; }
+.calib-params { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+.cp { background: #0e0e0e; border-radius: 8px; padding: 7px 10px; text-align: center; }
+.cp-val { font-size: 15px; font-weight: 800; color: #f0ede8; }
+.cp-label { font-size: 10px; color: #555; margin-top: 2px; }
+.calib-notas { font-size: 12px; color: #666; margin-top: 8px; font-style: italic; }
+.calib-persona-section { margin-bottom: 20px; }
+.calib-persona-header { font-size: 13px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 0 6px; border-bottom: 1px solid #1a1a1a; margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -172,6 +189,7 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
       <div class="tab" onclick="setTab(1)">🎵 Consig.</div>
       <div class="tab" onclick="setTab(2)">📋 Inventario</div>
       <div class="tab" onclick="setTab(3)">🕐 Asistencia</div>
+      <div class="tab" onclick="setTab(4)">☕ Calibraciones</div>
     </div>
   </header>
 
@@ -200,6 +218,12 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
     <div class="filter-row" id="asist-filter-row"></div>
     <div class="report-kpi" id="asist-kpi"></div>
     <div id="asist-content"></div>
+  </div>
+
+  <!-- CALIBRACIONES -->
+  <div class="panel" id="panel-4">
+    <div class="filter-row" id="calib-filter-row"></div>
+    <div id="calib-content"><div class="empty">Cargando...</div></div>
   </div>
 </div>
 
@@ -484,6 +508,7 @@ function setTab(i) {
   if (i===1) renderConsigPreview()
   if (i===2) renderHistInv()
   if (i===3) renderAsistencia()
+  if (i===4) renderCalibraciones()
 }
 
 // ── Asistencia ──────────────────────────────────────────────────────────────
@@ -560,9 +585,29 @@ function paresTurno(registros) {
   return pares
 }
 
-function renderAsistencia() {
+async function renderAsistencia() {
+  // Intentar leer de Supabase primero; si falla usar localStorage
   let todos = []
-  try { todos = JSON.parse(localStorage.getItem('tc_asistencia') || '[]') } catch {}
+  try {
+    const { data, error } = await _sb.from('trueno_registros')
+      .select('encargada,datos,ts')
+      .eq('tipo', 'asistencia')
+      .order('ts', { ascending: false })
+      .limit(500)
+    if (!error && data && data.length) {
+      todos = data.map(r => ({
+        nombre: r.encargada,
+        tipo: r.datos?.tipo_registro || 'entrada',
+        hora: r.datos?.hora || new Date(r.ts).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
+        fecha: new Date(r.ts).toLocaleDateString('es-MX'),
+        ts: r.ts
+      }))
+    } else {
+      throw new Error('fallback')
+    }
+  } catch {
+    try { todos = JSON.parse(localStorage.getItem('tc_asistencia') || '[]') } catch {}
+  }
   const filtrados = filtrarAsist(todos)
 
   // KPIs globales
@@ -683,9 +728,106 @@ function renderConsigPreview() {
 
 function initApp() {
   loadInv(); renderStock()
-  loadVentas(); buildFiltroRow()
   buildAsistFiltros()
+  buildCalibFiltros()
 }
+
+// ── Calibraciones ────────────────────────────────────────────────────────────
+let calibFiltro = 'semana'
+
+function buildCalibFiltros() {
+  const opciones = [['dia','Hoy'],['semana','7 días'],['mes','Este mes'],['anio','Este año']]
+  document.getElementById('calib-filter-row').innerHTML = opciones.map(([f,l]) =>
+    `<button class="filter-btn${f===calibFiltro?' active':''}" onclick="setCalibFiltro('${f}',this)">${l}</button>`
+  ).join('')
+}
+
+function setCalibFiltro(f, btn) {
+  calibFiltro = f
+  document.querySelectorAll('#calib-filter-row .filter-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  renderCalibraciones()
+}
+
+async function renderCalibraciones() {
+  const el = document.getElementById('calib-content')
+  el.innerHTML = '<div class="empty">Cargando...</div>'
+  let registros = []
+  try {
+    const { data, error } = await _sb.from('calibraciones')
+      .select('encargada,fecha,hora,gramaje,molienda,tiempo_extraccion,cantidad_extraida,temp_ambiente,temp_agua,notas,ts')
+      .order('ts', { ascending: false })
+      .limit(200)
+    if (!error && data) registros = data
+  } catch {}
+
+  // Filtrar por período
+  const ahora = new Date()
+  registros = registros.filter(r => {
+    if (!r.ts) return false
+    const f = new Date(r.ts)
+    if (calibFiltro === 'dia') return f.toDateString() === ahora.toDateString()
+    if (calibFiltro === 'semana') return (ahora - f) / 86400000 <= 7
+    if (calibFiltro === 'mes') return f.getMonth()===ahora.getMonth() && f.getFullYear()===ahora.getFullYear()
+    if (calibFiltro === 'anio') return f.getFullYear()===ahora.getFullYear()
+    return true
+  })
+
+  if (!registros.length) {
+    el.innerHTML = '<div class="empty">Sin calibraciones en este período</div>'
+    return
+  }
+
+  // Agrupar por persona
+  const porPersona = {}
+  registros.forEach(r => {
+    const n = r.encargada || 'Sin nombre'
+    if (!porPersona[n]) porPersona[n] = []
+    porPersona[n].push(r)
+  })
+
+  let html = ''
+  const orden = ['Melanie','Daniela','Daniel','Izchel']
+  const nombres = [...orden.filter(n=>porPersona[n]), ...Object.keys(porPersona).filter(n=>!orden.includes(n))]
+
+  nombres.forEach(nombre => {
+    const regs = porPersona[nombre]
+    html += `<div class="calib-persona-section"><div class="calib-persona-header">${nombre} · ${regs.length} calibración${regs.length!==1?'es':''}</div>`
+    regs.forEach(r => {
+      const ratio = r.cantidad_extraida && r.gramaje ? (r.cantidad_extraida / r.gramaje).toFixed(2) : null
+      const tiempoOk = r.tiempo_extraccion >= 25 && r.tiempo_extraccion <= 32
+      const ratioOk = ratio && ratio >= 1.8 && ratio <= 2.2
+      html += `<div class="calib-card">
+        <div class="calib-head">
+          <div>
+            <div class="calib-quien">${r.fecha || '—'} · ${r.hora || '—'}</div>
+            ${r.temp_ambiente ? `<div class="calib-ts">${r.temp_ambiente}°C ambiente</div>` : ''}
+          </div>
+          <div class="calib-result">
+            <span class="calib-badge ${tiempoOk?'cb-ok':'cb-warn'}">${tiempoOk?'✅':'⚠️'} ${r.tiempo_extraccion}s</span>
+            ${ratio ? `<span class="calib-badge ${ratioOk?'cb-ok':'cb-warn'}">${ratioOk?'✅':'⚠️'} 1:${ratio}</span>` : ''}
+          </div>
+        </div>
+        <div class="calib-params">
+          <div class="cp"><div class="cp-val">${r.gramaje ?? '—'}g</div><div class="cp-label">Gramaje</div></div>
+          <div class="cp"><div class="cp-val">${r.molienda ?? '—'}</div><div class="cp-label">Molienda</div></div>
+          <div class="cp"><div class="cp-val">${r.cantidad_extraida ?? '—'}ml</div><div class="cp-label">Yield</div></div>
+        </div>
+        ${r.notas ? `<div class="calib-notas">"${r.notas}"</div>` : ''}
+      </div>`
+    })
+    html += '</div>'
+  })
+  el.innerHTML = html
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const { createClient: _createClient } = supabase
+const _sb = _createClient(
+  'https://axxbsjbywivolwluzvrd.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+)
 </script>
 </body>
 </html>

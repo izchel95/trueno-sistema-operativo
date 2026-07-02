@@ -252,5 +252,34 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000)
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+;(function(){
+  const { createClient } = supabase
+  const _sb = createClient(
+    'https://axxbsjbywivolwluzvrd.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+  )
+  // Patch registrar to also push to Supabase after localStorage save
+  const _origRegistrar = registrar
+  window.registrar = function() {
+    _origRegistrar()
+    // Read the record that was just saved (first item in localStorage)
+    try {
+      const hist = JSON.parse(localStorage.getItem('tc_asistencia') || '[]')
+      const r = hist[0]
+      if (r) {
+        _sb.from('trueno_registros').insert({
+          tipo: 'asistencia',
+          encargada: r.nombre,
+          fecha: r.fecha,
+          datos: { tipo_registro: r.tipo, hora: r.hora, foto: null },
+          ts: r.ts
+        }).then().catch(() => {})
+      }
+    } catch(e) {}
+  }
+})()
+</script>
 </body>
 </html>
