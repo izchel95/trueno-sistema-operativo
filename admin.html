@@ -139,6 +139,45 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
 .turno-tag { font-size: 10px; color: #444; margin-top: 4px; }
 .asist-empty { text-align: center; color: #444; padding: 40px 20px; font-size: 14px; }
 
+/* ── Costos de recetas ── */
+.costos-subtabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.costos-stab { flex: 1; padding: 9px 6px; background: #141414; border: 1px solid #1e1e1e; border-radius: 10px; font-size: 12px; font-weight: 600; color: #555; text-align: center; cursor: pointer; }
+.costos-stab.active { background: #1a1600; border-color: #f5c842; color: #f5c842; }
+.costos-pane { display: none; }
+.costos-pane.active { display: block; }
+.costos-sort-row { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.costos-sort-row::-webkit-scrollbar { display: none; }
+.csort-chip { padding: 6px 12px; background: #141414; border: 1px solid #1e1e1e; border-radius: 20px; font-size: 12px; color: #555; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.csort-chip.active { background: #1a1600; border-color: #f5c842; color: #f5c842; }
+.drink-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 8px; cursor: pointer; }
+.drink-header { display: flex; align-items: center; gap: 10px; }
+.drink-name-lbl { flex: 1; font-size: 14px; font-weight: 700; }
+.margin-badge { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; flex-shrink: 0; }
+.mg-great { background: #0d1a0d; color: #6fcf6f; }
+.mg-ok    { background: #1a1600; color: #f5c842; }
+.mg-low   { background: #1a0808; color: #cf6f6f; }
+.drink-sub { display: flex; gap: 14px; margin-top: 6px; flex-wrap: wrap; }
+.drink-sub span { font-size: 12px; color: #555; }
+.drink-sub .dval { font-size: 13px; font-weight: 700; color: #f0ede8; }
+.drink-detail { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #1e1e1e; }
+.drink-detail.open { display: block; }
+.ddetail-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid #111; color: #666; }
+.ddetail-row:last-child { border: none; }
+.ddetail-val { font-weight: 600; color: #f0ede8; }
+.dtotal-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; padding-top: 8px; margin-top: 4px; }
+.margin-bar-wrap { background: #1a1a1a; border-radius: 4px; height: 5px; margin-top: 8px; overflow: hidden; }
+.margin-bar-fill { height: 100%; border-radius: 4px; }
+.costo-row { background: #141414; border: 1px solid #1e1e1e; border-radius: 10px; padding: 10px 12px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+.costo-name { flex: 1; font-size: 13px; }
+.costo-unit-lbl { font-size: 11px; color: #444; margin-top: 2px; }
+.costo-input { width: 90px; background: #0e0e0e; border: 1px solid #2a2a2a; border-radius: 8px; color: #f5c842; font-size: 14px; font-weight: 700; padding: 8px 10px; text-align: right; outline: none; font-family: inherit; }
+.costo-input:focus { border-color: #f5c842; }
+.costos-sum-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.inv-impacto { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+.imp-nombre { flex: 1; font-size: 13px; font-weight: 600; }
+.imp-fecha { font-size: 11px; color: #555; margin-top: 2px; }
+.imp-delta { font-size: 13px; font-weight: 700; flex-shrink: 0; }
+
 /* ── Calibraciones ── */
 .calib-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 13px; margin-bottom: 8px; }
 .calib-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
@@ -191,6 +230,7 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
       <div class="tab" onclick="setTab(3)">🕐 Asistencia</div>
       <div class="tab" onclick="setTab(4)">☕ Calibraciones</div>
       <div class="tab" onclick="setTab(5)">📧 Reporte</div>
+      <div class="tab" onclick="setTab(6)">📊 Costos</div>
     </div>
   </header>
 
@@ -226,6 +266,35 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
   <div class="panel" id="panel-4">
     <div class="filter-row" id="calib-filter-row"></div>
     <div id="calib-content"><div class="empty">Cargando...</div></div>
+  </div>
+
+  <!-- COSTOS DE RECETAS -->
+  <div class="panel" id="panel-6">
+    <div class="costos-subtabs">
+      <div class="costos-stab active" onclick="setCostosTab('menu',this)">📋 Menú</div>
+      <div class="costos-stab" onclick="setCostosTab('impacto',this)">📦 Últimas compras</div>
+      <div class="costos-stab" onclick="setCostosTab('editor',this)">✏️ Precios</div>
+    </div>
+    <div class="costos-pane active" id="cpane-menu">
+      <div class="costos-sum-grid" id="costos-summary"></div>
+      <div class="costos-sort-row">
+        <div class="csort-chip active" onclick="setCostosSort('cat',this)">Categoría</div>
+        <div class="csort-chip" onclick="setCostosSort('margen',this)">Mayor margen</div>
+        <div class="csort-chip" onclick="setCostosSort('costo',this)">Menor costo</div>
+        <div class="csort-chip" onclick="setCostosSort('bajo',this)">Margen bajo ⚠️</div>
+      </div>
+      <div id="drinks-list"></div>
+    </div>
+    <div class="costos-pane" id="cpane-impacto">
+      <div style="font-size:11px;color:#555;text-align:center;margin-bottom:12px">Impacto de las últimas entradas de inventario en el costo de recetas</div>
+      <div id="impacto-list"></div>
+    </div>
+    <div class="costos-pane" id="cpane-editor">
+      <div style="font-size:12px;color:#555;margin-bottom:12px">Edita el precio que pagas por cada insumo. Los márgenes se recalculan automáticamente.</div>
+      <div id="costos-editor-admin"></div>
+      <button onclick="saveCostosAdmin()" style="width:100%;padding:14px;background:#f5c842;color:#0e0e0e;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;margin-top:12px">💾 Guardar precios</button>
+      <button onclick="resetCostosAdmin()" style="width:100%;padding:11px;background:transparent;border:1px solid #2a2a2a;color:#555;border-radius:12px;font-size:13px;cursor:pointer;margin-top:8px">Restaurar valores por defecto</button>
+    </div>
   </div>
 
   <!-- REPORTE SEMANAL -->
@@ -522,6 +591,7 @@ function setTab(i) {
   if (i===3) renderAsistencia()
   if (i===4) renderCalibraciones()
   if (i===5) renderReporteSemanal()
+  if (i===6) renderCostosMenu()
 }
 
 // ── Asistencia ──────────────────────────────────────────────────────────────
@@ -901,6 +971,241 @@ async function enviarReporteSemanal() {
 }
 
 function initRepSem() { buildRepSemFiltros() }
+
+// ── Costos de recetas ─────────────────────────────────────────────────────────
+const K_COSTS = 'tc_costos_insumos'
+
+const INGREDIENTES_C = [
+  ['cafe',      'Café en grano',      'kg',   400],
+  ['leche',     'Leche entera',       'L',    28],
+  ['avena',     'Leche de avena',     'L',    65],
+  ['almendra',  'Leche de almendras', 'L',    70],
+  ['soya',      'Leche de soya',      'L',    45],
+  ['crema',     'Crema para batir',   'L',    55],
+  ['vainilla',  'Jarabe de vainilla', 'bot',  200],
+  ['caramelo',  'Jarabe de caramelo', 'bot',  180],
+  ['fresa',     'Jarabe de fresa',    'bot',  180],
+  ['blueberry', 'Jarabe blueberry',   'bot',  180],
+  ['cacao',     'Cacao en polvo',     'kg',   220],
+  ['canela',    'Canela',             'kg',   130],
+  ['datiles',   'Dátiles',            'kg',   180],
+  ['azucar',    'Azúcar',             'kg',   25],
+  ['vaso12',    'Vaso cartón 12oz',   'pza',  5],
+  ['vaso10',    'Vaso cartón 10oz',   'pza',  4.5],
+  ['vaso8',     'Vaso cartón 8oz',    'pza',  4],
+  ['vaso4',     'Vaso cartón 4oz',    'pza',  3.5],
+  ['cristal',   'Vaso cristal',       'pza',  6],
+  ['tapa',      'Tapadera',           'pza',  4],
+  ['manga',     'Manga/sleeve',       'pza',  1.5],
+  ['popote',    'Popote',             'pza',  1.5],
+]
+
+// Mapa: nombre de insumo en INSUMOS (inventario) → id en INGREDIENTES_C
+const INV_TO_COST_ID = {
+  'Café en grano': 'cafe', 'Leche entera': 'leche', 'Leche de avena': 'avena',
+  'Leche de almendras': 'almendra', 'Leche de soya': 'soya', 'Crema para batir': 'crema',
+  'Jarabe de vainilla': 'vainilla', 'Jarabe de caramelo': 'caramelo',
+  'Jarabe de fresa': 'fresa', 'Jarabe de blueberry': 'blueberry',
+  'Cacao en polvo': 'cacao', 'Canela': 'canela', 'Dátiles': 'datiles',
+  'Azúcar': 'azucar', 'Vasos cartón 12 oz': 'vaso12', 'Vasos cartón 10 oz': 'vaso10',
+  'Vasos cartón 8 oz': 'vaso8', 'Vasos cartón 4 oz': 'vaso4',
+  'Vasos cristal 12 oz': 'cristal', 'Tapaderas': 'tapa',
+  'Mangas/Sleeves': 'manga', 'Popotes': 'popote',
+}
+
+const RECETAS_C = [
+  ['Espresso',        'Café ☕',          60,  [['cafe',0.018,'18g'],['vaso4',1,'vaso']]],
+  ['Americano',       'Café ☕',          70,  [['cafe',0.018,'18g'],['vaso12',1,'vaso'],['tapa',1,'tapa']]],
+  ['Latte',           'Café ☕',          85,  [['cafe',0.018,'18g'],['leche',0.22,'220ml'],['vaso12',1,'vaso'],['tapa',1,'tapa'],['manga',1,'manga']]],
+  ['Cappuccino',      'Café ☕',          80,  [['cafe',0.018,'18g'],['leche',0.12,'120ml'],['vaso12',1,'vaso'],['tapa',1,'tapa'],['manga',1,'manga']]],
+  ['Mocha',           'Café ☕',          95,  [['cafe',0.018,'18g'],['leche',0.20,'200ml'],['cacao',0.008,'8g'],['vaso12',1,'vaso'],['tapa',1,'tapa'],['manga',1,'manga']]],
+  ['Cortado',         'Café ☕',          65,  [['cafe',0.018,'18g'],['leche',0.06,'60ml'],['vaso8',1,'vaso']]],
+  ['Macchiato',       'Café ☕',          70,  [['cafe',0.018,'18g'],['leche',0.04,'40ml'],['vaso8',1,'vaso']]],
+  ['Date Latte',      'Signature 🌟',    120,  [['cafe',0.018,'18g'],['leche',0.18,'180ml'],['datiles',0.025,'25g'],['vainilla',0.02,'15ml'],['canela',0.002,'2g'],['vaso12',1,'vaso'],['tapa',1,'tapa'],['manga',1,'manga']]],
+  ['Date Latte Frío', 'Signature 🌟',    125,  [['cafe',0.018,'18g'],['leche',0.18,'180ml'],['datiles',0.025,'25g'],['vainilla',0.02,'15ml'],['canela',0.002,'2g'],['cristal',1,'vaso'],['popote',1,'popote']]],
+  ['Latte Avena',     'Alternativas 🌿',  95,  [['cafe',0.018,'18g'],['avena',0.22,'220ml'],['vaso12',1,'vaso'],['tapa',1,'tapa'],['manga',1,'manga']]],
+  ['Latte Almendra',  'Alternativas 🌿',  98,  [['cafe',0.018,'18g'],['almendra',0.22,'220ml'],['vaso12',1,'vaso'],['tapa',1,'tapa'],['manga',1,'manga']]],
+  ['Latte Soya',      'Alternativas 🌿',  90,  [['cafe',0.018,'18g'],['soya',0.22,'220ml'],['vaso12',1,'vaso'],['tapa',1,'tapa'],['manga',1,'manga']]],
+  ['Cold Brew',       'Frías 🧊',         85,  [['cafe',0.040,'40g'],['cristal',1,'vaso'],['popote',1,'popote']]],
+  ['Latte Frío',      'Frías 🧊',         90,  [['cafe',0.018,'18g'],['leche',0.22,'220ml'],['cristal',1,'vaso'],['popote',1,'popote']]],
+  ['Mocha Frío',      'Frías 🧊',        100,  [['cafe',0.018,'18g'],['leche',0.20,'200ml'],['cacao',0.008,'8g'],['cristal',1,'vaso'],['popote',1,'popote']]],
+  ['Frappe Caramelo', 'Frappes 🥤',      105,  [['cafe',0.018,'18g'],['leche',0.15,'150ml'],['caramelo',0.04,'30ml'],['crema',0.04,'40ml'],['cristal',1,'vaso'],['popote',1,'popote']]],
+  ['Frappe Mocha',    'Frappes 🥤',      105,  [['cafe',0.018,'18g'],['leche',0.15,'150ml'],['cacao',0.012,'12g'],['crema',0.04,'40ml'],['cristal',1,'vaso'],['popote',1,'popote']]],
+  ['Frappe Vainilla', 'Frappes 🥤',      100,  [['cafe',0.018,'18g'],['leche',0.15,'150ml'],['vainilla',0.04,'30ml'],['crema',0.04,'40ml'],['cristal',1,'vaso'],['popote',1,'popote']]],
+  ['Frappe Fresa',    'Frappes 🥤',      100,  [['cafe',0.018,'18g'],['leche',0.15,'150ml'],['fresa',0.04,'30ml'],['crema',0.04,'40ml'],['cristal',1,'vaso'],['popote',1,'popote']]],
+  ['Té chai',         'Tisanas 🍵',       75,  [['vainilla',0.013,'10ml'],['leche',0.12,'120ml'],['vaso12',1,'vaso'],['tapa',1,'tapa'],['manga',1,'manga']]],
+  ['Matcha Latte',    'Tisanas 🍵',       90,  [['leche',0.22,'220ml'],['vaso12',1,'vaso'],['tapa',1,'tapa'],['manga',1,'manga']]],
+]
+
+let costosSortMode = 'cat'
+let costosActiveTab = 'menu'
+
+function getCostosAdmin() {
+  const stored = (() => { try { return JSON.parse(localStorage.getItem(K_COSTS)||'{}') } catch { return {} } })()
+  const costs = {}
+  INGREDIENTES_C.forEach(([id,,,def]) => { costs[id] = stored[id] !== undefined ? Number(stored[id]) : def })
+  return costs
+}
+
+function calcCostoReceta(ings, costs) {
+  return ings.reduce((s, [id, qty]) => s + (costs[id]||0) * qty, 0)
+}
+
+function setCostosTab(tab, el) {
+  costosActiveTab = tab
+  document.querySelectorAll('.costos-stab').forEach(b => b.classList.remove('active'))
+  el.classList.add('active')
+  document.querySelectorAll('.costos-pane').forEach(p => p.classList.remove('active'))
+  document.getElementById('cpane-' + tab).classList.add('active')
+  if (tab === 'menu') renderCostosMenu()
+  if (tab === 'impacto') renderImpactoCompras()
+  if (tab === 'editor') renderCostosEditorAdmin()
+}
+
+function setCostosSort(mode, el) {
+  costosSortMode = mode
+  document.querySelectorAll('.csort-chip').forEach(c => c.classList.remove('active'))
+  el.classList.add('active')
+  renderCostosMenu()
+}
+
+function renderCostosMenu() {
+  const costs = getCostosAdmin()
+  const data = RECETAS_C.map(([nombre, cat, pv, ings]) => {
+    const costo = calcCostoReceta(ings, costs)
+    const margen = pv - costo
+    const pct = (margen / pv) * 100
+    return { nombre, cat, pv, costo, margen, pct, ings }
+  })
+
+  const avgPct = data.reduce((s,d) => s + d.pct, 0) / data.length
+  const best  = [...data].sort((a,b) => b.pct - a.pct)[0]
+  const worst = [...data].sort((a,b) => a.pct - b.pct)[0]
+  document.getElementById('costos-summary').innerHTML = `
+    <div class="kpi-card"><div class="kpi-val" style="color:#6fcf6f">${avgPct.toFixed(0)}%</div><div class="kpi-label">Margen promedio</div></div>
+    <div class="kpi-card"><div class="kpi-val" style="color:#f5c842;font-size:15px">${best.nombre}</div><div class="kpi-label">Mayor margen ${best.pct.toFixed(0)}%</div></div>
+    <div class="kpi-card"><div class="kpi-val" style="color:#cf6f6f;font-size:15px">${worst.nombre}</div><div class="kpi-label">Menor margen ${worst.pct.toFixed(0)}%</div></div>
+    <div class="kpi-card"><div class="kpi-val" style="color:#f0ede8">${data.length}</div><div class="kpi-label">Bebidas</div></div>`
+
+  let sorted = [...data]
+  if (costosSortMode === 'margen') sorted.sort((a,b) => b.pct - a.pct)
+  else if (costosSortMode === 'costo') sorted.sort((a,b) => a.costo - b.costo)
+  else if (costosSortMode === 'bajo') sorted.sort((a,b) => a.pct - b.pct)
+  else sorted.sort((a,b) => a.cat.localeCompare(b.cat))
+
+  let lastCat = ''
+  document.getElementById('drinks-list').innerHTML = sorted.map((d, idx) => {
+    let catLabel = ''
+    if (costosSortMode === 'cat' && d.cat !== lastCat) { lastCat = d.cat; catLabel = `<div class="section-label">${d.cat}</div>` }
+    const barColor = d.pct >= 70 ? '#6fcf6f' : d.pct >= 55 ? '#f5c842' : '#cf6f6f'
+    const badge = d.pct >= 70 ? 'mg-great' : d.pct >= 55 ? 'mg-ok' : 'mg-low'
+    return `${catLabel}
+    <div class="drink-card" onclick="toggleDrinkDetail(${idx})">
+      <div class="drink-header">
+        <div class="drink-name-lbl">${d.nombre}</div>
+        <div class="margin-badge ${badge}">${d.pct.toFixed(0)}%</div>
+      </div>
+      <div class="drink-sub">
+        <span>Precio <span class="dval">$${d.pv}</span></span>
+        <span>Costo <span class="dval">$${d.costo.toFixed(2)}</span></span>
+        <span>Ganancia <span class="dval">$${d.margen.toFixed(2)}</span></span>
+      </div>
+      <div class="margin-bar-wrap"><div class="margin-bar-fill" style="width:${Math.min(d.pct,100)}%;background:${barColor}"></div></div>
+      <div class="drink-detail" id="dd-${idx}">
+        ${d.ings.map(([id, qty, desc]) => {
+          const ing = INGREDIENTES_C.find(x=>x[0]===id)
+          return `<div class="ddetail-row"><span>${ing?ing[1]:id} (${desc})</span><span class="ddetail-val">$${((costs[id]||0)*qty).toFixed(2)}</span></div>`
+        }).join('')}
+        <div class="dtotal-row"><span style="color:#666">Total insumos</span><span style="color:#cf6f6f">$${d.costo.toFixed(2)}</span></div>
+        <div class="dtotal-row"><span style="color:#666">Precio venta</span><span>$${d.pv}</span></div>
+        <div class="dtotal-row"><span style="color:#666">Ganancia</span><span style="color:#6fcf6f">$${d.margen.toFixed(2)}</span></div>
+      </div>
+    </div>`
+  }).join('')
+}
+
+function toggleDrinkDetail(idx) {
+  const el = document.getElementById('dd-' + idx)
+  if (el) el.classList.toggle('open')
+}
+
+function renderImpactoCompras() {
+  const el = document.getElementById('impacto-list')
+  let hist = []
+  try { hist = JSON.parse(localStorage.getItem(K_HIST)||'[]') } catch {}
+  // Últimas 20 entradas positivas (compras)
+  const compras = [...hist].reverse().filter(h => h.delta > 0).slice(0, 20)
+  if (!compras.length) { el.innerHTML = '<div class="empty">Sin entradas de inventario registradas</div>'; return }
+
+  const costs = getCostosAdmin()
+  let html = ''
+  compras.forEach(h => {
+    const costId = INV_TO_COST_ID[h.nombre]
+    if (!costId) {
+      html += `<div class="inv-impacto">
+        <div class="inv-info"><div class="inv-name">${h.nombre}</div><div class="inv-cat">${h.fecha}${h.notas?' · '+h.notas:''}</div></div>
+        <div class="imp-delta" style="color:#555">+${h.delta} ${h.unit}</div>
+      </div>`
+      return
+    }
+    const precioPorUnidad = costs[costId] || 0
+    const totalPagado = precioPorUnidad * h.delta
+    // Recetas afectadas
+    const afectadas = RECETAS_C.filter(([,,,ings]) => ings.some(([id]) => id === costId))
+    html += `<div class="inv-impacto">
+      <div style="flex:1;min-width:0">
+        <div class="inv-name">📥 +${h.delta} ${h.unit} ${h.nombre}</div>
+        <div class="inv-cat">${h.fecha}${h.notas?' · '+h.notas:''}</div>
+        ${totalPagado ? `<div style="font-size:12px;color:#f5c842;margin-top:4px">≈ $${totalPagado.toFixed(0)} MXN · $${precioPorUnidad}/${h.unit}</div>` : ''}
+        ${afectadas.length ? `<div style="font-size:11px;color:#555;margin-top:3px">Afecta: ${afectadas.map(r=>r[0]).join(', ')}</div>` : ''}
+      </div>
+    </div>`
+  })
+  el.innerHTML = html
+}
+
+const COSTOS_CATS = {
+  'Café y lácteos': ['cafe','leche','avena','almendra','soya','crema'],
+  'Jarabes y condimentos': ['vainilla','caramelo','fresa','blueberry','cacao','canela','datiles','azucar'],
+  'Empaque': ['vaso12','vaso10','vaso8','vaso4','cristal','tapa','manga','popote'],
+}
+
+function renderCostosEditorAdmin() {
+  const costs = getCostosAdmin()
+  let html = ''
+  for (const [cat, ids] of Object.entries(COSTOS_CATS)) {
+    html += `<div class="section-label">${cat}</div>`
+    ids.forEach(id => {
+      const ing = INGREDIENTES_C.find(x=>x[0]===id)
+      if (!ing) return
+      const [,nombre, unit] = ing
+      html += `<div class="costo-row">
+        <div class="costo-name">${nombre}<div class="costo-unit-lbl">por ${unit==='bot'?'botella (750ml)':unit==='pza'?'pieza':unit}</div></div>
+        <span style="color:#444;font-size:13px">$</span>
+        <input class="costo-input" type="number" id="cadmin-${id}" value="${costs[id]!==undefined?costs[id]:ing[3]}" step="1" min="0">
+      </div>`
+    })
+  }
+  document.getElementById('costos-editor-admin').innerHTML = html
+}
+
+function saveCostosAdmin() {
+  const costs = {}
+  INGREDIENTES_C.forEach(([id]) => {
+    const el = document.getElementById('cadmin-' + id)
+    if (el) costs[id] = Number(el.value) || 0
+  })
+  localStorage.setItem(K_COSTS, JSON.stringify(costs))
+  showToast('✓ Precios actualizados')
+  renderCostosMenu()
+}
+
+function resetCostosAdmin() {
+  if (!confirm('¿Restaurar todos los costos a valores por defecto?')) return
+  localStorage.removeItem(K_COSTS)
+  renderCostosEditorAdmin()
+  renderCostosMenu()
+}
 
 // ── Calibraciones ────────────────────────────────────────────────────────────
 let calibFiltro = 'semana'
