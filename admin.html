@@ -114,6 +114,26 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
 .hist-delta { font-size: 14px; font-weight: 700; flex-shrink: 0; }
 .delta-pos { color: #6fcf6f; }
 .delta-neg { color: #cf6f6f; }
+
+/* ── Asistencia ── */
+.persona-section { margin-bottom: 18px; }
+.persona-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 0 8px; border-bottom: 1px solid #1e1e1e; margin-bottom: 8px; }
+.persona-nombre { font-size: 15px; font-weight: 800; }
+.persona-total-hrs { font-size: 13px; font-weight: 700; color: #f5c842; }
+.turno-row { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 11px 13px; margin-bottom: 6px; }
+.turno-fecha { font-size: 11px; color: #555; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+.turno-times { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.t-badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 8px; padding: 5px 10px; font-size: 13px; font-weight: 700; }
+.t-entrada { background: #0a1a0a; color: #6fcf6f; }
+.t-salida { background: #1a0e0e; color: #cf6f6f; }
+.t-sin-salida { background: #1e1a0a; color: #f5c842; }
+.t-arrow { color: #333; font-size: 14px; }
+.t-horas { margin-left: auto; font-size: 14px; font-weight: 800; }
+.t-horas.ok { color: #6fcf6f; }
+.t-horas.parcial { color: #f5c842; }
+.t-horas.sin { color: #cf6f6f; }
+.turno-tag { font-size: 10px; color: #444; margin-top: 4px; }
+.asist-empty { text-align: center; color: #444; padding: 40px 20px; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -147,6 +167,7 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
       <div class="tab active" onclick="setTab(0)">📦 Stock</div>
       <div class="tab" onclick="setTab(1)">🎵 Ventas Consig.</div>
       <div class="tab" onclick="setTab(2)">📋 Mov. Inventario</div>
+      <div class="tab" onclick="setTab(3)">🕐 Asistencia</div>
     </div>
   </header>
 
@@ -166,6 +187,13 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
   <!-- MOVIMIENTOS INVENTARIO -->
   <div class="panel" id="panel-2">
     <div id="hist-list"></div>
+  </div>
+
+  <!-- ASISTENCIA -->
+  <div class="panel" id="panel-3">
+    <div class="filter-row" id="asist-filter-row"></div>
+    <div class="report-kpi" id="asist-kpi"></div>
+    <div id="asist-content"></div>
   </div>
 </div>
 
@@ -410,6 +438,173 @@ function setTab(i) {
   document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',i===j))
   if (i===1) renderVentas()
   if (i===2) renderHistInv()
+  if (i===3) renderAsistencia()
+}
+
+// ── Asistencia ──────────────────────────────────────────────────────────────
+let asistFiltro = 'dia'
+
+const TURNO_MAÑANA_CORTE = 14 * 60 + 30  // 14:30 en minutos
+const TURNO_TARDE_CORTE  = 22 * 60 + 20  // 22:20 en minutos
+
+function buildAsistFiltros() {
+  const opciones = [['dia','Hoy'],['semana','7 días'],['mes','Este mes'],['anio','Este año']]
+  document.getElementById('asist-filter-row').innerHTML = opciones.map(([f,l]) =>
+    `<button class="filter-btn${f==='dia'?' active':''}" onclick="setAsistFiltro('${f}',this)">${l}</button>`
+  ).join('')
+}
+
+function setAsistFiltro(f, btn) {
+  asistFiltro = f
+  document.querySelectorAll('#asist-filter-row .filter-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  renderAsistencia()
+}
+
+function filtrarAsist(registros) {
+  const ahora = new Date()
+  return registros.filter(r => {
+    if (!r.ts) return false
+    const f = new Date(r.ts)
+    if (asistFiltro === 'dia') {
+      return f.toDateString() === ahora.toDateString()
+    }
+    if (asistFiltro === 'semana') {
+      return (ahora - f) / 86400000 <= 7
+    }
+    if (asistFiltro === 'mes') {
+      return f.getMonth() === ahora.getMonth() && f.getFullYear() === ahora.getFullYear()
+    }
+    if (asistFiltro === 'anio') {
+      return f.getFullYear() === ahora.getFullYear()
+    }
+    return true
+  })
+}
+
+function calcHoras(entradaTs, salidaTs) {
+  const ms = new Date(salidaTs) - new Date(entradaTs)
+  if (ms <= 0) return null
+  const totalMin = Math.round(ms / 60000)
+  const h = Math.floor(totalMin / 60)
+  const m = totalMin % 60
+  return { h, m, total: ms / 3600000 }
+}
+
+function turnoTag(salidaTs) {
+  if (!salidaTs) return ''
+  const d = new Date(salidaTs)
+  const min = d.getHours() * 60 + d.getMinutes()
+  if (min <= TURNO_MAÑANA_CORTE + 60) return 'Turno mañana · corte 2:30 pm'
+  return 'Turno tarde · corte 10:20 pm'
+}
+
+function paresTurno(registros) {
+  const sorted = [...registros].sort((a, b) => new Date(a.ts) - new Date(b.ts))
+  const pares = []
+  let entrada = null
+  for (const r of sorted) {
+    if (r.tipo === 'entrada') {
+      if (entrada) pares.push({ entrada, salida: null })
+      entrada = r
+    } else if (r.tipo === 'salida') {
+      if (entrada) { pares.push({ entrada, salida: r }); entrada = null }
+    }
+  }
+  if (entrada) pares.push({ entrada, salida: null })
+  return pares
+}
+
+function renderAsistencia() {
+  let todos = []
+  try { todos = JSON.parse(localStorage.getItem('tc_asistencia') || '[]') } catch {}
+  const filtrados = filtrarAsist(todos)
+
+  // KPIs globales
+  const personas = [...new Set(todos.map(r => r.nombre))]
+  let totalHrsGlobal = 0
+  const hrsXPersona = {}
+  personas.forEach(p => { hrsXPersona[p] = 0 })
+
+  // Agrupar por persona → calcular horas
+  const porPersona = {}
+  filtrados.forEach(r => {
+    if (!porPersona[r.nombre]) porPersona[r.nombre] = []
+    porPersona[r.nombre].push(r)
+  })
+
+  Object.entries(porPersona).forEach(([nombre, regs]) => {
+    const pares = paresTurno(regs)
+    pares.forEach(p => {
+      if (p.salida) {
+        const h = calcHoras(p.entrada.ts, p.salida.ts)
+        if (h) { totalHrsGlobal += h.total; hrsXPersona[nombre] = (hrsXPersona[nombre] || 0) + h.total }
+      }
+    })
+  })
+
+  const totalPersonasActivas = Object.keys(porPersona).length
+  document.getElementById('asist-kpi').innerHTML = `
+    <div class="report-card"><div class="report-val">${totalPersonasActivas}</div><div class="report-label">Personas en periodo</div></div>
+    <div class="report-card"><div class="report-val">${Math.floor(totalHrsGlobal)}h ${Math.round((totalHrsGlobal % 1)*60)}m</div><div class="report-label">Horas trabajadas totales</div></div>
+  `
+
+  const el = document.getElementById('asist-content')
+  if (!Object.keys(porPersona).length) {
+    el.innerHTML = '<div class="asist-empty">Sin registros en este período</div>'
+    return
+  }
+
+  let html = ''
+  const nombreOrden = ['Melanie','Daniela','Daniel','Izchel']
+  const nombresOrdenados = [...nombreOrden.filter(n => porPersona[n]), ...Object.keys(porPersona).filter(n => !nombreOrden.includes(n))]
+
+  nombresOrdenados.forEach(nombre => {
+    const regs = porPersona[nombre]
+    const pares = paresTurno(regs)
+    const totalHrsP = hrsXPersona[nombre] || 0
+    const totalStr = `${Math.floor(totalHrsP)}h ${Math.round((totalHrsP % 1)*60)}m`
+
+    // Agrupar pares por fecha local
+    const porFecha = {}
+    pares.forEach(p => {
+      const fecha = new Date(p.entrada.ts).toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long' })
+      if (!porFecha[fecha]) porFecha[fecha] = []
+      porFecha[fecha].push(p)
+    })
+
+    let filas = ''
+    Object.entries(porFecha).forEach(([fecha, ps]) => {
+      ps.forEach(p => {
+        const hrs = p.salida ? calcHoras(p.entrada.ts, p.salida.ts) : null
+        const hrsStr = hrs ? `${hrs.h}h ${hrs.m}m` : '—'
+        const hrsClass = !p.salida ? 'sin' : hrs.total >= 5.5 ? 'ok' : 'parcial'
+        const salidaEl = p.salida
+          ? `<span class="t-badge t-salida">🌙 ${p.salida.hora}</span>`
+          : `<span class="t-badge t-sin-salida">⚠️ Sin salida</span>`
+        filas += `<div class="turno-row">
+          <div class="turno-fecha">${fecha}</div>
+          <div class="turno-times">
+            <span class="t-badge t-entrada">☀️ ${p.entrada.hora}</span>
+            <span class="t-arrow">→</span>
+            ${salidaEl}
+            <span class="t-horas ${hrsClass}">${hrsStr}</span>
+          </div>
+          ${p.salida ? `<div class="turno-tag">${turnoTag(p.salida.ts)}</div>` : ''}
+        </div>`
+      })
+    })
+
+    html += `<div class="persona-section">
+      <div class="persona-header">
+        <div class="persona-nombre">${nombre}</div>
+        <div class="persona-total-hrs">${totalStr}</div>
+      </div>
+      ${filas}
+    </div>`
+  })
+
+  el.innerHTML = html
 }
 
 function showToast(msg) {
@@ -421,6 +616,7 @@ function showToast(msg) {
 function initApp() {
   loadInv(); renderStock()
   loadVentas(); buildFiltroRow()
+  buildAsistFiltros()
 }
 </script>
 </body>
