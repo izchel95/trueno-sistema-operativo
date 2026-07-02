@@ -217,6 +217,10 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
 .pago-btn.active { background:#f5c842; color:#0e0e0e; border-color:#f5c842; }
 .pago-dividir-box { background:#141414; border:1px solid #2a2a2a; border-radius:12px; padding:14px; display:none; }
 .pago-dividir-box.visible { display:block; }
+.pago-cambio-box { background:#141414; border:1px solid #2a2a2a; border-radius:12px; padding:14px; display:none; }
+.pago-cambio-box.visible { display:block; }
+.cambio-val { font-size:22px; font-weight:800; color:#6fcf6f; text-align:right; flex-shrink:0; }
+.cambio-neg { color:#cf6f6f; }
 .pago-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
 .pago-row:last-child { margin-bottom:0; }
 .pago-row-icon { font-size:18px; flex-shrink:0; }
@@ -381,6 +385,21 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
           <button class="pago-btn" id="pago-btn-tarjeta" onclick="setPago('tarjeta')">💳<br>Tarjeta</button>
           <button class="pago-btn" id="pago-btn-dividir" onclick="setPago('dividir')">⚡<br>Dividir</button>
         </div>
+        <!-- Efectivo: con cuánto pagan / cambio -->
+        <div class="pago-cambio-box" id="pago-cambio-box">
+          <div class="pago-row">
+            <div class="pago-row-icon">💵</div>
+            <div class="pago-row-label">Con cuánto pagan</div>
+            <input class="pago-row-input" id="pago-recibido-input" type="number" min="0" placeholder="$0" oninput="calcCambio()">
+          </div>
+          <div class="pago-row">
+            <div class="pago-row-icon">🔄</div>
+            <div class="pago-row-label">Cambio</div>
+            <div class="cambio-val" id="cambio-val">—</div>
+          </div>
+          <div class="pago-error" id="pago-error-cambio">La cantidad es menor al total</div>
+        </div>
+
         <div class="pago-dividir-box" id="pago-dividir-box">
           <div class="pago-row">
             <div class="pago-row-icon">💵</div>
@@ -1236,9 +1255,14 @@ function abrirCarrito() {
   formaPago = null; pagoEfectivo = 0
   document.querySelectorAll('.pago-btn').forEach(b=>b.classList.remove('active'))
   document.getElementById('pago-dividir-box').classList.remove('visible')
+  document.getElementById('pago-cambio-box').classList.remove('visible')
   document.getElementById('pago-efec-input').value = ''
+  document.getElementById('pago-recibido-input').value = ''
   document.getElementById('pago-tarj-val').textContent = '$0'
+  document.getElementById('cambio-val').textContent = '—'
+  document.getElementById('cambio-val').classList.remove('cambio-neg')
   document.getElementById('pago-error').classList.remove('show')
+  document.getElementById('pago-error-cambio').classList.remove('show')
   document.getElementById('btn-registrar-cart').disabled = true
   document.getElementById('cart-overlay').classList.add('open')
 }
@@ -1248,15 +1272,47 @@ function setPago(tipo) {
   document.querySelectorAll('.pago-btn').forEach(b=>b.classList.remove('active'))
   document.getElementById('pago-btn-'+tipo).classList.add('active')
   const divBox = document.getElementById('pago-dividir-box')
+  const cambioBox = document.getElementById('pago-cambio-box')
   if (tipo==='dividir') {
     divBox.classList.add('visible')
+    cambioBox.classList.remove('visible')
     document.getElementById('pago-efec-input').value = ''
     document.getElementById('pago-tarj-val').textContent = '$0'
     document.getElementById('pago-error').classList.remove('show')
     document.getElementById('btn-registrar-cart').disabled = true
+  } else if (tipo==='efectivo') {
+    cambioBox.classList.add('visible')
+    divBox.classList.remove('visible')
+    document.getElementById('pago-recibido-input').value = ''
+    document.getElementById('cambio-val').textContent = '—'
+    document.getElementById('cambio-val').classList.remove('cambio-neg')
+    document.getElementById('pago-error-cambio').classList.remove('show')
+    document.getElementById('btn-registrar-cart').disabled = !vendedor
   } else {
     divBox.classList.remove('visible')
+    cambioBox.classList.remove('visible')
     document.getElementById('btn-registrar-cart').disabled = !vendedor
+  }
+}
+
+function calcCambio() {
+  const total = cart.reduce((s,e)=>s+e.p.pv*e.qty,0)
+  const recibido = parseFloat(document.getElementById('pago-recibido-input').value)||0
+  const cambio = recibido - total
+  const cambioEl = document.getElementById('cambio-val')
+  const errEl = document.getElementById('pago-error-cambio')
+  if (recibido === 0) {
+    cambioEl.textContent = '—'
+    cambioEl.classList.remove('cambio-neg')
+    errEl.classList.remove('show')
+  } else if (cambio < 0) {
+    cambioEl.textContent = `$${Math.abs(cambio).toLocaleString('es-MX')}`
+    cambioEl.classList.add('cambio-neg')
+    errEl.classList.add('show')
+  } else {
+    cambioEl.textContent = `$${cambio.toLocaleString('es-MX')}`
+    cambioEl.classList.remove('cambio-neg')
+    errEl.classList.remove('show')
   }
 }
 
