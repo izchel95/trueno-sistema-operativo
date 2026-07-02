@@ -1,0 +1,263 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Incidencias — Trueno ⚡</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 80px; }
+header { padding: 18px 20px 14px; border-bottom: 1px solid #1e1e1e; display: flex; align-items: center; justify-content: space-between; }
+.menu-btn { display: inline-flex; align-items: center; padding: 8px 14px; background: #1a1600; border: 1px solid #f5c842; border-radius: 10px; color: #f5c842; font-size: 13px; font-weight: 700; text-decoration: none; }
+.logo { font-size: 18px; font-weight: 700; }
+.logo span { color: #f5c842; }
+.main { padding: 16px; }
+.page-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+.page-sub { font-size: 12px; color: #555; margin-bottom: 18px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+.tab { flex: 1; padding: 10px 6px; background: #141414; border: 1px solid #1e1e1e; border-radius: 10px; font-size: 13px; font-weight: 600; color: #555; text-align: center; cursor: pointer; transition: all 0.15s; }
+.tab.active { background: #1a1600; border-color: #f5c842; color: #f5c842; }
+
+/* Form */
+.form-section { display: none; }
+.form-section.active { display: block; }
+.form-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.form-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #555; margin-bottom: 8px; display: block; }
+.tipo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tipo-btn { padding: 12px 8px; background: #0e0e0e; border: 1px solid #2a2a2a; border-radius: 10px; color: #888; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
+.tipo-btn.selected { border-color: #f5c842; color: #f5c842; background: #1a1600; }
+select, textarea { width: 100%; background: #0e0e0e; border: 1px solid #2a2a2a; border-radius: 10px; color: #f0ede8; font-size: 14px; padding: 12px; font-family: inherit; outline: none; appearance: none; }
+select:focus, textarea:focus { border-color: #f5c842; }
+textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+.severity-row { display: flex; gap: 8px; }
+.sev-btn { flex: 1; padding: 10px 6px; background: #0e0e0e; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s; }
+.sev-btn[data-sev="baja"]   { color: #6fcf6f; }
+.sev-btn[data-sev="media"]  { color: #f5c842; }
+.sev-btn[data-sev="alta"]   { color: #cf6f6f; }
+.sev-btn.selected { background: #1a1a1a; border-width: 2px; }
+.sev-btn[data-sev="baja"].selected   { border-color: #6fcf6f; }
+.sev-btn[data-sev="media"].selected  { border-color: #f5c842; }
+.sev-btn[data-sev="alta"].selected   { border-color: #cf6f6f; }
+.btn-submit { width: 100%; padding: 16px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 16px; }
+.btn-submit:active { opacity: 0.85; }
+
+/* Historial */
+.hist-section { display: none; }
+.hist-section.active { display: block; }
+.filters { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
+.filter-chip { padding: 6px 12px; background: #141414; border: 1px solid #1e1e1e; border-radius: 20px; font-size: 12px; color: #555; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.filter-chip.active { background: #1a1600; border-color: #f5c842; color: #f5c842; }
+.inc-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 8px; }
+.inc-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.inc-icon { font-size: 20px; flex-shrink: 0; line-height: 1; }
+.inc-meta { flex: 1; }
+.inc-tipo { font-size: 13px; font-weight: 700; }
+.inc-quien { font-size: 11px; color: #555; margin-top: 2px; }
+.inc-sev { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; }
+.sev-baja  { background: #0d1a0d; color: #6fcf6f; }
+.sev-media { background: #1a1600; color: #f5c842; }
+.sev-alta  { background: #1a0808; color: #cf6f6f; }
+.inc-desc { font-size: 13px; color: #ccc; line-height: 1.5; margin-bottom: 8px; }
+.inc-fecha { font-size: 11px; color: #333; }
+.empty { text-align: center; padding: 50px 20px; color: #333; }
+.empty .icon { font-size: 40px; margin-bottom: 10px; }
+.summary-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 16px; }
+.sum-box { background: #141414; border: 1px solid #1e1e1e; border-radius: 10px; padding: 10px 6px; text-align: center; }
+.sum-val { font-size: 18px; font-weight: 800; }
+.sum-lbl { font-size: 9px; color: #444; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #6fcf6f; color: #0e0e0e; padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: 700; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header>
+  <a class="menu-btn" href="index.html">← Menú</a>
+  <a class="logo" href="index.html" style="text-decoration:none;color:inherit;">⚡ <span>Trueno</span></a>
+</header>
+
+<div class="main">
+  <div class="page-title">⚠️ Incidencias</div>
+  <div class="page-sub">Reporta equipos, problemas y situaciones</div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('registrar')">+ Registrar</div>
+    <div class="tab" onclick="switchTab('historial')">Historial</div>
+  </div>
+
+  <!-- REGISTRAR -->
+  <div class="form-section active" id="tab-registrar">
+    <div class="form-card">
+      <span class="form-label">Tipo de incidencia</span>
+      <div class="tipo-grid">
+        <div class="tipo-btn selected" data-tipo="Equipo" onclick="selectTipo(this)">🔧 Equipo</div>
+        <div class="tipo-btn" data-tipo="Personal" onclick="selectTipo(this)">👤 Personal</div>
+        <div class="tipo-btn" data-tipo="Cliente" onclick="selectTipo(this)">🗣️ Cliente</div>
+        <div class="tipo-btn" data-tipo="Limpieza" onclick="selectTipo(this)">🧹 Limpieza</div>
+        <div class="tipo-btn" data-tipo="Insumos" onclick="selectTipo(this)">📦 Insumos</div>
+        <div class="tipo-btn" data-tipo="Otro" onclick="selectTipo(this)">📝 Otro</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <span class="form-label">Severidad</span>
+      <div class="severity-row">
+        <div class="sev-btn selected" data-sev="baja" onclick="selectSev(this)">🟢 Baja</div>
+        <div class="sev-btn" data-sev="media" onclick="selectSev(this)">🟡 Media</div>
+        <div class="sev-btn" data-sev="alta" onclick="selectSev(this)">🔴 Alta</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <span class="form-label">¿Quién reporta?</span>
+      <select id="quien">
+        <option value="">Selecciona tu nombre</option>
+        <option>Melanie</option>
+        <option>Daniela</option>
+        <option>Daniel</option>
+        <option>Izchel</option>
+      </select>
+    </div>
+
+    <div class="form-card">
+      <span class="form-label">Descripción</span>
+      <textarea id="descripcion" placeholder="Describe qué pasó, cuándo y el contexto..."></textarea>
+    </div>
+
+    <div class="form-card">
+      <span class="form-label">Acción tomada (opcional)</span>
+      <textarea id="accion" placeholder="¿Qué se hizo para resolverlo o mitigarlo?" style="min-height:60px;"></textarea>
+    </div>
+
+    <button class="btn-submit" onclick="guardar()">Registrar incidencia</button>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="hist-section" id="tab-historial">
+    <div class="summary-bar" id="summary-bar"></div>
+    <div class="filters" id="filtros">
+      <div class="filter-chip active" data-f="Todos" onclick="filtrar(this)">Todos</div>
+      <div class="filter-chip" data-f="alta"    onclick="filtrar(this)">🔴 Alta</div>
+      <div class="filter-chip" data-f="media"   onclick="filtrar(this)">🟡 Media</div>
+      <div class="filter-chip" data-f="baja"    onclick="filtrar(this)">🟢 Baja</div>
+      <div class="filter-chip" data-f="Equipo"  onclick="filtrar(this)">🔧 Equipo</div>
+      <div class="filter-chip" data-f="Personal" onclick="filtrar(this)">👤 Personal</div>
+      <div class="filter-chip" data-f="Cliente" onclick="filtrar(this)">🗣️ Cliente</div>
+    </div>
+    <div id="lista-hist"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✅ Incidencia registrada</div>
+
+<script>
+const K = 'tc_incidencias'
+const ICONS = { Equipo:'🔧', Personal:'👤', Cliente:'🗣️', Limpieza:'🧹', Insumos:'📦', Otro:'📝' }
+let currentFilter = 'Todos'
+
+function getData()     { try { return JSON.parse(localStorage.getItem(K)||'[]') } catch { return [] } }
+function saveData(d)   { localStorage.setItem(K, JSON.stringify(d)) }
+
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el, i) => el.classList.toggle('active', (i===0) === (t==='registrar')))
+  document.getElementById('tab-registrar').classList.toggle('active', t==='registrar')
+  document.getElementById('tab-historial').classList.toggle('active', t==='historial')
+  if (t === 'historial') renderHistorial()
+}
+
+function selectTipo(el) {
+  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('selected'))
+  el.classList.add('selected')
+}
+
+function selectSev(el) {
+  document.querySelectorAll('.sev-btn').forEach(b => b.classList.remove('selected'))
+  el.classList.add('selected')
+}
+
+function guardar() {
+  const tipo  = document.querySelector('.tipo-btn.selected')?.dataset.tipo
+  const sev   = document.querySelector('.sev-btn.selected')?.dataset.sev
+  const quien = document.getElementById('quien').value
+  const desc  = document.getElementById('descripcion').value.trim()
+  const acc   = document.getElementById('accion').value.trim()
+
+  if (!quien) { alert('Selecciona quién reporta'); return }
+  if (!desc)  { alert('Escribe una descripción'); return }
+
+  const datos = getData()
+  datos.unshift({ tipo, sev, quien, desc, acc, ts: Date.now() })
+  saveData(datos)
+
+  // Telegram push
+  const msg = `⚠️ *Incidencia Trueno*\n🔖 ${tipo} · ${sev.toUpperCase()}\n👤 ${quien}\n📝 ${desc}${acc ? '\n✅ Acción: ' + acc : ''}`
+  fetch(`https://api.telegram.org/bot8765854864:AAEuMxt5p264TL3LPHbQI89S6uqqyIEnQd8/sendMessage`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ chat_id: '8309237078', text: msg, parse_mode: 'Markdown' })
+  }).catch(()=>{})
+
+  // Reset form
+  document.getElementById('descripcion').value = ''
+  document.getElementById('accion').value = ''
+  document.getElementById('quien').value = ''
+
+  // Toast
+  const t = document.getElementById('toast')
+  t.classList.add('show')
+  setTimeout(()=> t.classList.remove('show'), 2500)
+}
+
+function filtrar(el) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'))
+  el.classList.add('active')
+  currentFilter = el.dataset.f
+  renderHistorial()
+}
+
+function renderHistorial() {
+  let datos = getData()
+  const total  = datos.length
+  const alta   = datos.filter(d=>d.sev==='alta').length
+  const media  = datos.filter(d=>d.sev==='media').length
+  const semana = datos.filter(d=>Date.now()-d.ts < 7*86400000).length
+
+  document.getElementById('summary-bar').innerHTML = `
+    <div class="sum-box"><div class="sum-val">${total}</div><div class="sum-lbl">Total</div></div>
+    <div class="sum-box"><div class="sum-val" style="color:#cf6f6f">${alta}</div><div class="sum-lbl">Alta</div></div>
+    <div class="sum-box"><div class="sum-val" style="color:#f5c842">${media}</div><div class="sum-lbl">Media</div></div>
+    <div class="sum-box"><div class="sum-val" style="color:#6fa6cf">${semana}</div><div class="sum-lbl">Esta semana</div></div>`
+
+  if (currentFilter !== 'Todos') {
+    const isSev = ['alta','media','baja'].includes(currentFilter)
+    datos = datos.filter(d => isSev ? d.sev === currentFilter : d.tipo === currentFilter)
+  }
+
+  const lista = document.getElementById('lista-hist')
+  if (!datos.length) {
+    lista.innerHTML = `<div class="empty"><div class="icon">📋</div><p>Sin incidencias${currentFilter!=='Todos' ? ' en esta categoría' : ''}</p></div>`
+    return
+  }
+
+  lista.innerHTML = datos.map(d => {
+    const fecha = new Date(d.ts)
+    const fechaStr = fecha.toLocaleDateString('es-MX', {day:'numeric', month:'short'}) + ' ' + fecha.toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
+    return `
+    <div class="inc-card">
+      <div class="inc-header">
+        <div class="inc-icon">${ICONS[d.tipo]||'📝'}</div>
+        <div class="inc-meta">
+          <div class="inc-tipo">${d.tipo}</div>
+          <div class="inc-quien">Reportó: ${d.quien}</div>
+        </div>
+        <div class="inc-sev sev-${d.sev}">${d.sev.toUpperCase()}</div>
+      </div>
+      <div class="inc-desc">${d.desc}</div>
+      ${d.acc ? `<div class="inc-desc" style="color:#6fcf6f;font-size:12px;">✅ ${d.acc}</div>` : ''}
+      <div class="inc-fecha">${fechaStr}</div>
+    </div>`
+  }).join('')
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Dashboard Izchel — Trueno ⚡</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+/* LOGIN */
+#login-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
+.login-logo { font-size:48px; margin-bottom:8px; }
+.login-title { font-size:22px; font-weight:800; margin-bottom:4px; }
+.login-sub { font-size:13px; color:#555; margin-bottom:32px; }
+.login-input { width:100%; max-width:320px; background:#141414; border:1px solid #2a2a2a; border-radius:12px; color:#f0ede8; font-size:16px; padding:14px 16px; text-align:center; letter-spacing:4px; outline:none; margin-bottom:12px; }
+.login-input:focus { border-color:#f5c842; }
+.login-btn { width:100%; max-width:320px; padding:14px; background:#f5c842; color:#0e0e0e; border:none; border-radius:12px; font-size:16px; font-weight:800; cursor:pointer; }
+.login-err { color:#cf6f6f; font-size:13px; margin-top:8px; display:none; }
+
+/* MAIN */
+#main-screen { display:none; padding-bottom:60px; }
+header { padding:18px 20px 14px; border-bottom:1px solid #1e1e1e; display:flex; align-items:center; justify-content:space-between; }
+.menu-btn { display:inline-flex; align-items:center; padding:8px 14px; background:#1a1600; border:1px solid #f5c842; border-radius:10px; color:#f5c842; font-size:13px; font-weight:700; text-decoration:none; }
+.logo { font-size:18px; font-weight:700; }
+.logo span { color:#f5c842; }
+.logout-btn { font-size:12px; color:#555; cursor:pointer; text-decoration:underline; }
+.main { padding:16px; }
+.page-title { font-size:20px; font-weight:800; margin-bottom:2px; }
+.page-sub { font-size:12px; color:#555; margin-bottom:18px; }
+
+/* KPI row */
+.kpi-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:18px; }
+.kpi { background:#141414; border:1px solid #1e1e1e; border-radius:12px; padding:12px 10px; text-align:center; }
+.kpi-val { font-size:20px; font-weight:800; line-height:1; }
+.kpi-lbl { font-size:9px; text-transform:uppercase; letter-spacing:0.5px; color:#444; margin-top:4px; }
+
+/* Sections */
+.sec-label { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#444; margin:20px 0 8px; display:flex; align-items:center; justify-content:space-between; }
+.sec-label a { font-size:11px; color:#f5c842; text-decoration:none; }
+.card { background:#141414; border:1px solid #1e1e1e; border-radius:14px; padding:14px; margin-bottom:8px; }
+.card-row { display:flex; align-items:center; justify-content:space-between; }
+.card-title { font-size:14px; font-weight:700; }
+.card-sub   { font-size:12px; color:#555; margin-top:3px; }
+.badge { font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; }
+.badge-red    { background:#1a0808; color:#cf6f6f; }
+.badge-yellow { background:#1a1600; color:#f5c842; }
+.badge-green  { background:#0d1a0d; color:#6fcf6f; }
+.badge-blue   { background:#080d1a; color:#6fa6cf; }
+.empty-hint { font-size:13px; color:#333; padding:8px 0; }
+
+/* Alert items */
+.alert-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #1a1a1a; }
+.alert-item:last-child { border:none; }
+.alert-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.dot-red    { background:#cf6f6f; }
+.dot-yellow { background:#f5c842; }
+.alert-name { flex:1; font-size:13px; }
+.alert-qty  { font-size:12px; color:#555; }
+
+/* Corte card */
+.corte-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+.corte-item { background:#0e0e0e; border-radius:8px; padding:10px; }
+.corte-v { font-size:16px; font-weight:800; }
+.corte-l { font-size:10px; color:#444; margin-top:2px; }
+
+/* Inc item */
+.inc-row { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid #1a1a1a; }
+.inc-row:last-child { border:none; }
+.sev-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.inc-body { flex:1; }
+.inc-line1 { font-size:13px; font-weight:600; }
+.inc-line2 { font-size:11px; color:#555; margin-top:2px; }
+
+/* Loader */
+.loader { text-align:center; color:#333; font-size:13px; padding:16px; }
+
+/* Links grid */
+.links-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.link-card { background:#141414; border:1px solid #1e1e1e; border-radius:12px; padding:12px; text-decoration:none; color:#f0ede8; display:flex; align-items:center; gap:10px; }
+.link-card:active { opacity:0.75; }
+.link-icon { font-size:20px; }
+.link-name { font-size:13px; font-weight:600; }
+
+/* Refresh */
+.refresh-row { text-align:center; margin-top:20px; }
+.refresh-btn { background:transparent; border:1px solid #2a2a2a; color:#555; padding:8px 20px; border-radius:20px; font-size:12px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-logo">⚡</div>
+  <div class="login-title">Dashboard Trueno</div>
+  <div class="login-sub">Solo para Izchel</div>
+  <input class="login-input" type="password" id="pwd-input" placeholder="contraseña" onkeydown="if(event.key==='Enter')login()">
+  <button class="login-btn" onclick="login()">Entrar</button>
+  <div class="login-err" id="login-err">Contraseña incorrecta</div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div id="main-screen">
+  <header>
+    <a class="menu-btn" href="index.html">← Menú</a>
+    <a class="logo" href="index.html" style="text-decoration:none;color:inherit;">⚡ <span>Trueno</span></a>
+    <span class="logout-btn" onclick="logout()">Salir</span>
+  </header>
+
+  <div class="main">
+    <div class="page-title">Buenos días, Izchel ☀️</div>
+    <div class="page-sub" id="page-sub-date"></div>
+
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-val" id="kpi-neto" style="color:#6fcf6f">—</div><div class="kpi-lbl">Último neto</div></div>
+      <div class="kpi"><div class="kpi-val" id="kpi-stock" style="color:#cf6f6f">—</div><div class="kpi-lbl">Alertas stock</div></div>
+      <div class="kpi"><div class="kpi-val" id="kpi-consig" style="color:#f5c842">—</div><div class="kpi-lbl">Ventas consig.</div></div>
+    </div>
+
+    <!-- STOCK ALERTS -->
+    <div class="sec-label">📦 Alertas de inventario <a href="compras.html">→ Compras</a></div>
+    <div class="card" id="stock-alerts"><div class="loader">Cargando...</div></div>
+
+    <!-- ÚLTIMO CORTE -->
+    <div class="sec-label">💰 Último corte <a href="corte.html">→ Ver</a></div>
+    <div class="card" id="ultimo-corte"><div class="loader">Cargando...</div></div>
+
+    <!-- CONSIGNACION -->
+    <div class="sec-label">🛍️ Consignación — últimas ventas <a href="consignacion.html">→ Ver</a></div>
+    <div class="card" id="consig-resumen"><div class="loader">Cargando...</div></div>
+
+    <!-- CALIBRACIONES -->
+    <div class="sec-label">⚙️ Última calibración <a href="calibracion.html">→ Ver</a></div>
+    <div class="card" id="ultima-calib"><div class="loader">Cargando...</div></div>
+
+    <!-- INCIDENCIAS -->
+    <div class="sec-label">⚠️ Incidencias recientes <a href="incidencias.html">→ Ver</a></div>
+    <div class="card" id="incidencias-panel"><div class="loader">Cargando...</div></div>
+
+    <!-- LINKS RÁPIDOS -->
+    <div class="sec-label">🔗 Accesos directos</div>
+    <div class="links-grid">
+      <a class="link-card" href="apertura.html"><span class="link-icon">☀️</span><span class="link-name">Apertura</span></a>
+      <a class="link-card" href="corte.html"><span class="link-icon">💰</span><span class="link-name">Corte</span></a>
+      <a class="link-card" href="inventario.html"><span class="link-icon">📦</span><span class="link-name">Inventario</span></a>
+      <a class="link-card" href="calibracion.html"><span class="link-icon">⚙️</span><span class="link-name">Calibración</span></a>
+      <a class="link-card" href="consignacion.html"><span class="link-icon">🛍️</span><span class="link-name">Consig.</span></a>
+      <a class="link-card" href="admin.html"><span class="link-icon">🔐</span><span class="link-name">Admin</span></a>
+    </div>
+
+    <div class="refresh-row">
+      <button class="refresh-btn" onclick="loadAll()">↻ Actualizar datos</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PASS     = 'IZ9595iz'
+const SB_URL   = 'https://axxbsjbywivolwluzvrd.supabase.co'
+const SB_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+
+const INSUMOS = [
+  ['Café en grano','kg',1],
+  ['Leche entera','L',4],
+  ['Leche deslactosada','L',2],
+  ['Leche de avena','L',2],
+  ['Leche de almendras','L',1],
+  ['Leche de soya','L',1],
+  ['Crema para batir','L',1],
+  ['Jarabe vainilla','bot',1],
+  ['Jarabe caramelo','bot',1],
+  ['Jarabe fresa','bot',1],
+  ['Jarabe blueberry','bot',1],
+  ['Cacao en polvo','kg',0.5],
+  ['Canela','kg',0.2],
+  ['Dátiles','kg',0.5],
+  ['Azúcar','kg',1],
+  ['Hielo','bolsas',2],
+  ['Agua purificada','garrafones',2],
+  ['Vasos cartón 12oz','paq',1],
+  ['Vasos cartón 10oz','paq',1],
+  ['Vasos cartón 8oz','paq',1],
+  ['Vasos cartón 4oz','paq',1],
+  ['Vasos cristal 12oz','paq',1],
+  ['Tapaderas','paq',2],
+  ['Mangas','paq',1],
+  ['Popotes','paq',1],
+  ['Palitos','paq',1],
+  ['Servilletas','paq',2],
+]
+
+function login() {
+  const v = document.getElementById('pwd-input').value
+  if (v === PASS) {
+    document.getElementById('login-screen').style.display = 'none'
+    document.getElementById('main-screen').style.display = 'block'
+    loadAll()
+  } else {
+    document.getElementById('login-err').style.display = 'block'
+    document.getElementById('pwd-input').value = ''
+  }
+}
+
+function logout() {
+  document.getElementById('main-screen').style.display = 'none'
+  document.getElementById('login-screen').style.display = 'flex'
+  document.getElementById('pwd-input').value = ''
+}
+
+async function sbGet(table, query='') {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}${query}`, {
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, Accept: 'application/json' }
+  })
+  if (!r.ok) return []
+  return r.json()
+}
+
+function fmt(n) {
+  return '$' + (Number(n)||0).toLocaleString('es-MX', {minimumFractionDigits:0, maximumFractionDigits:0})
+}
+
+function loadAll() {
+  const now = new Date()
+  const hora = now.getHours()
+  const saludo = hora<12 ? 'Buenos días' : hora<18 ? 'Buenas tardes' : 'Buenas noches'
+  document.querySelector('.page-title').textContent = `${saludo}, Izchel ☀️`
+  document.getElementById('page-sub-date').textContent = now.toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long', year:'numeric'})
+
+  loadStock()
+  loadCorte()
+  loadConsig()
+  loadCalib()
+  loadIncidencias()
+}
+
+function loadStock() {
+  const stock = (() => { try { return JSON.parse(localStorage.getItem('tc_inv_stock')||'{}') } catch { return {} } })()
+  const iniciales = [3,10,6,6,4,4,3,2,2,2,2,1,0.5,1,3,5,4,3,3,2,2,2,4,3,3,2,5]
+  const agotados = [], bajos = []
+  INSUMOS.forEach(([n,u,min], i) => {
+    const qty = stock[i] !== undefined ? Number(stock[i]) : iniciales[i]
+    if (qty <= 0)   agotados.push({n,u,qty})
+    else if (qty <= min) bajos.push({n,u,qty})
+  })
+
+  document.getElementById('kpi-stock').textContent = agotados.length + bajos.length
+
+  const el = document.getElementById('stock-alerts')
+  if (!agotados.length && !bajos.length) {
+    el.innerHTML = `<div style="color:#6fcf6f;font-size:13px;">✅ Todo el inventario está OK</div>`
+    return
+  }
+  const items = [
+    ...agotados.map(x => `<div class="alert-item"><div class="alert-dot dot-red"></div><div class="alert-name">${x.n}</div><div class="alert-qty">⚠️ Agotado</div></div>`),
+    ...bajos.map(x => `<div class="alert-item"><div class="alert-dot dot-yellow"></div><div class="alert-name">${x.n}</div><div class="alert-qty">${x.qty} ${x.u}</div></div>`)
+  ]
+  el.innerHTML = items.join('')
+}
+
+async function loadCorte() {
+  const el = document.getElementById('ultimo-corte')
+  try {
+    const rows = await sbGet('trueno_registros', '?tipo=eq.corte&order=ts.desc&limit=1&select=*')
+    if (!rows.length) {
+      el.innerHTML = `<div class="empty-hint">Sin cortes registrados aún</div>`
+      return
+    }
+    const r = rows[0]
+    const d = typeof r.datos === 'string' ? JSON.parse(r.datos) : (r.datos || {})
+    const ventas = d.ventas || d.total_ventas || 0
+    const gastos = d.gastos || d.total_gastos || 0
+    const neto   = d.neto || (ventas - gastos) || 0
+    const encargada = r.encargada || d.encargada || '—'
+    const fecha = new Date(r.ts || r.fecha).toLocaleDateString('es-MX', {day:'numeric', month:'short'})
+    document.getElementById('kpi-neto').textContent = fmt(neto)
+    el.innerHTML = `
+      <div class="card-row">
+        <div><div class="card-title">${fecha} · ${encargada}</div></div>
+        <div class="badge ${neto>=0?'badge-green':'badge-red'}">${fmt(neto)}</div>
+      </div>
+      <div class="corte-grid">
+        <div class="corte-item"><div class="corte-v" style="color:#6fa6cf">${fmt(ventas)}</div><div class="corte-l">Ventas</div></div>
+        <div class="corte-item"><div class="corte-v" style="color:#cf6f6f">${fmt(gastos)}</div><div class="corte-l">Gastos</div></div>
+      </div>`
+  } catch(e) {
+    el.innerHTML = `<div class="empty-hint">No se pudo cargar (sin conexión)</div>`
+  }
+}
+
+function loadConsig() {
+  const el = document.getElementById('consig-resumen')
+  const ventas = (() => { try { return JSON.parse(localStorage.getItem('tc_consig_ventas')||'[]') } catch { return [] } })()
+  if (!ventas.length) {
+    document.getElementById('kpi-consig').textContent = '0'
+    el.innerHTML = `<div class="empty-hint">Sin ventas de consignación aún</div>`
+    return
+  }
+  // Last 7 days
+  const week = ventas.filter(v => Date.now() - (v.ts||0) < 7*86400000)
+  const totalSemana = week.reduce((s,v) => s + (Number(v.total)||0), 0)
+  document.getElementById('kpi-consig').textContent = fmt(totalSemana)
+  const ultimas = ventas.slice(0, 4)
+  el.innerHTML = `
+    <div class="card-row" style="margin-bottom:10px;">
+      <div style="font-size:12px;color:#555;">Últimas ${ventas.length > 4 ? '4' : ventas.length} ventas</div>
+      <div class="badge badge-yellow">Esta semana ${fmt(totalSemana)}</div>
+    </div>` +
+    ultimas.map(v => {
+      const f = v.ts ? new Date(v.ts).toLocaleDateString('es-MX', {day:'numeric',month:'short'}) : ''
+      const prods = (v.items||[]).map(i=>i.nombre||i.name||'').slice(0,2).join(', ')
+      return `<div class="inc-row">
+        <div class="inc-body">
+          <div class="inc-line1">${prods || 'Productos'}</div>
+          <div class="inc-line2">${v.encargada||''} · ${f}</div>
+        </div>
+        <div class="badge badge-yellow">${fmt(v.total)}</div>
+      </div>`
+    }).join('')
+}
+
+async function loadCalib() {
+  const el = document.getElementById('ultima-calib')
+  try {
+    const rows = await sbGet('calibraciones', '?order=ts.desc&limit=1&select=*')
+    if (!rows.length) {
+      el.innerHTML = `<div class="empty-hint">Sin calibraciones registradas aún</div>`
+      return
+    }
+    const c = rows[0]
+    const fecha = c.fecha || new Date(c.ts).toLocaleDateString('es-MX')
+    const hora  = c.hora  || ''
+    const ratio = c.cantidad && c.gramaje ? (Number(c.cantidad)/Number(c.gramaje)).toFixed(2) : '—'
+    el.innerHTML = `
+      <div class="card-row">
+        <div><div class="card-title">${fecha} ${hora}</div><div class="card-sub">${c.encargada||''}</div></div>
+        <div class="badge badge-blue">1:${ratio}</div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:10px;">
+        ${c.gramaje ? `<div><span style="font-size:13px;color:#555">Dosis </span><span style="font-weight:700">${c.gramaje}g</span></div>` : ''}
+        ${c.molienda ? `<div><span style="font-size:13px;color:#555">Molienda </span><span style="font-weight:700">${c.molienda}</span></div>` : ''}
+        ${c.tiempo ? `<div><span style="font-size:13px;color:#555">Tiempo </span><span style="font-weight:700">${c.tiempo}s</span></div>` : ''}
+        ${c.cantidad ? `<div><span style="font-size:13px;color:#555">Yield </span><span style="font-weight:700">${c.cantidad}g</span></div>` : ''}
+      </div>
+      ${c.notas ? `<div style="font-size:12px;color:#555;margin-top:8px;">📝 ${c.notas}</div>` : ''}`
+  } catch(e) {
+    el.innerHTML = `<div class="empty-hint">No se pudo cargar (sin conexión)</div>`
+  }
+}
+
+function loadIncidencias() {
+  const el = document.getElementById('incidencias-panel')
+  const inc = (() => { try { return JSON.parse(localStorage.getItem('tc_incidencias')||'[]') } catch { return [] } })()
+  const recientes = inc.slice(0, 5)
+  if (!recientes.length) {
+    el.innerHTML = `<div class="empty-hint" style="color:#6fcf6f">✅ Sin incidencias recientes</div>`
+    return
+  }
+  const ICONS = {Equipo:'🔧',Personal:'👤',Cliente:'🗣️',Limpieza:'🧹',Insumos:'📦',Otro:'📝'}
+  el.innerHTML = recientes.map(i => {
+    const fecha = new Date(i.ts).toLocaleDateString('es-MX', {day:'numeric',month:'short'})
+    const dotColor = {alta:'#cf6f6f',media:'#f5c842',baja:'#6fcf6f'}[i.sev]||'#555'
+    return `<div class="inc-row">
+      <div class="sev-dot" style="background:${dotColor}"></div>
+      <div class="inc-body">
+        <div class="inc-line1">${ICONS[i.tipo]||'📝'} ${i.tipo} · ${i.quien}</div>
+        <div class="inc-line2">${i.desc.length>60 ? i.desc.slice(0,60)+'…' : i.desc}</div>
+        <div class="inc-line2">${fecha}</div>
+      </div>
+    </div>`
+  }).join('')
+}
+</script>
+</body>
+</html>

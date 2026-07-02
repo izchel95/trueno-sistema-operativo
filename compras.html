@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Lista de Compras — Trueno ⚡</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 60px; }
+header { background: #0e0e0e; padding: 18px 20px 14px; border-bottom: 1px solid #1e1e1e; display: flex; align-items: center; justify-content: space-between; }
+.menu-btn { display: inline-flex; align-items: center; padding: 8px 14px; background: #1a1600; border: 1px solid #f5c842; border-radius: 10px; color: #f5c842; font-size: 13px; font-weight: 700; text-decoration: none; }
+.logo { font-size: 18px; font-weight: 700; }
+.logo span { color: #f5c842; }
+.main { padding: 16px; }
+.summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+.sum-box { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 12px; text-align: center; }
+.sum-val { font-size: 22px; font-weight: 800; }
+.sum-lbl { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.red { color: #cf6f6f; } .yellow { color: #f5c842; } .green { color: #6fcf6f; }
+.sec-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin: 16px 0 8px; }
+.item-row { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 12px 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 12px; }
+.item-row.done { opacity: 0.4; }
+.item-row.done .item-name { text-decoration: line-through; }
+.item-urgency { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.u-red    { background: #cf6f6f; box-shadow: 0 0 6px #cf6f6f66; }
+.u-yellow { background: #f5c842; box-shadow: 0 0 6px #f5c84266; }
+.item-info { flex: 1; min-width: 0; }
+.item-name { font-size: 14px; font-weight: 600; }
+.item-cat  { font-size: 11px; color: #555; margin-top: 2px; }
+.item-need { text-align: right; flex-shrink: 0; }
+.item-qty  { font-size: 16px; font-weight: 800; color: #f5c842; }
+.item-unit { font-size: 10px; color: #555; }
+.check-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #2a2a2a; background: #0e0e0e; color: #555; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+.check-btn.checked { background: #1a2a1a; border-color: #2d5a2d; color: #6fcf6f; }
+.all-ok { text-align: center; padding: 50px 20px; color: #444; }
+.all-ok .icon { font-size: 48px; margin-bottom: 10px; }
+.all-ok p { font-size: 14px; line-height: 1.5; }
+.btn-share { width: 100%; padding: 14px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 16px; }
+.btn-clear { width: 100%; padding: 12px; background: transparent; color: #555; border: 1px solid #2a2a2a; border-radius: 12px; font-size: 13px; cursor: pointer; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <a class="menu-btn" href="index.html">← Menú</a>
+  <a class="logo" href="index.html" style="text-decoration:none;color:inherit;">⚡ <span>Trueno</span></a>
+</header>
+
+<div class="main">
+  <div style="font-size:20px;font-weight:800;margin-bottom:4px;">🛒 Lista de compras</div>
+  <div style="font-size:12px;color:#555;margin-bottom:16px;" id="fecha-sub"></div>
+
+  <div class="summary">
+    <div class="sum-box"><div class="sum-val red" id="cnt-agotado">0</div><div class="sum-lbl">Agotados</div></div>
+    <div class="sum-box"><div class="sum-val yellow" id="cnt-bajo">0</div><div class="sum-lbl">Bajos</div></div>
+    <div class="sum-box"><div class="sum-val green" id="cnt-ok">0</div><div class="sum-lbl">OK</div></div>
+  </div>
+
+  <div id="compras-content"></div>
+</div>
+
+<script>
+const INSUMOS = [
+  ['Café en grano','Café','kg',1,3],
+  ['Leche entera','Lácteos','L',4,10],
+  ['Leche deslactosada','Lácteos','L',2,6],
+  ['Leche de avena','Lácteos','L',2,6],
+  ['Leche de almendras','Lácteos','L',1,4],
+  ['Leche de soya','Lácteos','L',1,4],
+  ['Crema para batir','Lácteos','L',1,3],
+  ['Jarabe de vainilla','Jarabes','bot',1,2],
+  ['Jarabe de caramelo','Jarabes','bot',1,2],
+  ['Jarabe de fresa','Jarabes','bot',1,2],
+  ['Jarabe de blueberry','Jarabes','bot',1,2],
+  ['Cacao en polvo','Jarabes','kg',0.5,1],
+  ['Canela','Jarabes','kg',0.2,0.5],
+  ['Dátiles','Insumos','kg',0.5,1],
+  ['Azúcar','Insumos','kg',1,3],
+  ['Hielo','Insumos','bolsas',2,5],
+  ['Agua purificada','Insumos','garrafones',2,4],
+  ['Vasos cartón 12 oz','Empaque','paq',1,3],
+  ['Vasos cartón 10 oz','Empaque','paq',1,3],
+  ['Vasos cartón 8 oz','Empaque','paq',1,2],
+  ['Vasos cartón 4 oz','Empaque','paq',1,2],
+  ['Vasos cristal 12 oz','Empaque','paq',1,2],
+  ['Tapaderas','Empaque','paq',2,4],
+  ['Mangas/Sleeves','Empaque','paq',1,3],
+  ['Popotes','Empaque','paq',1,3],
+  ['Palitos removedores','Empaque','paq',1,2],
+  ['Servilletas','Empaque','paq',2,5],
+]
+
+const K_INV   = 'tc_inv_stock'
+const K_CHECK = 'tc_compras_checked'
+
+function getStock()   { try { return JSON.parse(localStorage.getItem(K_INV)||'{}') } catch { return {} } }
+function getChecked() { try { return JSON.parse(localStorage.getItem(K_CHECK)||'{}') } catch { return {} } }
+function saveChecked(c) { localStorage.setItem(K_CHECK, JSON.stringify(c)) }
+
+function toggleCheck(idx) {
+  const c = getChecked()
+  c[idx] = !c[idx]
+  saveChecked(c)
+  render()
+}
+
+function clearChecked() {
+  localStorage.removeItem(K_CHECK)
+  render()
+}
+
+function render() {
+  const stock   = getStock()
+  const checked = getChecked()
+  const content = document.getElementById('compras-content')
+
+  // Build list of items that need buying
+  const necesita = []
+  let cntAgotado = 0, cntBajo = 0, cntOk = 0
+
+  INSUMOS.forEach((ins, i) => {
+    const [nombre, cat, unit, min, inicial] = ins
+    const qty = stock[i] !== undefined ? Number(stock[i]) : inicial
+    if (qty <= 0)   { cntAgotado++; necesita.push({ i, nombre, cat, unit, qty, min, inicial, urgencia: 'red' }) }
+    else if (qty <= min) { cntBajo++;   necesita.push({ i, nombre, cat, unit, qty, min, inicial, urgencia: 'yellow' }) }
+    else cntOk++
+  })
+
+  document.getElementById('cnt-agotado').textContent = cntAgotado
+  document.getElementById('cnt-bajo').textContent = cntBajo
+  document.getElementById('cnt-ok').textContent = cntOk
+
+  if (!necesita.length) {
+    content.innerHTML = `<div class="all-ok"><div class="icon">✅</div><p>¡Todo está abastecido!<br>No hay nada que comprar hoy.</p></div>`
+    return
+  }
+
+  // Sort: agotados first, then by category
+  necesita.sort((a, b) => {
+    if (a.urgencia === 'red' && b.urgencia !== 'red') return -1
+    if (b.urgencia === 'red' && a.urgencia !== 'red') return 1
+    return a.cat.localeCompare(b.cat)
+  })
+
+  // Group by category
+  const byCat = {}
+  necesita.forEach(item => {
+    if (!byCat[item.cat]) byCat[item.cat] = []
+    byCat[item.cat].push(item)
+  })
+
+  let html = ''
+  for (const cat in byCat) {
+    html += `<div class="sec-label">${cat}</div>`
+    byCat[cat].forEach(item => {
+      const isDone = !!checked[item.i]
+      const comprar = Math.max(0, item.inicial - item.qty)
+      html += `
+        <div class="item-row ${isDone ? 'done' : ''}">
+          <div class="item-urgency u-${item.urgencia}"></div>
+          <div class="item-info">
+            <div class="item-name">${item.nombre}</div>
+            <div class="item-cat">${item.urgencia === 'red' ? '⚠️ Agotado' : `Quedan ${item.qty} ${item.unit}`}</div>
+          </div>
+          <div class="item-need">
+            <div class="item-qty">${comprar}</div>
+            <div class="item-unit">${item.unit}</div>
+          </div>
+          <button class="check-btn ${isDone ? 'checked' : ''}" onclick="toggleCheck(${item.i})">
+            ${isDone ? '✓' : '○'}
+          </button>
+        </div>`
+    })
+  }
+
+  html += `<button class="btn-share" onclick="compartir()">📤 Compartir lista por WhatsApp</button>`
+  html += `<button class="btn-clear" onclick="clearChecked()">Limpiar ✓ marcados</button>`
+  content.innerHTML = html
+}
+
+function compartir() {
+  const stock = getStock()
+  const necesita = []
+  INSUMOS.forEach((ins, i) => {
+    const qty = stock[i] !== undefined ? Number(stock[i]) : ins[4]
+    if (qty <= ins[3]) {
+      const comprar = Math.max(0, ins[4] - qty)
+      necesita.push(`${qty <= 0 ? '🔴' : '🟡'} ${ins[0]}: comprar ${comprar} ${ins[2]}`)
+    }
+  })
+  const fecha = new Date().toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long'})
+  const texto = `⚡ *Trueno — Lista de compras*\n_${fecha}_\n\n${necesita.join('\n')}`
+  const url = `https://wa.me/?text=${encodeURIComponent(texto)}`
+  window.open(url, '_blank')
+}
+
+document.getElementById('fecha-sub').textContent =
+  'Basado en el inventario · ' + new Date().toLocaleDateString('es-MX', {day:'numeric', month:'long', year:'numeric'})
+
+render()
+</script>
+</body>
+</html>
