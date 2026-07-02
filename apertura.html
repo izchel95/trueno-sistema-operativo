@@ -289,32 +289,31 @@
   .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .submit-btn:active { opacity: 0.8; }
 
-  /* Review screen */
-  .review-screen {
-    display: none;
-    flex-direction: column;
-    min-height: 100vh;
-    padding: 24px 20px 60px;
-  }
-  .rev-header { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 20px; }
-  .rev-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
-  .rev-subtitle { font-size: 13px; color: #666; margin-bottom: 24px; }
-  .rev-progress-ring { position: relative; width: 100px; height: 100px; margin: 0 auto 24px; }
-  .rev-ring-bg { fill: none; stroke: #1e1e1e; stroke-width: 8; }
-  .rev-ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transform-origin: 50% 50%; transform: rotate(-90deg); transition: stroke-dashoffset 0.6s ease; }
-  .rev-ring-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .rev-ring-num { font-size: 22px; font-weight: 800; }
-  .rev-ring-den { font-size: 11px; color: #555; }
-  .rev-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 16px; padding: 16px; margin-bottom: 12px; }
-  .rev-card-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 10px; font-weight: 700; }
-  .rev-card-value { font-size: 15px; font-weight: 600; }
-  .rev-item-ok { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; color: #6fcf6f; border-bottom: 1px solid #1a1a1a; }
-  .rev-item-ok:last-child { border-bottom: none; }
-  .rev-item-pending { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; color: #cf6f6f; border-bottom: 1px solid #1a1a1a; }
-  .rev-item-pending:last-child { border-bottom: none; }
-  .rev-actions { position: fixed; bottom: 0; left: 0; right: 0; background: #0e0e0e; border-top: 1px solid #1e1e1e; padding: 16px 20px; display: flex; gap: 10px; }
-  .rev-back-btn { flex: 1; padding: 14px; background: #141414; border: 1px solid #2a2a2a; border-radius: 14px; color: #f0ede8; font-size: 15px; font-weight: 600; cursor: pointer; }
-  .rev-confirm-btn { flex: 2; padding: 14px; background: #f5c842; border: none; border-radius: 14px; color: #0e0e0e; font-size: 15px; font-weight: 700; cursor: pointer; }
+  /* Modal de confirmación */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 999; overflow-y: auto; padding: 20px 0 120px; }
+  .modal-overlay.active { display: block; }
+  .modal-box { background: #141414; border: 1px solid #2a2a2a; border-radius: 20px; margin: 0 16px; padding: 24px; }
+  .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .modal-sub { font-size: 13px; color: #666; margin-bottom: 20px; }
+  .modal-progress { display: flex; align-items: center; gap: 14px; background: #0e0e0e; border-radius: 14px; padding: 14px; margin-bottom: 16px; }
+  .modal-ring { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+  .modal-ring-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .modal-ring-num { font-size: 17px; font-weight: 800; line-height: 1; }
+  .modal-ring-den { font-size: 10px; color: #555; }
+  .modal-progress-info { flex: 1; }
+  .modal-estado { font-size: 14px; font-weight: 700; }
+  .modal-estado-sub { font-size: 12px; color: #555; margin-top: 2px; }
+  .modal-section { margin-bottom: 14px; }
+  .modal-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #555; font-weight: 700; margin-bottom: 8px; }
+  .modal-pending-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; color: #cf6f6f; border-bottom: 1px solid #1a1a1a; }
+  .modal-pending-item:last-child { border-bottom: none; }
+  .modal-data-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1a1a1a; font-size: 14px; }
+  .modal-data-row:last-child { border-bottom: none; }
+  .modal-data-label { color: #666; }
+  .modal-data-value { font-weight: 600; }
+  .modal-actions { position: fixed; bottom: 0; left: 0; right: 0; background: #141414; border-top: 1px solid #2a2a2a; padding: 14px 16px; display: flex; gap: 10px; z-index: 1000; }
+  .modal-back-btn { flex: 1; padding: 14px; background: #0e0e0e; border: 1px solid #2a2a2a; border-radius: 14px; color: #f0ede8; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .modal-confirm-btn { flex: 2; padding: 14px; background: #f5c842; border: none; border-radius: 14px; color: #0e0e0e; font-size: 15px; font-weight: 700; cursor: pointer; }
 
   .success-screen {
     display: none;
@@ -439,26 +438,21 @@
   </div>
 </div>
 
-<div class="review-screen" id="review-screen">
-  <div style="padding-top:16px">
-    <div class="rev-header">Revisa antes de enviar</div>
-    <div class="rev-title">☀️ Apertura</div>
-    <div class="rev-subtitle" id="rev-encargada-sub"></div>
-    <div class="rev-progress-ring">
-      <svg viewBox="0 0 100 100" width="100" height="100">
-        <circle class="rev-ring-bg" cx="50" cy="50" r="40"/>
-        <circle class="rev-ring-fill" id="rev-ring" cx="50" cy="50" r="40" stroke="#f5c842" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
-      </svg>
-      <div class="rev-ring-label">
-        <div class="rev-ring-num" id="rev-num">0</div>
-        <div class="rev-ring-den" id="rev-den">de 22</div>
-      </div>
+<div class="modal-overlay" id="modal-rev">
+  <div class="modal-box">
+    <div class="modal-title">☀️ ¿Enviar apertura?</div>
+    <div class="modal-sub" id="modal-sub"></div>
+    <div class="modal-progress" id="modal-progress"></div>
+    <div id="modal-pendientes"></div>
+    <div class="modal-section">
+      <div class="modal-section-title">Datos capturados</div>
+      <div id="modal-datos"></div>
     </div>
-    <div id="rev-cards"></div>
+    <div style="font-size:12px;color:#555;text-align:center;padding-top:4px">← Cierra para seguir editando el checklist</div>
   </div>
-  <div class="rev-actions">
-    <button class="rev-back-btn" onclick="volverARevisar()">← Seguir revisando</button>
-    <button class="rev-confirm-btn" onclick="enviar()">✅ Confirmar y enviar</button>
+  <div class="modal-actions">
+    <button class="modal-back-btn" onclick="cerrarModal()">← Editar</button>
+    <button class="modal-confirm-btn" onclick="enviar()">✅ Sí, enviar</button>
   </div>
 </div>
 
@@ -526,37 +520,49 @@
     const pending = [...document.querySelectorAll('.check-item:not(.checked)')].map(el => el.dataset.key);
     const fondo = parseFloat(document.getElementById('fondo').value) || 0;
     const notas = document.getElementById('notas').value.trim();
+    const color = checked === TOTAL ? '#6fcf6f' : checked >= TOTAL * 0.8 ? '#f5c842' : '#cf6f6f';
+    const estado = checked === TOTAL ? '✅ Todo completo' : checked >= TOTAL * 0.8 ? '⚠️ Casi listo' : '❌ Faltan varios ítems';
 
-    // Ring progress
-    const pct = checked / TOTAL;
-    const circ = 2 * Math.PI * 40;
-    document.getElementById('rev-ring').style.strokeDashoffset = circ * (1 - pct);
-    document.getElementById('rev-ring').style.stroke = checked === TOTAL ? '#6fcf6f' : checked >= TOTAL * 0.8 ? '#f5c842' : '#cf6f6f';
-    document.getElementById('rev-num').textContent = checked;
-    document.getElementById('rev-den').textContent = `de ${TOTAL}`;
-    document.getElementById('rev-encargada-sub').textContent = encargadas.join(' & ') + ' · ' + hoy.toLocaleDateString('es-MX');
+    document.getElementById('modal-sub').textContent = encargadas.join(' & ') + ' · ' + hoy.toLocaleDateString('es-MX');
 
-    let cards = '';
+    const pct = Math.round((checked / TOTAL) * 100);
+    const circ = 2 * Math.PI * 26;
+    const offset = circ * (1 - checked / TOTAL);
+    document.getElementById('modal-progress').innerHTML = `
+      <div class="modal-ring">
+        <svg viewBox="0 0 64 64" width="64" height="64">
+          <circle fill="none" stroke="#1e1e1e" stroke-width="6" cx="32" cy="32" r="26"/>
+          <circle fill="none" stroke="${color}" stroke-width="6" stroke-linecap="round" cx="32" cy="32" r="26"
+            stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
+            transform="rotate(-90 32 32)"/>
+        </svg>
+        <div class="modal-ring-label">
+          <div class="modal-ring-num" style="color:${color}">${checked}</div>
+          <div class="modal-ring-den">/${TOTAL}</div>
+        </div>
+      </div>
+      <div class="modal-progress-info">
+        <div class="modal-estado" style="color:${color}">${estado}</div>
+        <div class="modal-estado-sub">${checked} de ${TOTAL} ítems verificados (${pct}%)</div>
+      </div>`;
+
+    let pend = '';
     if (pending.length) {
-      cards += `<div class="rev-card"><div class="rev-card-title">⏳ Falta completar (${pending.length})</div>${pending.map(k=>`<div class="rev-item-pending"><span>✗</span>${k}</div>`).join('')}</div>`;
-    } else {
-      cards += `<div class="rev-card"><div class="rev-card-title">✅ Todo completado</div><div style="font-size:13px;color:#6fcf6f">¡Todos los ítems están verificados!</div></div>`;
+      pend = `<div class="modal-section"><div class="modal-section-title">⏳ Falta completar (${pending.length})</div>
+        ${pending.map(k => `<div class="modal-pending-item"><span style="color:#555">✗</span> ${k}</div>`).join('')}
+      </div>`;
     }
-    cards += `<div class="rev-card"><div class="rev-card-title">💵 Fondo de caja</div><div class="rev-card-value">${fondo ? '$' + fondo.toLocaleString('es-MX') : '<span style="color:#555">Sin capturar</span>'}</div></div>`;
-    if (notas) cards += `<div class="rev-card"><div class="rev-card-title">📝 Notas</div><div class="rev-card-value" style="font-size:13px;font-weight:400">${notas}</div></div>`;
+    document.getElementById('modal-pendientes').innerHTML = pend;
 
-    document.getElementById('rev-cards').innerHTML = cards;
-    document.getElementById('form-view').style.display = 'none';
-    const rs = document.getElementById('review-screen');
-    rs.style.display = 'flex';
-    rs.style.flexDirection = 'column';
-    window.scrollTo(0, 0);
+    document.getElementById('modal-datos').innerHTML = `
+      <div class="modal-data-row"><span class="modal-data-label">💵 Fondo de caja</span><span class="modal-data-value">${fondo ? '$' + fondo.toLocaleString('es-MX') : '<span style="color:#555">—</span>'}</span></div>
+      ${notas ? `<div class="modal-data-row"><span class="modal-data-label">📝 Notas</span><span class="modal-data-value" style="font-size:12px;font-weight:400;max-width:60%;text-align:right">${notas}</span></div>` : ''}`;
+
+    document.getElementById('modal-rev').classList.add('active');
   }
 
-  function volverARevisar() {
-    document.getElementById('review-screen').style.display = 'none';
-    document.getElementById('form-view').style.display = 'block';
-    window.scrollTo(0, 0);
+  function cerrarModal() {
+    document.getElementById('modal-rev').classList.remove('active');
   }
 
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec';
