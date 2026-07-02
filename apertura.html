@@ -331,12 +331,12 @@
   </header>
 
   <div class="encargada-section">
-    <label>¿Quién abre hoy?</label>
+    <label>¿Quién abre hoy? <span style="font-size:11px;color:#555;font-weight:400">(puedes seleccionar hasta 2)</span></label>
     <div class="encargada-btns">
-      <button class="enc-btn" onclick="setEncargada('Melanie', this)">Melanie</button>
-      <button class="enc-btn" onclick="setEncargada('Daniela', this)">Daniela</button>
-      <button class="enc-btn" onclick="setEncargada('Daniel', this)">Daniel</button>
-      <button class="enc-btn" onclick="setEncargada('Izchel', this)">Izchel</button>
+      <button class="enc-btn" onclick="toggleEncargada('Melanie', this)">Melanie</button>
+      <button class="enc-btn" onclick="toggleEncargada('Daniela', this)">Daniela</button>
+      <button class="enc-btn" onclick="toggleEncargada('Daniel', this)">Daniel</button>
+      <button class="enc-btn" onclick="toggleEncargada('Izchel', this)">Izchel</button>
     </div>
   </div>
 
@@ -425,16 +425,21 @@
   const _sb = createClient('https://axxbsjbywivolwluzvrd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk')
 
   const TOTAL = 22;
-  let encargada = '';
+  let encargadas = [];
 
   const hoy = new Date();
   const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
   document.getElementById('fecha-display').textContent = hoy.toLocaleDateString('es-MX', opciones);
 
-  function setEncargada(nombre, btn) {
-    encargada = nombre;
-    document.querySelectorAll('.enc-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+  function toggleEncargada(nombre, btn) {
+    if (encargadas.includes(nombre)) {
+      encargadas = encargadas.filter(n => n !== nombre);
+      btn.classList.remove('active');
+    } else {
+      if (encargadas.length >= 2) return;
+      encargadas.push(nombre);
+      btn.classList.add('active');
+    }
   }
 
   function toggle(el) {
@@ -468,7 +473,8 @@
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec';
 
   async function enviar() {
-    if (!encargada) { alert('¿Quién abre hoy? Selecciona tu nombre.'); return; }
+    if (!encargadas.length) { alert('¿Quién abre hoy? Selecciona al menos un nombre.'); return; }
+    const encargadaStr = encargadas.join(' & ');
 
     const btn = document.getElementById('submit-btn');
     btn.disabled = true;
@@ -478,7 +484,7 @@
     const checked = document.querySelectorAll('.check-item.checked').length;
     const estado = checked === TOTAL ? '✅ Completo' : checked >= TOTAL * 0.8 ? '⚠️ Faltó algo' : '❌ Incompleto';
 
-    const row = [hoy.toLocaleDateString('es-MX'), encargada];
+    const row = [hoy.toLocaleDateString('es-MX'), encargadaStr];
     items.forEach(item => row.push(item.classList.contains('checked') ? '✅' : '❌'));
     row.push(parseFloat(document.getElementById('fondo').value) || 0);
     row.push(document.getElementById('notas').value || '');
@@ -495,7 +501,7 @@
       _sb.from('trueno_registros').insert({
         tipo: 'apertura',
         fecha: hoy.toLocaleDateString('es-MX'),
-        encargada,
+        encargada: encargadaStr,
         datos: { estado, fondo: row[row.length-2], notas: row[row.length-1], items_ok: checked, items_total: TOTAL },
         ts: new Date().toISOString()
       }).then().catch(() => {})
