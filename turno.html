@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Mi Turno — Trueno ⚡</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 40px; }
+
+/* HEADER */
+header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #1e1e1e; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.menu-btn { display: inline-flex; align-items: center; padding: 8px 14px; background: #1a1600; border: 1px solid #f5c842; border-radius: 10px; color: #f5c842; font-size: 13px; font-weight: 700; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+.logo { font-size: 20px; font-weight: 700; }
+.logo span { color: #f5c842; }
+
+/* ENCARGADA SELECTOR */
+.encargada-bar { display: flex; gap: 8px; padding-bottom: 14px; overflow-x: auto; scrollbar-width: none; }
+.encargada-bar::-webkit-scrollbar { display: none; }
+.enc-btn { flex-shrink: 0; padding: 7px 16px; background: #141414; border: 1px solid #2a2a2a; border-radius: 30px; color: #555; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+.enc-btn.active { background: #1a1600; border-color: #f5c842; color: #f5c842; }
+
+/* TABS */
+.tabs { display: flex; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid #1e1e1e; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex-shrink: 0; padding: 10px 16px; font-size: 13px; color: #555; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+.tab.active { color: #f5c842; border-bottom-color: #f5c842; font-weight: 600; }
+
+/* PANELS */
+.panel { display: none; padding: 16px 16px 60px; }
+.panel.active { display: block; }
+
+/* GREETING */
+.greeting { margin-bottom: 18px; }
+.greeting-hora { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin-bottom: 4px; }
+.greeting-msg { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
+.greeting-msg span { color: #f5c842; }
+.greeting-sub { font-size: 13px; color: #555; margin-top: 4px; }
+
+/* SECTION LABEL */
+.sec-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin: 18px 0 8px; }
+
+/* STOCK RÁPIDO */
+.stock-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stock-item { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 12px 14px; border-left: 3px solid; }
+.stock-item.ok   { border-left-color: #6fcf6f; }
+.stock-item.low  { border-left-color: #f5c842; }
+.stock-item.out  { border-left-color: #cf6f6f; }
+.stock-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stock-qty  { font-size: 18px; font-weight: 800; }
+.stock-qty.ok  { color: #6fcf6f; }
+.stock-qty.low { color: #f5c842; }
+.stock-qty.out { color: #cf6f6f; }
+.stock-unit { font-size: 10px; color: #444; }
+.stock-link { display: block; margin-top: 8px; font-size: 11px; color: #555; text-decoration: none; }
+.stock-link:hover { color: #f5c842; }
+
+/* PUSH CARDS */
+.push-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 14px; }
+.push-emoji { font-size: 28px; flex-shrink: 0; }
+.push-body { flex: 1; }
+.push-title { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.push-why { font-size: 12px; color: #555; line-height: 1.4; }
+.push-tip { font-size: 11px; background: #1a1600; color: #a88a00; border-radius: 6px; padding: 3px 8px; margin-top: 6px; display: inline-block; }
+
+/* SCRIPTS */
+.script-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 16px; margin-bottom: 10px; overflow: hidden; }
+.script-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.script-icon { width: 38px; height: 38px; border-radius: 10px; background: #1a1600; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.script-htitle { flex: 1; font-size: 14px; font-weight: 700; }
+.script-hsub { font-size: 11px; color: #555; margin-top: 2px; }
+.script-arrow { color: #333; font-size: 18px; transition: transform 0.2s; }
+.script-card.open .script-arrow { transform: rotate(90deg); }
+.script-body { display: none; padding: 0 16px 16px; }
+.script-card.open .script-body { display: block; }
+.script-line { background: #0e0e0e; border-left: 3px solid #f5c842; border-radius: 0 8px 8px 0; padding: 10px 14px; margin-bottom: 8px; }
+.script-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: #f5c842; margin-bottom: 5px; }
+.script-text  { font-size: 13px; color: #d0cdc8; line-height: 1.65; font-style: italic; }
+.script-note  { font-size: 11px; color: #444; margin-top: 8px; line-height: 1.5; }
+.objection    { background: #1a0e0e; border-left: 3px solid #cf6f6f; border-radius: 0 8px 8px 0; padding: 8px 12px; margin-bottom: 6px; }
+.obj-q  { font-size: 12px; color: #cf6f6f; font-weight: 600; margin-bottom: 3px; }
+.obj-a  { font-size: 12px; color: #888; font-style: italic; line-height: 1.5; }
+
+/* FLUJO */
+.flujo-item { display: flex; gap: 14px; margin-bottom: 4px; }
+.flujo-line  { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+.flujo-dot   { width: 14px; height: 14px; border-radius: 50%; background: #f5c842; flex-shrink: 0; margin-top: 3px; }
+.flujo-dot.dim { background: #333; }
+.flujo-connector { width: 2px; background: #1e1e1e; flex: 1; min-height: 24px; margin: 3px 0; }
+.flujo-content { flex: 1; padding-bottom: 20px; }
+.flujo-hora  { font-size: 11px; color: #444; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+.flujo-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.flujo-desc  { font-size: 12px; color: #555; line-height: 1.5; margin-bottom: 6px; }
+.flujo-link  { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; background: #1a1600; border: 1px solid #3a2e00; border-radius: 8px; color: #f5c842; font-size: 12px; font-weight: 700; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+
+/* ALERT BANNER */
+.alert-banner { background: #1a0e0e; border: 1px solid #5a2d2d; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; display: flex; gap: 10px; align-items: flex-start; }
+.alert-banner .ab-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.alert-banner .ab-text { font-size: 13px; color: #cf6f6f; line-height: 1.5; }
+.alert-banner .ab-items { font-size: 12px; color: #888; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <a class="menu-btn" href="index.html">← Menú</a>
+    <div class="logo">⚡ <span>Trueno</span></div>
+  </div>
+  <div class="encargada-bar">
+    <div class="enc-btn" onclick="setEnc('Melanie',this)">Melanie</div>
+    <div class="enc-btn" onclick="setEnc('Daniela',this)">Daniela</div>
+    <div class="enc-btn" onclick="setEnc('Daniel',this)">Daniel</div>
+    <div class="enc-btn" onclick="setEnc('Izchel',this)">Izchel</div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="setTab(0,this)">🌅 Mi Turno</div>
+    <div class="tab" onclick="setTab(1,this)">💬 Scripts</div>
+    <div class="tab" onclick="setTab(2,this)">🗓️ Flujo</div>
+  </div>
+</header>
+
+<!-- ═══════ PANEL 0: MI TURNO ═══════ -->
+<div class="panel active" id="p0">
+
+  <div class="greeting">
+    <div class="greeting-hora" id="hora-label"></div>
+    <div class="greeting-msg" id="saludo-msg">Hola, <span id="enc-name">barista</span> ⚡</div>
+    <div class="greeting-sub" id="fecha-hoy"></div>
+  </div>
+
+  <!-- Alerta si hay items agotados -->
+  <div id="alert-stock" class="alert-banner" style="display:none;">
+    <div class="ab-icon">⚠️</div>
+    <div>
+      <div class="ab-text">Avísale a Izchel — estos insumos están bajos o agotados:</div>
+      <div class="ab-items" id="alert-items"></div>
+    </div>
+  </div>
+
+  <div class="sec-label">Stock del turno</div>
+  <div class="stock-grid" id="stock-grid"></div>
+  <a class="stock-link" href="inventario.html">Ver inventario completo →</a>
+
+  <div class="sec-label">Hoy empuja esto</div>
+  <div id="push-list"></div>
+
+</div>
+
+<!-- ═══════ PANEL 1: SCRIPTS ═══════ -->
+<div class="panel" id="p1">
+
+  <!-- SALUDO -->
+  <div class="script-card" onclick="toggleScript(this)">
+    <div class="script-header">
+      <div class="script-icon">👋</div>
+      <div class="script-body-h">
+        <div class="script-htitle">Bienvenida</div>
+        <div class="script-hsub">El primer momento importa mucho</div>
+      </div>
+      <div class="script-arrow">›</div>
+    </div>
+    <div class="script-body">
+      <div class="script-line">
+        <div class="script-label">Cuando entran</div>
+        <div class="script-text">"¡Bienvenidos a Trueno! ¿Qué les gustaría tomar hoy?"</div>
+      </div>
+      <div class="script-line">
+        <div class="script-label">Si dudan</div>
+        <div class="script-text">"¿Buscan algo caliente o frío? ¿Con café o sin café?"</div>
+      </div>
+      <div class="script-note">💡 Contacto visual + sonrisa. Espera su respuesta sin interrumpir.</div>
+    </div>
+  </div>
+
+  <!-- DATE LATTE -->
+  <div class="script-card" onclick="toggleScript(this)">
+    <div class="script-header">
+      <div class="script-icon">🌴</div>
+      <div class="script-body-h">
+        <div class="script-htitle">Date Latte</div>
+        <div class="script-hsub">Nuestra bebida signature — siempre mencionarla</div>
+      </div>
+      <div class="script-arrow">›</div>
+    </div>
+    <div class="script-body">
+      <div class="script-line">
+        <div class="script-label">Cuando ordenan latte o no saben qué quieren</div>
+        <div class="script-text">"¿Han probado nuestro Date Latte? Es nuestro latte especial — hecho con dátiles, sin azúcar refinada. Tiene un dulzor muy natural. ¡Se ha convertido en el favorito!"</div>
+      </div>
+      <div class="script-line">
+        <div class="script-label">Versión corta (cuando hay fila)</div>
+        <div class="script-text">"¿Se animan con el Date Latte? Es latte con dátiles, sin azúcar."</div>
+      </div>
+      <div class="objection">
+        <div class="obj-q">→ "¿Qué sabe?"</div>
+        <div class="obj-a">"Sabe a un latte cremoso con un toque dulce muy suave y caramelizado, como toffee natural. Nada empalagoso."</div>
+      </div>
+      <div class="objection">
+        <div class="obj-q">→ "¿Es dulce?"</div>
+        <div class="obj-a">"Tiene dulzor natural de los dátiles, pero no es pesado. Mucho más sutil que un latte con syrup."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPGRADE DE LECHE -->
+  <div class="script-card" onclick="toggleScript(this)">
+    <div class="script-header">
+      <div class="script-icon">🌾</div>
+      <div class="script-body-h">
+        <div class="script-htitle">Upgrade de leche</div>
+        <div class="script-hsub">+$15–20 por cambio de leche</div>
+      </div>
+      <div class="script-arrow">›</div>
+    </div>
+    <div class="script-body">
+      <div class="script-line">
+        <div class="script-label">Cuando ordenan cualquier bebida con leche</div>
+        <div class="script-text">"¿Lo prefieren con leche regular o quieren probar con leche de avena? Queda increíble con el espresso y le da un toque cremoso diferente."</div>
+      </div>
+      <div class="script-line">
+        <div class="script-label">Para los que ya conocen</div>
+        <div class="script-text">"¿De avena, almendras o soya hoy?"</div>
+      </div>
+      <div class="script-note">💡 Menciona el upgrade naturalmente — no como opción extra, sino como parte de la experiencia.</div>
+    </div>
+  </div>
+
+  <!-- JARABE EXTRA -->
+  <div class="script-card" onclick="toggleScript(this)">
+    <div class="script-header">
+      <div class="script-icon">🍮</div>
+      <div class="script-body-h">
+        <div class="script-htitle">Jarabe adicional</div>
+        <div class="script-hsub">Vainilla · Caramelo · Fresa · Blueberry</div>
+      </div>
+      <div class="script-arrow">›</div>
+    </div>
+    <div class="script-body">
+      <div class="script-line">
+        <div class="script-label">Al tomar la orden de un latte o café frío</div>
+        <div class="script-text">"¿Le gustaría añadir un toque de sabor? Tenemos vainilla, caramelo, fresa o blueberry."</div>
+      </div>
+      <div class="script-line">
+        <div class="script-label">Si ya llevan avena o almendras</div>
+        <div class="script-text">"La vainilla queda perfecta con la leche de avena, ¿se lo pongo?"</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAVECARD -->
+  <div class="script-card" onclick="toggleScript(this)">
+    <div class="script-header">
+      <div class="script-icon">⭐</div>
+      <div class="script-body-h">
+        <div class="script-htitle">FaveCard</div>
+        <div class="script-hsub">Programa de lealtad digital de Trueno</div>
+      </div>
+      <div class="script-arrow">›</div>
+    </div>
+    <div class="script-body">
+      <div class="script-line">
+        <div class="script-label">Clientes nuevos — al final de la orden</div>
+        <div class="script-text">"¿Tienes tu FaveCard de Trueno? Llevamos un registro digital de tus visitas. Cuando completas tu meta, tienes una bebida de cortesía. ¡Te la armamos en un momento!"</div>
+      </div>
+      <div class="script-line">
+        <div class="script-label">Clientes que regresan</div>
+        <div class="script-text">"¡Qué gusto verte de nuevo! ¿Quieres que registremos tu visita de hoy?"</div>
+      </div>
+      <div class="objection">
+        <div class="obj-q">→ "¿Cómo funciona?"</div>
+        <div class="obj-a">"Es digital, no necesitas tarjeta física. Cada visita cuenta. Cuando llegas a tu meta, te ganas una bebida."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONSIGNACIÓN -->
+  <div class="script-card" onclick="toggleScript(this)">
+    <div class="script-header">
+      <div class="script-icon">🎵</div>
+      <div class="script-body-h">
+        <div class="script-htitle">Discos y Velas</div>
+        <div class="script-hsub">Mencionar cuando haya un momento tranquilo</div>
+      </div>
+      <div class="script-arrow">›</div>
+    </div>
+    <div class="script-body">
+      <div class="script-line">
+        <div class="script-label">Mientras esperan su bebida o al pagar</div>
+        <div class="script-text">"Por cierto, tenemos una colección de vinilos y velas artesanales. Si quieren echarle un ojo mientras esperan, están allá."</div>
+      </div>
+      <div class="script-line">
+        <div class="script-label">Si muestran interés en la música</div>
+        <div class="script-text">"¿Te gusta este disco que está sonando? Lo tenemos en la colección."</div>
+      </div>
+      <div class="script-note">💡 No presiones. Es una mención natural. Si muestran interés, ofrécete a enseñárselos.</div>
+    </div>
+  </div>
+
+  <!-- RESEÑA -->
+  <div class="script-card" onclick="toggleScript(this)">
+    <div class="script-header">
+      <div class="script-icon">⭐</div>
+      <div class="script-body-h">
+        <div class="script-htitle">Reseña de Google</div>
+        <div class="script-hsub">Solo si la experiencia fue buena</div>
+      </div>
+      <div class="script-arrow">›</div>
+    </div>
+    <div class="script-body">
+      <div class="script-line">
+        <div class="script-label">Al entregar o al despedirse</div>
+        <div class="script-text">"¿Todo estuvo a su gusto? Nos ayudaría mucho si nos dejan una reseña en Google. Toma solo un minuto y nos ayuda un montón."</div>
+      </div>
+      <div class="script-line">
+        <div class="script-label">Versión corta</div>
+        <div class="script-text">"¡Gracias por venir! Si les gustó, nos encantaría su reseña en Google. 🙏"</div>
+      </div>
+      <div class="script-note">💡 Solo mencionarlo una vez, nunca insistir. Si el cliente tuvo algún problema, no pidas reseña — primero resuelve.</div>
+    </div>
+  </div>
+
+  <!-- QUEJAS -->
+  <div class="script-card" onclick="toggleScript(this)">
+    <div class="script-header">
+      <div class="script-icon">🤝</div>
+      <div class="script-body-h">
+        <div class="script-htitle">Manejo de quejas</div>
+        <div class="script-hsub">Protocolo HEAR</div>
+      </div>
+      <div class="script-arrow">›</div>
+    </div>
+    <div class="script-body">
+      <div class="script-line">
+        <div class="script-label">H — Escucha sin interrumpir</div>
+        <div class="script-text">"Cuéntame, ¿qué pasó?"  — Deja que terminen. No te defiendas aún.</div>
+      </div>
+      <div class="script-line">
+        <div class="script-label">E — Empatiza</div>
+        <div class="script-text">"Entiendo perfectamente, eso no debió pasar. Lo siento mucho."</div>
+      </div>
+      <div class="script-line">
+        <div class="script-label">A — Actúa</div>
+        <div class="script-text">"Lo rehago ahorita mismo / Te traigo otro / ¿Qué prefieren que hagamos?"</div>
+      </div>
+      <div class="script-line">
+        <div class="script-label">R — Resuelve y cierra bien</div>
+        <div class="script-text">"¿Así está mejor? Gracias por decírnoslo — nos ayuda a mejorar."</div>
+      </div>
+      <div class="script-note">⚠️ Si la queja es grave o el cliente está muy molesto, llama a Izchel de inmediato. No improvises en situaciones difíciles.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════ PANEL 2: FLUJO ═══════ -->
+<div class="panel" id="p2">
+
+  <div class="sec-label" style="margin-top:4px;">El turno de principio a fin</div>
+
+  <!-- Apertura -->
+  <div class="flujo-item">
+    <div class="flujo-line">
+      <div class="flujo-dot"></div>
+      <div class="flujo-connector"></div>
+    </div>
+    <div class="flujo-content">
+      <div class="flujo-hora">Al llegar · Primero esto</div>
+      <div class="flujo-title">☀️ Apertura</div>
+      <div class="flujo-desc">28 puntos de revisión: barra, mise en place, caja chica. Documenta el estado del día.</div>
+      <a class="flujo-link" href="apertura.html">Abrir checklist →</a>
+    </div>
+  </div>
+
+  <!-- Calibración -->
+  <div class="flujo-item">
+    <div class="flujo-line">
+      <div class="flujo-dot"></div>
+      <div class="flujo-connector"></div>
+    </div>
+    <div class="flujo-content">
+      <div class="flujo-hora">Antes del primer cliente</div>
+      <div class="flujo-title">⚙️ Calibración</div>
+      <div class="flujo-desc">Haz tu primer shot y calibra. Registra gramaje, molienda, tiempo y yield. La curva te dice si está bien.</div>
+      <a class="flujo-link" href="calibracion.html">Calibrar espresso →</a>
+    </div>
+  </div>
+
+  <!-- Servicio -->
+  <div class="flujo-item">
+    <div class="flujo-line">
+      <div class="flujo-dot"></div>
+      <div class="flujo-connector"></div>
+    </div>
+    <div class="flujo-content">
+      <div class="flujo-hora">Durante el turno</div>
+      <div class="flujo-title">☕ Servicio</div>
+      <div class="flujo-desc">Saludo → Orden → Sugerencia activa → Bebida → FaveCard → Reseña. Usa los scripts de la pestaña 💬.</div>
+      <a class="flujo-link" href="recetario.html">Ver recetario →</a>
+    </div>
+  </div>
+
+  <!-- Consignación -->
+  <div class="flujo-item">
+    <div class="flujo-line">
+      <div class="flujo-dot"></div>
+      <div class="flujo-connector"></div>
+    </div>
+    <div class="flujo-content">
+      <div class="flujo-hora">Cuando hay venta</div>
+      <div class="flujo-title">🎵 Discos y Velas</div>
+      <div class="flujo-desc">Registra la venta aquí para actualizar el stock y notificar a Izchel.</div>
+      <a class="flujo-link" href="consignacion.html">Registrar venta →</a>
+    </div>
+  </div>
+
+  <!-- Inventario -->
+  <div class="flujo-item">
+    <div class="flujo-line">
+      <div class="flujo-dot"></div>
+      <div class="flujo-connector"></div>
+    </div>
+    <div class="flujo-content">
+      <div class="flujo-hora">Cuando llegue mercancía</div>
+      <div class="flujo-title">📦 Inventario</div>
+      <div class="flujo-desc">Registra la entrada de insumos para que el stock se mantenga actualizado.</div>
+      <a class="flujo-link" href="inventario.html">Actualizar stock →</a>
+    </div>
+  </div>
+
+  <!-- Corte -->
+  <div class="flujo-item">
+    <div class="flujo-line">
+      <div class="flujo-dot"></div>
+      <div class="flujo-connector"></div>
+    </div>
+    <div class="flujo-content">
+      <div class="flujo-hora">Al final del turno · Antes de cerrar</div>
+      <div class="flujo-title">💰 Corte de caja</div>
+      <div class="flujo-desc">Cuenta el efectivo, registra ventas totales, propinas y gastos del día.</div>
+      <a class="flujo-link" href="corte.html">Hacer corte →</a>
+    </div>
+  </div>
+
+  <!-- Cierre -->
+  <div class="flujo-item">
+    <div class="flujo-line">
+      <div class="flujo-dot dim"></div>
+    </div>
+    <div class="flujo-content">
+      <div class="flujo-hora">Lo último del día</div>
+      <div class="flujo-title">🔐 Cierre</div>
+      <div class="flujo-desc">Checklist de limpieza y seguridad. No te vayas sin completarlo.</div>
+      <a class="flujo-link" href="checklist.html">Checklist de cierre →</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════
+//  INSUMOS — mismo orden que inventario.html
+// ══════════════════════════════════
+const INSUMOS = [
+  ['Café en grano','kg',1,'☕'],        // 0
+  ['Leche entera','L',4,'🥛'],          // 1
+  ['Leche deslactosada','L',2,'🥛'],    // 2
+  ['Leche de avena','L',2,'🌾'],        // 3
+  ['Leche almendras','L',1,'🌰'],       // 4
+  ['Leche de soya','L',1,'🫘'],         // 5
+  ['Crema para batir','L',1,'🍦'],      // 6
+  ['Jarabe vainilla','bot',1,'🍶'],     // 7
+  ['Jarabe caramelo','bot',1,'🍮'],     // 8
+  ['Jarabe fresa','bot',1,'🍓'],        // 9
+  ['Jarabe blueberry','bot',1,'🫐'],    // 10
+  ['Cacao en polvo','kg',0.5,'🍫'],     // 11
+  ['Dátiles','kg',0.5,'🌴'],            // 12
+  ['Hielo','bolsas',2,'🧊'],            // 13
+]
+
+// Los índices visibles en el stock rápido (los más relevantes para servicio)
+const STOCK_SHOW = [0, 1, 3, 4, 7, 8, 12, 13]
+
+const K_INV = 'tc_inv_stock'
+
+function getStock() {
+  try { return JSON.parse(localStorage.getItem(K_INV) || '{}') } catch { return {} }
+}
+
+function stockEstado(qty, min) {
+  if (qty <= 0) return 'out'
+  if (qty <= min) return 'low'
+  return 'ok'
+}
+
+// ══════════════════════════════════
+//  ENCARGADA
+// ══════════════════════════════════
+let encargada = localStorage.getItem('tc_turno_enc') || ''
+
+function setEnc(nombre, btn) {
+  encargada = nombre
+  localStorage.setItem('tc_turno_enc', nombre)
+  document.querySelectorAll('.enc-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  document.getElementById('enc-name').textContent = nombre
+  updatePush()
+}
+
+// ══════════════════════════════════
+//  TABS
+// ══════════════════════════════════
+function setTab(idx, btn) {
+  document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===idx))
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+}
+
+// ══════════════════════════════════
+//  GREETING
+// ══════════════════════════════════
+function initGreeting() {
+  const now  = new Date()
+  const hora = now.getHours()
+  const enc  = encargada || 'barista'
+  let turno, emoji
+  if (hora < 12)      { turno = 'Buenos días'; emoji = '🌅' }
+  else if (hora < 18) { turno = 'Buenas tardes'; emoji = '☀️' }
+  else                { turno = 'Buenas noches'; emoji = '🌙' }
+
+  document.getElementById('hora-label').textContent = `${emoji} ${turno}`
+  document.getElementById('saludo-msg').innerHTML = `Listo para el turno, <span id="enc-name">${enc}</span> ⚡`
+  document.getElementById('fecha-hoy').textContent = now.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'})
+
+  if (encargada) {
+    document.querySelectorAll('.enc-btn').forEach(btn => {
+      if (btn.textContent === encargada) btn.classList.add('active')
+    })
+  }
+}
+
+// ══════════════════════════════════
+//  STOCK RÁPIDO
+// ══════════════════════════════════
+function renderStock() {
+  const stock = getStock()
+  const grid  = document.getElementById('stock-grid')
+  const agotados = []
+
+  grid.innerHTML = STOCK_SHOW.map(i => {
+    const [nombre, unit, min, emoji] = INSUMOS[i]
+    const qty   = stock[i] !== undefined ? Number(stock[i]) : null
+    const estado = qty === null ? 'ok' : stockEstado(qty, min)
+    const qtyStr = qty === null ? '?' : (Number.isInteger(qty) ? qty : qty.toFixed(1))
+    if (estado !== 'ok' && qty !== null) agotados.push(`${emoji} ${nombre}`)
+    return `
+      <div class="stock-item ${estado}">
+        <div class="stock-name">${emoji} ${nombre}</div>
+        <span class="stock-qty ${estado}">${qtyStr}</span>
+        <span class="stock-unit">${unit}</span>
+      </div>`
+  }).join('')
+
+  // Alerta banner
+  const banner = document.getElementById('alert-stock')
+  if (agotados.length) {
+    document.getElementById('alert-items').textContent = agotados.join('  ·  ')
+    banner.style.display = 'flex'
+  } else {
+    banner.style.display = 'none'
+  }
+}
+
+// ══════════════════════════════════
+//  QUÉ VENDER HOY
+// ══════════════════════════════════
+function updatePush() {
+  const stock  = getStock()
+  const avena  = stock[3] !== undefined ? Number(stock[3]) : 99
+  const datiles= stock[12] !== undefined ? Number(stock[12]) : 99
+  const vaini  = stock[7] !== undefined ? Number(stock[7]) : 99
+
+  const sugs = []
+
+  // Date Latte — siempre si hay dátiles
+  if (datiles > 0) {
+    sugs.push({
+      emoji: '🌴',
+      title: 'Date Latte',
+      why: 'Nuestra bebida signature. Siempre mencionarla — es el mejor diferenciador de Trueno.',
+      tip: 'Script completo en pestaña 💬'
+    })
+  }
+
+  // Upgrade de leche
+  if (avena > INSUMOS[3][2]) {
+    sugs.push({
+      emoji: '🌾',
+      title: 'Leche de avena',
+      why: 'Hay stock suficiente. Menciona el upgrade cuando pidan bebidas con leche.',
+      tip: '+$15–20 por cambio'
+    })
+  }
+
+  // Jarabe
+  if (vaini > INSUMOS[7][2]) {
+    sugs.push({
+      emoji: '🍮',
+      title: 'Jarabes adicionales',
+      why: 'Vainilla, caramelo, fresa y blueberry disponibles. Ofrécelos al tomar la orden.',
+      tip: 'Pregunta siempre, no esperes a que lo pidan'
+    })
+  }
+
+  // Consignación — siempre
+  sugs.push({
+    emoji: '🎵',
+    title: 'Discos y Velas',
+    why: 'Mientras esperan su bebida o al pagar — es el momento perfecto para mencionarlos.',
+    tip: 'Una mención natural, sin presionar'
+  })
+
+  // FaveCard — siempre
+  sugs.push({
+    emoji: '⭐',
+    title: 'FaveCard + Reseña',
+    why: 'A cada cliente nuevo: registra el FaveCard. Al despedirse: invita a dejar reseña en Google.',
+    tip: 'Dos hábitos que construyen la marca'
+  })
+
+  document.getElementById('push-list').innerHTML = sugs.map(s => `
+    <div class="push-card">
+      <div class="push-emoji">${s.emoji}</div>
+      <div class="push-body">
+        <div class="push-title">${s.title}</div>
+        <div class="push-why">${s.why}</div>
+        <span class="push-tip">${s.tip}</span>
+      </div>
+    </div>
+  `).join('')
+}
+
+// ══════════════════════════════════
+//  SCRIPTS TOGGLE
+// ══════════════════════════════════
+function toggleScript(card) {
+  const wasOpen = card.classList.contains('open')
+  document.querySelectorAll('.script-card.open').forEach(c => c.classList.remove('open'))
+  if (!wasOpen) card.classList.add('open')
+}
+
+// ══════════════════════════════════
+//  INIT
+// ══════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  initGreeting()
+  renderStock()
+  updatePush()
+})
+</script>
+</body>
+</html>
