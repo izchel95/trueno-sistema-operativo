@@ -37,6 +37,17 @@ header { background: #0e0e0e; padding: 18px 20px 14px; border-bottom: 1px solid 
 .all-ok p { font-size: 14px; line-height: 1.5; }
 .btn-share { width: 100%; padding: 14px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 16px; }
 .btn-clear { width: 100%; padding: 12px; background: transparent; color: #555; border: 1px solid #2a2a2a; border-radius: 12px; font-size: 13px; cursor: pointer; margin-top: 8px; }
+.add-extra-form { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; margin-top: 20px; }
+.add-extra-form .form-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #555; font-weight: 700; margin-bottom: 12px; }
+.add-extra-row { display: flex; gap: 8px; }
+.add-extra-input { flex: 1; background: #0e0e0e; border: 1px solid #2a2a2a; border-radius: 10px; color: #f0ede8; font-size: 14px; padding: 10px 12px; font-family: inherit; outline: none; }
+.add-extra-input:focus { border-color: #f5c842; }
+.add-extra-btn { padding: 10px 16px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+.extra-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1a1a1a; }
+.extra-item:last-child { border-bottom: none; }
+.extra-item.done .extra-name { text-decoration: line-through; color: #444; }
+.extra-name { flex: 1; font-size: 14px; }
+.extra-del { background: none; border: none; color: #444; font-size: 16px; cursor: pointer; padding: 4px 8px; }
 </style>
 </head>
 <body>
@@ -56,6 +67,7 @@ header { background: #0e0e0e; padding: 18px 20px 14px; border-bottom: 1px solid 
   </div>
 
   <div id="compras-content"></div>
+  <div id="extras-section"></div>
 </div>
 
 <script>
@@ -131,6 +143,7 @@ function render() {
 
   if (!necesita.length) {
     content.innerHTML = `<div class="all-ok"><div class="icon">✅</div><p>¡Todo está abastecido!<br>No hay nada que comprar hoy.</p></div>`
+    renderExtras()
     return
   }
 
@@ -175,6 +188,7 @@ function render() {
   html += `<button class="btn-share" onclick="compartir()">📤 Compartir lista por WhatsApp</button>`
   html += `<button class="btn-clear" onclick="clearChecked()">Limpiar ✓ marcados</button>`
   content.innerHTML = html
+  renderExtras()
 }
 
 function compartir() {
@@ -187,10 +201,65 @@ function compartir() {
       necesita.push(`${qty <= 0 ? '🔴' : '🟡'} ${ins[0]}: comprar ${comprar} ${ins[2]}`)
     }
   })
+  const extras = getExtras().filter(e => !e.done).map(e => `⬜ ${e.texto}`)
+  if (extras.length) necesita.push(...extras)
   const fecha = new Date().toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long'})
   const texto = `⚡ *Trueno — Lista de compras*\n_${fecha}_\n\n${necesita.join('\n')}`
   const url = `https://wa.me/?text=${encodeURIComponent(texto)}`
   window.open(url, '_blank')
+}
+
+const K_EXTRA = 'tc_compras_extra'
+function getExtras() { try { return JSON.parse(localStorage.getItem(K_EXTRA)||'[]') } catch { return [] } }
+function saveExtras(e) { localStorage.setItem(K_EXTRA, JSON.stringify(e)) }
+
+function agregarExtra() {
+  const inp = document.getElementById('extra-input')
+  const val = inp.value.trim()
+  if (!val) return
+  const extras = getExtras()
+  extras.push({ texto: val, done: false })
+  saveExtras(extras)
+  inp.value = ''
+  renderExtras()
+}
+
+function toggleExtra(i) {
+  const extras = getExtras()
+  extras[i].done = !extras[i].done
+  saveExtras(extras)
+  renderExtras()
+}
+
+function eliminarExtra(i) {
+  const extras = getExtras()
+  extras.splice(i, 1)
+  saveExtras(extras)
+  renderExtras()
+}
+
+function renderExtras() {
+  const extras = getExtras()
+  const sec = document.getElementById('extras-section')
+  let html = `<div class="add-extra-form">
+    <div class="form-title">➕ Agregar ítem manual</div>
+    <div class="add-extra-row">
+      <input class="add-extra-input" id="extra-input" type="text" placeholder="Ej: Servilletas de coctel, detergente..." onkeydown="if(event.key==='Enter')agregarExtra()">
+      <button class="add-extra-btn" onclick="agregarExtra()">+</button>
+    </div>`
+  if (extras.length) {
+    html += `<div style="margin-top:12px">`
+    extras.forEach((e, i) => {
+      html += `<div class="extra-item ${e.done?'done':''}">
+        <button class="check-btn ${e.done?'checked':''}" onclick="toggleExtra(${i})" style="width:28px;height:28px;flex-shrink:0">${e.done?'✓':'○'}</button>
+        <span class="extra-name">${e.texto}</span>
+        <button class="extra-del" onclick="eliminarExtra(${i})">✕</button>
+      </div>`
+    })
+    html += `</div>`
+  }
+  html += `</div>`
+  sec.innerHTML = html
 }
 
 document.getElementById('fecha-sub').textContent =

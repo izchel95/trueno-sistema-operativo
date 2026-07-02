@@ -243,6 +243,26 @@
   .success-sub { font-size: 14px; color: #666; }
 
   .loading { display: none; }
+
+  /* Review screen */
+  .review-screen { display: none; flex-direction: column; min-height: 100vh; padding: 24px 20px 80px; }
+  .rev-header { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 20px; }
+  .rev-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+  .rev-subtitle { font-size: 13px; color: #666; margin-bottom: 24px; }
+  .rev-progress-ring { position: relative; width: 100px; height: 100px; margin: 0 auto 24px; }
+  .rev-ring-bg { fill: none; stroke: #1e1e1e; stroke-width: 8; }
+  .rev-ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transform-origin: 50% 50%; transform: rotate(-90deg); transition: stroke-dashoffset 0.6s ease; }
+  .rev-ring-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .rev-ring-num { font-size: 22px; font-weight: 800; }
+  .rev-ring-den { font-size: 11px; color: #555; }
+  .rev-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .rev-card-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 10px; font-weight: 700; }
+  .rev-card-value { font-size: 15px; font-weight: 600; }
+  .rev-item-pending { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; color: #cf6f6f; border-bottom: 1px solid #1a1a1a; }
+  .rev-item-pending:last-child { border-bottom: none; }
+  .rev-actions { position: fixed; bottom: 0; left: 0; right: 0; background: #0e0e0e; border-top: 1px solid #1e1e1e; padding: 16px 20px; display: flex; gap: 10px; }
+  .rev-back-btn { flex: 1; padding: 14px; background: #141414; border: 1px solid #2a2a2a; border-radius: 14px; color: #f0ede8; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .rev-confirm-btn { flex: 2; padding: 14px; background: #f5c842; border: none; border-radius: 14px; color: #0e0e0e; font-size: 15px; font-weight: 700; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -337,7 +357,30 @@
   </div>
 
   <div class="submit-bar">
-    <button class="submit-btn" id="submit-btn" onclick="enviar()">Enviar cierre</button>
+    <button class="submit-btn" id="submit-btn" onclick="mostrarRevision()">Enviar cierre</button>
+  </div>
+</div>
+
+<div class="review-screen" id="review-screen">
+  <div style="padding-top:16px">
+    <div class="rev-header">Revisa antes de enviar</div>
+    <div class="rev-title">🔐 Cierre</div>
+    <div class="rev-subtitle" id="rev-encargada-sub"></div>
+    <div class="rev-progress-ring">
+      <svg viewBox="0 0 100 100" width="100" height="100">
+        <circle class="rev-ring-bg" cx="50" cy="50" r="40"/>
+        <circle class="rev-ring-fill" id="rev-ring" cx="50" cy="50" r="40" stroke="#f5c842" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+      </svg>
+      <div class="rev-ring-label">
+        <div class="rev-ring-num" id="rev-num">0</div>
+        <div class="rev-ring-den" id="rev-den">de 25</div>
+      </div>
+    </div>
+    <div id="rev-cards"></div>
+  </div>
+  <div class="rev-actions">
+    <button class="rev-back-btn" onclick="volverARevisar()">← Seguir revisando</button>
+    <button class="rev-confirm-btn" onclick="enviar()">✅ Confirmar y enviar</button>
   </div>
 </div>
 
@@ -402,6 +445,38 @@
   }
 
   renderPendientes();
+
+  function mostrarRevision() {
+    if (!encargadas.length) { alert('¿Quién cierra hoy? Selecciona al menos un nombre.'); return; }
+    const checked = document.querySelectorAll('.check-item.checked').length;
+    const pending = [...document.querySelectorAll('.check-item:not(.checked)')].map(el => el.dataset.key);
+    const notas = document.getElementById('notas').value.trim();
+
+    const pct = checked / total;
+    const circ = 2 * Math.PI * 40;
+    document.getElementById('rev-ring').style.strokeDashoffset = circ * (1 - pct);
+    document.getElementById('rev-ring').style.stroke = checked === total ? '#6fcf6f' : checked >= total * 0.8 ? '#f5c842' : '#cf6f6f';
+    document.getElementById('rev-num').textContent = checked;
+    document.getElementById('rev-den').textContent = `de ${total}`;
+    document.getElementById('rev-encargada-sub').textContent = encargadas.join(' & ') + ' · ' + hoy.toLocaleDateString('es-MX');
+
+    let cards = '';
+    if (pending.length) {
+      cards += `<div class="rev-card"><div class="rev-card-title">⏳ Falta completar (${pending.length})</div>${pending.map(k=>`<div class="rev-item-pending"><span>✗</span>${k}</div>`).join('')}</div>`;
+    } else {
+      cards += `<div class="rev-card"><div class="rev-card-title">✅ Todo completado</div><div style="font-size:13px;color:#6fcf6f">¡Todos los ítems están verificados!</div></div>`;
+    }
+    if (notas) cards += `<div class="rev-card"><div class="rev-card-title">📝 Notas</div><div class="rev-card-value" style="font-size:13px;font-weight:400">${notas}</div></div>`;
+
+    document.getElementById('rev-cards').innerHTML = cards;
+    document.getElementById('form-view').style.display = 'none';
+    document.getElementById('review-screen').style.display = 'flex';
+  }
+
+  function volverARevisar() {
+    document.getElementById('review-screen').style.display = 'none';
+    document.getElementById('form-view').style.display = 'block';
+  }
 
   async function enviar() {
     if (!encargadas.length) { alert('¿Quién cierra hoy? Selecciona al menos un nombre.'); return; }
