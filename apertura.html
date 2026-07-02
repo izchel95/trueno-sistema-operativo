@@ -402,6 +402,11 @@
     <textarea id="notas" placeholder="¿Falta algo? ¿Algo importante para el turno?"></textarea>
   </div>
 
+  <div id="pendientes-section" style="margin:0 20px 16px;background:#141414;border:1px solid #2a2a2a;border-radius:14px;padding:14px;display:none">
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#666;margin-bottom:10px;font-weight:700">⏳ Falta completar</div>
+    <div id="pendientes-list"></div>
+  </div>
+
   <div class="submit-bar">
     <button class="submit-btn" id="submit-btn" onclick="enviar()">Registrar apertura</button>
   </div>
@@ -436,6 +441,7 @@
     el.classList.toggle('checked');
     el.querySelector('.check-icon').textContent = el.classList.contains('checked') ? '✓' : '';
     updateProgress();
+    renderPendientes();
   }
 
   function updateProgress() {
@@ -444,6 +450,20 @@
     document.getElementById('progress-fill').style.width = pct + '%';
     document.getElementById('progress-text').textContent = `${checked} de ${TOTAL} completados`;
   }
+
+  function renderPendientes() {
+    const pending = [...document.querySelectorAll('.check-item:not(.checked)')].map(el => el.dataset.key);
+    const sec = document.getElementById('pendientes-section');
+    const list = document.getElementById('pendientes-list');
+    if (!pending.length) {
+      sec.style.display = 'none';
+      return;
+    }
+    sec.style.display = 'block';
+    list.innerHTML = pending.map(k => `<div style="font-size:13px;color:#888;padding:4px 0;border-bottom:1px solid #1e1e1e;display:flex;align-items:center;gap:8px"><span style="color:#444">·</span>${k}</div>`).join('');
+  }
+
+  renderPendientes();
 
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec';
 
