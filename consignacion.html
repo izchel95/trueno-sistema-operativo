@@ -457,7 +457,10 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
   <div class="admin-header">
     <div class="admin-header-top">
       <div class="logo">⚡ <span>Trueno</span> <span class="admin-badge">ADMIN</span></div>
-      <button class="logout-btn" onclick="cerrarAdmin()">Salir 🔓</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <a id="admin-back-btn" href="admin.html" style="display:none;align-items:center;padding:7px 12px;background:#1a1600;border:1px solid #f5c842;border-radius:10px;color:#f5c842;font-size:12px;font-weight:700;text-decoration:none">← Admin</a>
+        <button class="logout-btn" onclick="cerrarAdmin()">Salir 🔓</button>
+      </div>
     </div>
     <div class="admin-tabs">
       <div class="admin-tab active" onclick="setAdminTab('reporte')">📊 Rep.</div>
@@ -1394,6 +1397,11 @@ function checkPin() {
 }
 function openAdmin() {
   document.getElementById('admin-panel').classList.add('open'); setAdminTab('reporte')
+  const fromAdmin = new URLSearchParams(location.search).get('from') === 'admin'
+  if (fromAdmin) {
+    const backBtn = document.getElementById('admin-back-btn')
+    if (backBtn) backBtn.style.display = 'inline-flex'
+  }
   tg(`🔐 <b>Admin abierto</b>\n📅 ${new Date().toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
 }
 function cerrarAdmin() { document.getElementById('admin-panel').classList.remove('open') }
@@ -1958,7 +1966,14 @@ seedBaseStock(); seedVelas()
 renderCatHome()
 updateCatSelects()
 syncFromCloud().then(()=>{ renderCatHome() })
-tg(`👀 <b>Consignación abierta</b>\n📅 ${new Date().toLocaleString('es-MX',{weekday:'long',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
+
+// Auto-abrir admin si viene de admin.html autenticado
+if (new URLSearchParams(location.search).get('from') === 'admin' &&
+    sessionStorage.getItem('trueno_admin') === '1') {
+  openAdmin()
+} else {
+  tg(`👀 <b>Consignación abierta</b>\n📅 ${new Date().toLocaleString('es-MX',{weekday:'long',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
+}
 </script>
 
 </body>

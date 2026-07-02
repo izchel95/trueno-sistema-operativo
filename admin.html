@@ -115,6 +115,10 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
 .delta-pos { color: #6fcf6f; }
 .delta-neg { color: #cf6f6f; }
 
+/* ── Consignación link ── */
+.consig-link-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 20px; background: #1a1600; border: 1px solid #f5c842; border-radius: 16px; color: #f5c842; font-size: 15px; font-weight: 700; text-decoration: none; margin-top: 4px; }
+.consig-link-btn:active { opacity: 0.7; }
+
 /* ── Asistencia ── */
 .persona-section { margin-bottom: 18px; }
 .persona-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 0 8px; border-bottom: 1px solid #1e1e1e; margin-bottom: 8px; }
@@ -165,8 +169,8 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
     </div>
     <div class="tabs">
       <div class="tab active" onclick="setTab(0)">📦 Stock</div>
-      <div class="tab" onclick="setTab(1)">🎵 Ventas Consig.</div>
-      <div class="tab" onclick="setTab(2)">📋 Mov. Inventario</div>
+      <div class="tab" onclick="setTab(1)">🎵 Consig.</div>
+      <div class="tab" onclick="setTab(2)">📋 Inventario</div>
       <div class="tab" onclick="setTab(3)">🕐 Asistencia</div>
     </div>
   </header>
@@ -177,11 +181,13 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
     <div id="stock-list"></div>
   </div>
 
-  <!-- VENTAS CONSIGNACIÓN -->
+  <!-- CONSIGNACIÓN (enlace a panel completo) -->
   <div class="panel" id="panel-1">
-    <div class="report-kpi" id="report-kpi"></div>
-    <div class="filter-row" id="filter-row"></div>
-    <div id="ventas-list"></div>
+    <div id="consig-preview-kpi" class="report-kpi"></div>
+    <a id="btn-ir-consig" href="consignacion.html?from=admin" class="consig-link-btn">
+      🎵 Abrir Panel Completo de Consignación →
+    </a>
+    <div style="font-size:12px;color:#444;text-align:center;margin-top:10px">Reporte, historial, registros, inventario y productos</div>
   </div>
 
   <!-- MOVIMIENTOS INVENTARIO -->
@@ -215,14 +221,37 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Auth ──
+// ── Auth + sesión con expiración ──
 const CREDS = { user: 'izchelac', pass: 'IZ9595iz' }
+const SESSION_MS = 10 * 60 * 1000  // 10 minutos
+
+function sessionValida() {
+  if (sessionStorage.getItem('trueno_admin') !== '1') return false
+  const ts = parseInt(sessionStorage.getItem('trueno_admin_ts') || '0')
+  return (Date.now() - ts) < SESSION_MS
+}
+
+function refrescarSesion() {
+  if (sessionStorage.getItem('trueno_admin') === '1')
+    sessionStorage.setItem('trueno_admin_ts', Date.now().toString())
+}
+
+function mostrarLogin() {
+  sessionStorage.removeItem('trueno_admin')
+  sessionStorage.removeItem('trueno_admin_ts')
+  document.getElementById('app').classList.remove('visible')
+  document.getElementById('login-screen').style.display = 'flex'
+  document.getElementById('l-pass').value = ''
+  document.getElementById('l-user').value = ''
+  document.getElementById('l-error').classList.remove('show')
+}
 
 function intentarLogin() {
   const u = document.getElementById('l-user').value.trim()
   const p = document.getElementById('l-pass').value
   if (u === CREDS.user && p === CREDS.pass) {
     sessionStorage.setItem('trueno_admin', '1')
+    sessionStorage.setItem('trueno_admin_ts', Date.now().toString())
     document.getElementById('login-screen').style.display = 'none'
     document.getElementById('app').classList.add('visible')
     initApp()
@@ -234,18 +263,32 @@ function intentarLogin() {
 
 function cerrarSesion() {
   sessionStorage.removeItem('trueno_admin')
+  sessionStorage.removeItem('trueno_admin_ts')
   window.location.href = 'index.html'
 }
 
-if (sessionStorage.getItem('trueno_admin') === '1') {
-  document.getElementById('login-screen').style.display = 'none'
-  document.getElementById('app').classList.add('visible')
-  document.addEventListener('DOMContentLoaded', initApp)
-} else {
-  document.addEventListener('DOMContentLoaded', ()=>{
+// Refrescar timer en cualquier toque del usuario
+document.addEventListener('click', refrescarSesion)
+document.addEventListener('touchstart', refrescarSesion)
+
+// Verificar sesión al cargar y al volver al tab
+document.addEventListener('DOMContentLoaded', () => {
+  if (sessionValida()) {
+    refrescarSesion()
+    document.getElementById('login-screen').style.display = 'none'
+    document.getElementById('app').classList.add('visible')
+    initApp()
+  } else {
+    mostrarLogin()
     document.getElementById('l-user').focus()
-  })
-}
+  }
+})
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && document.getElementById('app').classList.contains('visible')) {
+    if (!sessionValida()) mostrarLogin()
+  }
+})
 
 // ── Inventario ──
 const INSUMOS = [
@@ -434,9 +477,11 @@ function buildFiltroRow() {
 
 // ── General ──
 function setTab(i) {
+  if (!sessionValida()) { mostrarLogin(); return }
+  refrescarSesion()
   document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j))
   document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',i===j))
-  if (i===1) renderVentas()
+  if (i===1) renderConsigPreview()
   if (i===2) renderHistInv()
   if (i===3) renderAsistencia()
 }
@@ -611,6 +656,29 @@ function showToast(msg) {
   const t = document.getElementById('toast')
   t.textContent = msg; t.className='toast show'
   setTimeout(()=>t.classList.remove('show'),3000)
+}
+
+function renderConsigPreview() {
+  let ventas = []
+  try { ventas = JSON.parse(localStorage.getItem('tc_consig_ventas')||'[]') } catch {}
+  const ahora = new Date()
+  const hoy = ventas.filter(v => {
+    if (!v.ts) return false
+    const f = new Date(v.ts)
+    return f.toDateString() === ahora.toDateString()
+  })
+  const semana = ventas.filter(v => {
+    if (!v.ts) return false
+    return (ahora - new Date(v.ts)) / 86400000 <= 7
+  })
+  const totalHoy = hoy.reduce((s,v)=>s+(v.total||0), 0)
+  const totalSem = semana.reduce((s,v)=>s+(v.total||0), 0)
+  const utSem    = semana.reduce((s,v)=>s+(v.utilidad||0), 0)
+  document.getElementById('consig-preview-kpi').innerHTML = `
+    <div class="report-card"><div class="report-val">$${totalHoy.toLocaleString('es-MX')}</div><div class="report-label">Ventas hoy (${hoy.length})</div></div>
+    <div class="report-card"><div class="report-val">$${totalSem.toLocaleString('es-MX')}</div><div class="report-label">Ventas 7 días (${semana.length})</div></div>
+    <div class="report-card" style="grid-column:1/-1"><div class="report-val">$${utSem.toLocaleString('es-MX')}</div><div class="report-label">Utilidad Trueno — 7 días</div></div>
+  `
 }
 
 function initApp() {
