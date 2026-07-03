@@ -390,7 +390,7 @@ async function registrar() {
     notas: document.getElementById('notas').value.trim()||null
   }
 
-  const { id: _localId, ...registroSb } = registro
+  const registroSb = {...registro, id: crypto.randomUUID ? crypto.randomUUID() : registro.id}
   sb.from('calibraciones').insert(registroSb).then(({error})=>{
     if (error) {
       const warn = document.getElementById('sync-warn')
