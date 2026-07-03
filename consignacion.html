@@ -416,6 +416,12 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
         </div>
       </div>
 
+      <!-- Observaciones -->
+      <div class="pago-section" style="margin-top:4px;padding-top:10px">
+        <div class="pago-label">Observaciones (opcional)</div>
+        <textarea id="cart-observaciones" class="form-input" rows="2" style="resize:none;font-size:14px" placeholder="Notas, detalles de la venta..."></textarea>
+      </div>
+
       <button class="btn-registrar-cart" id="btn-registrar-cart" onclick="registrarCarrito()">Registrar venta</button>
       <button class="btn-seguir-cart" onclick="cerrarCarrito()">← Seguir agregando</button>
     </div>
@@ -503,6 +509,8 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
       <div class="kpi-card"><div class="kpi-label">De Trueno</div><div class="kpi-val c-green" id="rep-trueno">$0</div><div class="kpi-sub">Comisión</div></div>
       <div class="kpi-card" style="grid-column:1/-1"><div class="kpi-label">Del proveedor (CLIP)</div><div class="kpi-val c-blue" id="rep-proveedor">$0</div><div class="kpi-sub">A liquidar</div></div>
     </div>
+    <!-- Fiscal breakdown -->
+    <div id="rep-fiscal"></div>
     <!-- Top productos -->
     <div class="section-label">🏆 Top productos</div>
     <div id="rep-top-prods"></div>
@@ -1267,6 +1275,7 @@ function abrirCarrito() {
   document.getElementById('pago-error').classList.remove('show')
   document.getElementById('pago-error-cambio').classList.remove('show')
   document.getElementById('btn-registrar-cart').disabled = true
+  document.getElementById('cart-observaciones').value = ''
   document.getElementById('cart-overlay').classList.add('open')
 }
 
@@ -1351,6 +1360,7 @@ async function registrarCarrito() {
   const totalPzas = cart.reduce((s,e)=>s+e.qty,0)
   const pagoTarjeta = formaPago==='dividir' ? totalVenta-pagoEfectivo : (formaPago==='tarjeta'?totalVenta:0)
   const pagoEfec = formaPago==='dividir' ? pagoEfectivo : (formaPago==='efectivo'?totalVenta:0)
+  const observaciones = document.getElementById('cart-observaciones').value.trim()
   let resumen = []
   for (const e of cart) {
     for (let i=0;i<e.qty;i++) {
@@ -1359,7 +1369,9 @@ async function registrarCarrito() {
         fecha, prod_id:e.id, nombre:e.p.nombre, sub:e.p.sub||'',
         tipo:e.p.tipo||'', cat:e.p.cat,
         precio_venta:e.p.pv, precio_proveedor:e.p.pp||0, utilidad:e.p.ut||0,
-        vendedor, forma_pago:formaPago, ts
+        comision_empleado: Math.round((e.p.ut||0)*0.10*100)/100,
+        vendedor, forma_pago:formaPago, ts,
+        observaciones: observaciones||''
       }
       ventas.push(v); pushVenta(v)
     }
@@ -1374,7 +1386,9 @@ async function registrarCarrito() {
   const pagoLinea = formaPago==='efectivo' ? `💵 Efectivo: $${totalVenta.toLocaleString('es-MX')}`
     : formaPago==='tarjeta' ? `💳 Tarjeta: $${totalVenta.toLocaleString('es-MX')}`
     : `💵 Efectivo: $${pagoEfec.toLocaleString('es-MX')} · 💳 Tarjeta: $${pagoTarjeta.toLocaleString('es-MX')}`
-  tg(`💸 <b>${totalPzas} venta${totalPzas!==1?'s':''} registrada${totalPzas!==1?'s':''}</b>\n${resumen.map(r=>`• ${r}`).join('\n')}\n💰 Total: $${totalVenta.toLocaleString('es-MX')}\n${pagoLinea}\n👤 ${vendedor}\n📅 ${now.toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
+  const totalUtilidad = cart.reduce((s,e)=>s+(e.p.ut||0)*e.qty,0)
+  const totalComision = Math.round(totalUtilidad*0.10)
+  tg(`💸 <b>${totalPzas} venta${totalPzas!==1?'s':''} registrada${totalPzas!==1?'s':''}</b>\n${resumen.map(r=>`• ${r}`).join('\n')}\n💰 Total: $${totalVenta.toLocaleString('es-MX')}\n${pagoLinea}\n⚡ Trueno: $${totalUtilidad.toLocaleString('es-MX')} · 🎯 Comisión: $${totalComision.toLocaleString('es-MX')}\n👤 ${vendedor}${observaciones?`\n📝 ${observaciones}`:''}\n📅 ${now.toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`)
 
   // Google Sheets — una fila por carrito
   fetch('https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec', {
@@ -1386,8 +1400,10 @@ async function registrarCarrito() {
       resumen.join(' | '),
       totalPzas,
       totalVenta,
-      cart.reduce((s,e)=>s+(e.p.ut||0)*e.qty,0),
-      formaPago
+      totalUtilidad,
+      totalComision,
+      formaPago,
+      observaciones
     ]})
   }).catch(()=>{})
 
@@ -1623,8 +1639,9 @@ function renderReporte() {
   const vendMap={}
   vs.forEach(v=>{
     const nom=v.vendedor||'—'
-    if(!vendMap[nom]) vendMap[nom]={cnt:0,rev:0,ut:0}
+    if(!vendMap[nom]) vendMap[nom]={cnt:0,rev:0,ut:0,comision:0}
     vendMap[nom].cnt++; vendMap[nom].rev+=v.precio_venta; vendMap[nom].ut+=(v.utilidad||0)
+    vendMap[nom].comision+=(v.comision_empleado!=null?v.comision_empleado:(v.utilidad||0)*0.10)
   })
   const vends=Object.entries(vendMap).sort((a,b)=>b[1].rev-a[1].rev)
   const mvEl=document.getElementById('rep-mejor-vendedor')
@@ -1632,15 +1649,42 @@ function renderReporte() {
   else {
     const medals=['🥇','🥈','🥉','4️⃣','5️⃣']
     mvEl.innerHTML=`<div class="section-box" style="padding:10px"><table class="top-table">
-      <thead><tr><th></th><th>Colaborador</th><th class="top-cnt">Pzas</th><th class="top-rev">Total</th><th class="top-rev" style="color:#6fcf6f">Trueno</th></tr></thead>
+      <thead><tr><th></th><th>Colaborador</th><th class="top-cnt">Pzas</th><th class="top-rev">Total</th><th class="top-rev" style="color:#6fcf6f">Trueno</th><th class="top-rev" style="color:#f5a842">Comisión</th></tr></thead>
       <tbody>`+vends.map(([nom,d],i)=>`<tr>
         <td class="top-rank">${medals[i]||'·'}</td>
         <td><div class="top-name">${nom}</div></td>
         <td class="top-cnt">${d.cnt}</td>
         <td class="top-rev">$${d.rev.toLocaleString('es-MX')}</td>
         <td class="top-rev" style="color:#6fcf6f">$${d.ut.toLocaleString('es-MX')}</td>
+        <td class="top-rev" style="color:#f5a842">$${Math.round(d.comision).toLocaleString('es-MX')}</td>
       </tr>`).join('')+`</tbody></table></div>`
   }
+
+  // Desglose fiscal
+  try {
+    var totalTarjeta = vs.filter(function(v){return v.forma_pago==='tarjeta'}).reduce(function(s,v){return s+v.precio_venta},0)
+    var terminalFee = Math.round(totalTarjeta*0.03)
+    var ivaEnTrueno = Math.round(tru*16/116)
+    var comisionEmpleados = Math.round(tru*0.10)
+    var truNeto = tru - ivaEnTrueno - comisionEmpleados
+    var isrEstimado = Math.round(truNeto>0?truNeto*0.01:0)
+    var netoFinal = Math.max(0, truNeto - isrEstimado)
+    var fiscalEl = document.getElementById('rep-fiscal')
+    if(fiscalEl) {
+      var html = '<div class="section-label" style="padding-top:4px">📋 Desglose estimado</div>'
+      html += '<div class="section-box" style="padding:12px;margin-bottom:14px">'
+      html += '<div style="display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:13px">'
+      html += '<span style="color:#888">Terminal (3% tarjeta)</span><span style="text-align:right;color:#cf6f6f">−$' + terminalFee.toLocaleString('es-MX') + '</span>'
+      html += '<span style="color:#888">IVA incluido en utilidad (16%)</span><span style="text-align:right;color:#cf6f6f">−$' + ivaEnTrueno.toLocaleString('es-MX') + '</span>'
+      html += '<span style="color:#888">Comisión empleados (10%)</span><span style="text-align:right;color:#f5a842">−$' + comisionEmpleados.toLocaleString('es-MX') + '</span>'
+      html += '<span style="color:#888;padding-top:6px;border-top:1px solid #1a1a1a">ISR (1%)</span><span style="text-align:right;color:#cf6f6f;padding-top:6px;border-top:1px solid #1a1a1a">−$' + isrEstimado.toLocaleString('es-MX') + '</span>'
+      html += '<span style="font-weight:700;color:#f0ede8;padding-top:6px;border-top:1px solid #2a2a2a">Neto estimado Trueno</span><span style="text-align:right;font-weight:800;color:#6fcf6f;padding-top:6px;border-top:1px solid #2a2a2a">$' + netoFinal.toLocaleString('es-MX') + '</span>'
+      html += '</div>'
+      if(totalTarjeta>0) html += '<div style="font-size:10px;color:#444;margin-top:8px">Ventas con tarjeta: $' + totalTarjeta.toLocaleString('es-MX') + '</div>'
+      html += '</div>'
+      fiscalEl.innerHTML = html
+    }
+  } catch(e) { console.error('[fiscal]', e) }
 
   // Lista ventas
   const catOf=v=>{const c=cats.find(x=>x.name===v.cat);return c?c.icon:'📦'}
@@ -1652,10 +1696,12 @@ function renderReporte() {
       <div class="venta-info">
         <div class="venta-prod">${v.nombre}${v.sub?` — ${v.sub}`:''}</div>
         <div class="venta-meta">${v.vendedor} · ${new Date(v.ts).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})} · ${v.fecha}</div>
+        ${v.observaciones?`<div class="venta-meta" style="color:#666;font-style:italic">📝 ${v.observaciones}</div>`:''}
       </div>
       <div class="venta-right">
         <div class="venta-pv">$${v.precio_venta.toLocaleString('es-MX')}</div>
         ${v.precio_proveedor?`<div class="venta-split">Prov: $${v.precio_proveedor.toLocaleString('es-MX')} · Trueno: $${(v.utilidad||0).toLocaleString('es-MX')}</div>`:''}
+        ${v.comision_empleado!=null?`<div class="venta-split" style="color:#f5a842">Comisión: $${(v.comision_empleado).toLocaleString('es-MX')}</div>`:''}
       </div>
     </div>`).join('')
 }
@@ -1753,10 +1799,12 @@ function renderHistorial() {
       <div class="venta-info">
         <div class="venta-prod">${v.nombre}${v.sub?` — ${v.sub}`:''}</div>
         <div class="venta-meta">${v.vendedor} · ${new Date(v.ts).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+        ${v.observaciones?`<div class="venta-meta" style="color:#666;font-style:italic">📝 ${v.observaciones}</div>`:''}
       </div>
       <div class="venta-right">
         <div class="venta-pv">$${v.precio_venta.toLocaleString('es-MX')}</div>
         ${v.precio_proveedor?`<div class="venta-split">Prov: $${v.precio_proveedor.toLocaleString('es-MX')}</div>`:''}
+        ${v.comision_empleado!=null?`<div class="venta-split" style="color:#f5a842">Comisión: $${(v.comision_empleado).toLocaleString('es-MX')}</div>`:''}
       </div>
     </div>`).join('')
 }

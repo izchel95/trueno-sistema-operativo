@@ -305,6 +305,7 @@ header { padding: 16px 20px; border-bottom: 1px solid #1a1a1a; background: #0e0e
   <div class="success-title">¡Calibración guardada!</div>
   <div class="success-sub" id="success-resumen"></div>
   <div class="success-ts" id="success-ts"></div>
+  <div id="sync-warn" style="display:none;background:#2a1a00;border:1px solid #5a3a00;border-radius:10px;padding:10px 14px;font-size:13px;color:#f5a842;margin-bottom:12px;text-align:center"></div>
   <button class="success-btn blue" onclick="verCurvaUltimo()">📈 Ver curva de este shot</button>
   <button class="success-btn gold" onclick="volverAlForm()">+ Nueva calibración</button>
   <a class="success-btn" href="index.html">← Menú principal</a>
@@ -389,7 +390,16 @@ async function registrar() {
     notas: document.getElementById('notas').value.trim()||null
   }
 
-  sb.from('calibraciones').insert(registro).then().catch(()=>{})
+  const { id: _localId, ...registroSb } = registro
+  sb.from('calibraciones').insert(registroSb).then(({error})=>{
+    if (error) {
+      const warn = document.getElementById('sync-warn')
+      if (warn) { warn.style.display='block'; warn.textContent='⚠️ No se sincronizó con la nube. Avísale a Izchel.' }
+    }
+  }).catch(()=>{
+    const warn = document.getElementById('sync-warn')
+    if (warn) { warn.style.display='block'; warn.textContent='⚠️ Sin conexión. La calibración se guardó localmente.' }
+  })
   fetch(GAS,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({tipo:'calibracion',row:[registro.fecha,registro.hora,registro.encargada,registro.gramaje,registro.molienda,registro.tiempo_extraccion,registro.cantidad_extraida,registro.temp_ambiente||'',registro.temp_agua,registro.notas||'']})
   }).catch(()=>{})

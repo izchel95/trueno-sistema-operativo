@@ -330,7 +330,7 @@ async function loadCalib() {
     const c = rows[0]
     const fecha = c.fecha || new Date(c.ts).toLocaleDateString('es-MX')
     const hora  = c.hora  || ''
-    const ratio = c.cantidad && c.gramaje ? (Number(c.cantidad)/Number(c.gramaje)).toFixed(2) : '—'
+    const ratio = c.cantidad_extraida && c.gramaje ? (Number(c.cantidad_extraida)/Number(c.gramaje)).toFixed(2) : '—'
     el.innerHTML = `
       <div class="card-row">
         <div><div class="card-title">${fecha} ${hora}</div><div class="card-sub">${c.encargada||''}</div></div>
@@ -339,8 +339,8 @@ async function loadCalib() {
       <div style="display:flex;gap:12px;margin-top:10px;">
         ${c.gramaje ? `<div><span style="font-size:13px;color:#555">Dosis </span><span style="font-weight:700">${c.gramaje}g</span></div>` : ''}
         ${c.molienda ? `<div><span style="font-size:13px;color:#555">Molienda </span><span style="font-weight:700">${c.molienda}</span></div>` : ''}
-        ${c.tiempo ? `<div><span style="font-size:13px;color:#555">Tiempo </span><span style="font-weight:700">${c.tiempo}s</span></div>` : ''}
-        ${c.cantidad ? `<div><span style="font-size:13px;color:#555">Yield </span><span style="font-weight:700">${c.cantidad}g</span></div>` : ''}
+        ${c.tiempo_extraccion ? `<div><span style="font-size:13px;color:#555">Tiempo </span><span style="font-weight:700">${c.tiempo_extraccion}s</span></div>` : ''}
+        ${c.cantidad_extraida ? `<div><span style="font-size:13px;color:#555">Yield </span><span style="font-weight:700">${c.cantidad_extraida}ml</span></div>` : ''}
       </div>
       ${c.notas ? `<div style="font-size:12px;color:#555;margin-top:8px;">📝 ${c.notas}</div>` : ''}`
   } catch(e) {
