@@ -392,13 +392,22 @@ async function registrar() {
 
   const registroSb = {...registro, id: crypto.randomUUID ? crypto.randomUUID() : registro.id}
   sb.from('calibraciones').insert(registroSb).then(({error})=>{
-    if (error) {
-      const warn = document.getElementById('sync-warn')
-      if (warn) { warn.style.display='block'; warn.textContent='⚠️ No se sincronizó con la nube. Avísale a Izchel.' }
-    }
-  }).catch(()=>{
     const warn = document.getElementById('sync-warn')
-    if (warn) { warn.style.display='block'; warn.textContent='⚠️ Sin conexión. La calibración se guardó localmente.' }
+    if (!warn) return
+    if (error) {
+      warn.style.display='block'
+      warn.style.background='#2a1a00'
+      warn.style.color='#f5a842'
+      warn.textContent='⚠️ Error al sincronizar: ' + error.message
+    } else {
+      warn.style.display='block'
+      warn.style.background='#0a2a0a'
+      warn.style.color='#6fcf6f'
+      warn.textContent='✅ Sincronizado con la nube correctamente'
+    }
+  }).catch((e)=>{
+    const warn = document.getElementById('sync-warn')
+    if (warn) { warn.style.display='block'; warn.textContent='⚠️ Sin conexión: ' + (e?.message||'error de red') }
   })
   fetch(GAS,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({tipo:'calibracion',row:[registro.fecha,registro.hora,registro.encargada,registro.gramaje,registro.molienda,registro.tiempo_extraccion,registro.cantidad_extraida,registro.temp_ambiente||'',registro.temp_agua,registro.notas||'']})
