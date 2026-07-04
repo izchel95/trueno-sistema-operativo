@@ -1044,13 +1044,13 @@ async function syncFromCloud() {
     if (sc?.length) { customProds = sc; localStorage.setItem(K.custom, JSON.stringify(customProds)) }
   } catch(e) { console.warn('[sync]',e) }
 }
-function pushVenta(v) { sb.from('consig_ventas').upsert(v).then().catch(()=>{}) }
-function pushStock(id, n) { sb.from('consig_stock').upsert({prod_id:id, stock:n}).then().catch(()=>{}) }
-function pushProduct(p) {
-  const row = {...p, is_custom:true, descripcion: p.desc}
-  sb.from('consig_products').upsert(row).then().catch(()=>{})
-}
-function deleteProductCloud(id) { sb.from('consig_products').delete().eq('id',id).then().catch(()=>{}) }
+var _sbUrl = 'https://axxbsjbywivolwluzvrd.supabase.co'
+var _sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+var _sbH = { 'apikey': _sbKey, 'Authorization': 'Bearer ' + _sbKey, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' }
+function pushVenta(v) { fetch(_sbUrl+'/rest/v1/consig_ventas', { method:'POST', headers:_sbH, body:JSON.stringify(v) }).catch(function(){}) }
+function pushStock(id, n) { fetch(_sbUrl+'/rest/v1/consig_stock', { method:'POST', headers:_sbH, body:JSON.stringify({prod_id:id, stock:n}) }).catch(function(){}) }
+function pushProduct(p) { fetch(_sbUrl+'/rest/v1/consig_products', { method:'POST', headers:_sbH, body:JSON.stringify({...p, is_custom:true, descripcion:p.desc}) }).catch(function(){}) }
+function deleteProductCloud(id) { fetch(_sbUrl+'/rest/v1/consig_products?id=eq.'+id, { method:'DELETE', headers:_sbH }).catch(function(){}) }
 
 // ─── Seed base stock once ─────────────────────────────────────────────────────
 function seedBaseStock() {

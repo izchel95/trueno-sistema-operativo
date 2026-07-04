@@ -816,9 +816,15 @@ function showToast(msg) {
   setTimeout(()=>t.classList.remove('show'),3000)
 }
 
-function renderConsigPreview() {
+async function renderConsigPreview() {
   let ventas = []
-  try { ventas = JSON.parse(localStorage.getItem('tc_consig_ventas')||'[]') } catch {}
+  try {
+    var _h = { 'apikey': _adminSbKey, 'Authorization': 'Bearer ' + _adminSbKey }
+    var rv = await fetch(_adminSbUrl + '/rest/v1/consig_ventas?select=*&order=ts.desc', { headers: _h })
+    var dv = await rv.json()
+    if (Array.isArray(dv) && dv.length) { ventas = dv; localStorage.setItem('tc_consig_ventas', JSON.stringify(dv)) }
+    else { try { ventas = JSON.parse(localStorage.getItem('tc_consig_ventas')||'[]') } catch {} }
+  } catch { try { ventas = JSON.parse(localStorage.getItem('tc_consig_ventas')||'[]') } catch {} }
   const ahora = new Date()
   const hoy = ventas.filter(v => {
     if (!v.ts) return false
@@ -839,11 +845,31 @@ function renderConsigPreview() {
   `
 }
 
+var _adminSbUrl = 'https://axxbsjbywivolwluzvrd.supabase.co'
+var _adminSbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+
+async function syncAllFromCloud() {
+  var h = { 'apikey': _adminSbKey, 'Authorization': 'Bearer ' + _adminSbKey }
+  try {
+    var rv = await fetch(_adminSbUrl + '/rest/v1/consig_ventas?select=*&order=ts.desc', { headers: h })
+    var dv = await rv.json()
+    if (Array.isArray(dv) && dv.length) localStorage.setItem('tc_consig_ventas', JSON.stringify(dv))
+  } catch(e) {}
+  try {
+    var ri = await fetch(_adminSbUrl + '/rest/v1/incidencias?select=*&order=ts.desc', { headers: h })
+    var di = await ri.json()
+    if (Array.isArray(di) && di.length) localStorage.setItem('tc_incidencias', JSON.stringify(di.map(function(r) {
+      return { tipo: r.tipo, sev: r.sev, quien: r.quien, desc: r.descripcion, acc: r.accion, ts: new Date(r.ts).getTime() }
+    })))
+  } catch(e) {}
+}
+
 function initApp() {
   loadInv(); renderStock()
   buildAsistFiltros()
   buildCalibFiltros()
   initRepSem()
+  syncAllFromCloud()
 }
 
 // ── Reporte semanal ──────────────────────────────────────────────────────────
@@ -878,11 +904,13 @@ async function renderReporteSemanal() {
   const desdeISO = desde.toISOString()
 
   try {
-    const [rCortes, rCalib, rAsist, rIncid] = await Promise.all([
+    var _sbH2 = { 'apikey': _adminSbKey, 'Authorization': 'Bearer ' + _adminSbKey }
+    const [rCortes, rCalib, rAsist, rIncid, rConsig] = await Promise.all([
       _sb.from('trueno_registros').select('encargada,datos,ts').eq('tipo','corte').gte('ts',desdeISO).order('ts',{ascending:false}),
       _sb.from('calibraciones').select('encargada,gramaje,molienda,tiempo_extraccion,cantidad_extraida,ts').gte('ts',desdeISO).order('ts',{ascending:false}),
       _sb.from('trueno_registros').select('encargada,datos,ts').eq('tipo','asistencia').gte('ts',desdeISO).order('ts',{ascending:false}),
-      Promise.resolve({ data: (() => { try { return JSON.parse(localStorage.getItem('tc_incidencias')||'[]').filter(i => new Date(i.ts) >= desde) } catch { return [] } })() })
+      fetch(_adminSbUrl+'/rest/v1/incidencias?select=*&ts=gte.'+desdeISO+'&order=ts.desc',{headers:_sbH2}).then(r=>r.json()).then(d=>({data:Array.isArray(d)?d.map(r=>({tipo:r.tipo,sev:r.sev,quien:r.quien,desc:r.descripcion,acc:r.accion,ts:new Date(r.ts).getTime()})):[]})).catch(()=>({data:[]})),
+      fetch(_adminSbUrl+'/rest/v1/consig_ventas?select=*&ts=gte.'+desdeISO+'&order=ts.desc',{headers:_sbH2}).then(r=>r.json()).then(d=>({data:Array.isArray(d)?d:[]})).catch(()=>({data:[]}))
     ])
 
     const cortes = rCortes.data || []
@@ -894,10 +922,9 @@ async function renderReporteSemanal() {
     const netoTotal = cortes.reduce((s,c) => s + (c.datos?.neto||0), 0)
     const ventasTotal = cortes.reduce((s,c) => s + (c.datos?.ventas||0), 0)
 
-    // Ventas consig localStorage
-    let consigVentas = []
-    try { consigVentas = JSON.parse(localStorage.getItem('tc_consig_ventas')||'[]').filter(v => v.ts && new Date(v.ts) >= desde) } catch {}
-    const consigTotal = consigVentas.reduce((s,v) => s+(v.precio_venta||0), 0)
+    // Ventas consig desde Supabase
+    const consigVentas = rConsig.data || []
+    const consigTotal = consigVentas.reduce((s,v) => s+(v.total||v.precio_venta||0), 0)
     const consigUt = consigVentas.reduce((s,v) => s+(v.utilidad||0), 0)
 
     // Asistencia: horas por persona

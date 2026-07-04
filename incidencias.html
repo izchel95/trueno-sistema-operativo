@@ -205,6 +205,15 @@ function guardar() {
     body: JSON.stringify({ tipo:'incidencia', row:[_fecha, _hora, tipo||'—', sev||'—', quien, desc, acc||''] })
   }).catch(()=>{})
 
+  // Sync a Supabase
+  var _sbUrl = 'https://axxbsjbywivolwluzvrd.supabase.co'
+  var _sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+  fetch(_sbUrl + '/rest/v1/incidencias', {
+    method: 'POST',
+    headers: { 'apikey': _sbKey, 'Authorization': 'Bearer ' + _sbKey, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ id: Date.now().toString(), ts: new Date().toISOString(), fecha: _fecha, hora: _hora, tipo: tipo||null, sev: sev||null, quien: quien, descripcion: desc, accion: acc||null, empleado: quien })
+  }).catch(function(){})
+
   // Reset form
   document.getElementById('descripcion').value = ''
   document.getElementById('accion').value = ''

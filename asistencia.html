@@ -195,6 +195,21 @@ function registrar() {
   hist.forEach((r, i) => { if (i >= 30 && r.foto) r.foto = null })
   localStorage.setItem(K, JSON.stringify(hist))
 
+  // Sync a Supabase
+  var _sbUrl = 'https://axxbsjbywivolwluzvrd.supabase.co'
+  var _sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+  fetch(_sbUrl + '/rest/v1/trueno_registros', {
+    method: 'POST',
+    headers: { 'apikey': _sbKey, 'Authorization': 'Bearer ' + _sbKey, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      id: registro.id,
+      tipo: 'asistencia',
+      encargada: registro.nombre,
+      datos: { tipo_registro: registro.tipo, hora: registro.hora },
+      ts: registro.ts
+    })
+  }).catch(function(){})
+
   showToast(`✓ ${tipo === 'entrada' ? 'Entrada' : 'Salida'} registrada — ${persona}`)
 
   // Reset form
