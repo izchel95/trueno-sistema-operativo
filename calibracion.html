@@ -715,7 +715,7 @@ function renderHistList(list) {
 function cargarHistorial() {
   var SB_URL = 'https://axxbsjbywivolwluzvrd.supabase.co'
   var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
-  fetch(SB_URL + '/rest/v1/calibraciones?select=*&order=created_at.desc&limit=10', {
+  fetch(SB_URL + '/rest/v1/calibraciones?select=*&order=ts.desc&limit=10', {
     headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
   }).then(function(r) { return r.json() }).then(function(data) {
     if (Array.isArray(data) && data.length) {
