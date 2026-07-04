@@ -683,12 +683,11 @@ function renderTrend(hist) {
   document.getElementById('trend-svg').innerHTML = svg
 }
 
-// ─── Historial local ──────────────────────────────────────────────────────────
-function cargarHistorial() {
-  const list = JSON.parse(localStorage.getItem('tc_calibraciones')||'[]')
+// ─── Historial (Supabase + localStorage fallback) ─────────────────────────────
+function renderHistList(list) {
   const el = document.getElementById('hist-list')
   const countEl = document.getElementById('hist-count')
-  if (countEl) countEl.textContent = list.length ? `${list.length} registradas` : ''
+  if (countEl) countEl.textContent = list.length ? list.length + ' registradas' : ''
   if (!list.length) {
     el.innerHTML = '<div style="color:#2a2a2a;font-size:13px;text-align:center;padding:20px">Sin registros aún</div>'
     return
@@ -711,6 +710,24 @@ function cargarHistorial() {
       ${r.temp_ambiente?`<div class="calib-temp">🌡️ ${r.temp_ambiente}°C · Ratio 1:${ratio}</div>`:`<div class="calib-temp">Ratio 1:${ratio}</div>`}
     </div>`
   }).join('')
+}
+
+function cargarHistorial() {
+  var SB_URL = 'https://axxbsjbywivolwluzvrd.supabase.co'
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+  fetch(SB_URL + '/rest/v1/calibraciones?select=*&order=created_at.desc&limit=10', {
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+  }).then(function(r) { return r.json() }).then(function(data) {
+    if (Array.isArray(data) && data.length) {
+      renderHistList(data)
+    } else {
+      var local = JSON.parse(localStorage.getItem('tc_calibraciones')||'[]')
+      renderHistList(local)
+    }
+  }).catch(function() {
+    var local = JSON.parse(localStorage.getItem('tc_calibraciones')||'[]')
+    renderHistList(local)
+  })
 }
 
 cargarHistorial()
