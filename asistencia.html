@@ -1,316 +1,226 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Asistencia — Trueno ⚡</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 40px; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>⚡ Trueno — Asistencia</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      background: #0e0e0e; color: #f0ede8;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh; padding: 24px 20px 60px;
+    }
 
-header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #1e1e1e; }
-.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.menu-btn { display: inline-flex; align-items: center; padding: 8px 14px; background: #1a1600; border: 1px solid #f5c842; border-radius: 10px; color: #f5c842; font-size: 13px; font-weight: 700; text-decoration: none; flex-shrink: 0; }
-.logo { font-size: 20px; font-weight: 700; }
-.logo span { color: #f5c842; }
+    .header { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
+    .logo { font-size: 20px; font-weight: 800; }
+    .logo span { color: #f5c842; }
+    .back-btn {
+      background: transparent; border: 1px solid #2a2a2a; border-radius: 10px;
+      color: #666; padding: 7px 13px; font-size: 13px; cursor: pointer;
+      text-decoration: none; display: inline-block;
+    }
 
-.tabs { display: flex; }
-.tab { flex: 1; padding: 10px 16px; font-size: 13px; color: #555; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; text-align: center; }
-.tab.active { color: #f5c842; border-bottom-color: #f5c842; font-weight: 600; }
+    .banner {
+      border-radius: 14px; padding: 13px 16px; font-size: 13px;
+      line-height: 1.5; margin-bottom: 24px;
+    }
+    .banner.ok  { background: #0a2a0a; border: 1px solid #1a5a1a; color: #6fcf6f; }
+    .banner.warn { background: #1a1000; border: 1px solid #4a3000; color: #f5a842; }
 
-.panel { display: none; padding: 20px 16px 80px; }
-.panel.active { display: block; }
+    .section-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;
+      color: #555; margin-bottom: 12px;
+    }
 
-.section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin-bottom: 10px; }
+    .persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+    .persona-btn {
+      background: #141414; border: 2px solid #222; border-radius: 14px;
+      color: #f0ede8; padding: 20px 10px; text-align: center;
+      cursor: pointer; font-size: 15px; font-weight: 600;
+      transition: border-color .15s, background .15s;
+    }
+    .persona-btn.active { border-color: #f5c842; background: #1a1700; color: #f5c842; }
 
-/* Persona selector */
-.persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-.persona-btn { padding: 16px 10px; border: 1px solid #2a2a2a; border-radius: 14px; background: #141414; color: #888; font-size: 15px; font-weight: 700; cursor: pointer; text-align: center; font-family: inherit; transition: all 0.15s; }
-.persona-btn.active { background: #f5c842; color: #0e0e0e; border-color: #f5c842; }
+    .pin-wrap { margin-bottom: 28px; }
+    .pin-input {
+      width: 100%; background: #141414; border: 1px solid #252525;
+      border-radius: 14px; color: #f0ede8; font-size: 28px; font-weight: 700;
+      padding: 18px; outline: none; text-align: center; letter-spacing: 10px;
+      font-family: monospace; transition: border-color .15s;
+    }
+    .pin-input:focus { border-color: #f5c842; }
 
-/* Tipo entrada/salida */
-.tipo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-.tipo-btn { padding: 16px; border: 1px solid #2a2a2a; border-radius: 14px; background: #141414; color: #888; font-size: 14px; font-weight: 700; cursor: pointer; text-align: center; font-family: inherit; transition: all 0.15s; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.tipo-btn.entrada.active { background: #0a1a0a; border-color: #2d5a2d; color: #6fcf6f; }
-.tipo-btn.salida.active { background: #1a0e0e; border-color: #5a2d2d; color: #cf6f6f; }
+    .event-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+    .event-btn {
+      padding: 20px 10px; border-radius: 14px; border: 2px solid #222;
+      background: #141414; color: #555; font-size: 15px; font-weight: 600;
+      cursor: pointer; text-align: center; transition: all .15s;
+    }
+    .event-btn.sel-in  { border-color: #2d8f2d; background: #091a09; color: #6fcf6f; }
+    .event-btn.sel-out { border-color: #8f2d2d; background: #1a0909; color: #cf6f6f; }
 
-/* Foto */
-.foto-section { margin-bottom: 20px; }
-.foto-preview { width: 100%; aspect-ratio: 4/3; background: #141414; border: 1px dashed #2a2a2a; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #444; font-size: 13px; overflow: hidden; cursor: pointer; position: relative; }
-.foto-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 15px; }
-.foto-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 12px; font-size: 12px; color: #aaa; text-align: center; border-radius: 0 0 15px 15px; }
-.foto-icon { font-size: 36px; }
-.foto-label { font-size: 13px; color: #555; }
-.foto-change { font-size: 12px; color: #f5c842; margin-top: 4px; }
-#foto-input { display: none; }
+    .submit-btn {
+      width: 100%; padding: 19px; border-radius: 16px; border: none;
+      background: #f5c842; color: #0e0e0e; font-size: 17px; font-weight: 800;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .submit-btn:disabled { background: #222; color: #444; cursor: not-allowed; }
 
-.btn-registrar { width: 100%; padding: 17px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; }
-.btn-registrar:disabled { opacity: 0.35; cursor: not-allowed; }
+    .result {
+      display: none; border-radius: 16px; padding: 22px; text-align: center;
+      font-size: 16px; font-weight: 600; margin-top: 20px; line-height: 1.6;
+    }
+    .result.ok  { background: #091a09; border: 1px solid #2d8f2d; color: #6fcf6f; }
+    .result.err { background: #1a0909; border: 1px solid #8f2d2d; color: #cf6f6f; }
+    .result small { display: block; font-size: 13px; color: #888; font-weight: 400; margin-top: 6px; }
 
-/* Toast */
-.toast { position: fixed; bottom: 32px; left: 16px; right: 16px; padding: 14px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; z-index: 500; text-align: center; }
-.toast.ok { background: #1a2a1a; border: 1px solid #2d5a2d; color: #6fcf6f; display: none; }
-.toast.ok.show { display: block; }
-
-/* Historial */
-.dia-label { font-size: 12px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.5px; padding: 14px 0 8px; border-top: 1px solid #1a1a1a; margin-top: 6px; }
-.dia-label:first-child { border-top: none; margin-top: 0; }
-
-.asist-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
-.asist-foto { width: 54px; height: 54px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #1e1e1e; }
-.asist-foto-placeholder { width: 54px; height: 54px; border-radius: 10px; background: #1e1e1e; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-.asist-info { flex: 1; min-width: 0; }
-.asist-nombre { font-size: 15px; font-weight: 700; }
-.asist-hora { font-size: 12px; color: #555; margin-top: 2px; }
-.asist-tipo { font-size: 13px; font-weight: 700; flex-shrink: 0; }
-.tipo-entrada-tag { color: #6fcf6f; }
-.tipo-salida-tag { color: #cf6f6f; }
-
-.empty { text-align: center; color: #444; padding: 50px 20px; font-size: 14px; }
-</style>
+    .new-btn {
+      display: none; width: 100%; margin-top: 14px; padding: 16px;
+      background: transparent; border: 1px solid #333; border-radius: 14px;
+      color: #888; font-size: 15px; cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
-<header>
-  <div class="header-top">
-    <a class="menu-btn" href="index.html">← Menú</a>
-    <a class="logo" href="index.html" style="text-decoration:none;color:inherit;">⚡ <span>Trueno</span></a>
-    <div style="width:60px"></div>
-  </div>
-  <div class="tabs">
-    <div class="tab active" onclick="setTab(0)">📋 Registrar</div>
-    <div class="tab" onclick="setTab(1)">📅 Historial</div>
-  </div>
-</header>
-
-<!-- REGISTRAR -->
-<div class="panel active" id="panel-0">
-
-  <div class="section-label" style="margin-bottom:10px">¿Quién es?</div>
-  <div class="persona-grid">
-    <button class="persona-btn" onclick="selectPersona('Melanie', this)">Melanie</button>
-    <button class="persona-btn" onclick="selectPersona('Daniela', this)">Daniela</button>
-    <button class="persona-btn" onclick="selectPersona('Daniel', this)">Daniel</button>
-    <button class="persona-btn" onclick="selectPersona('Izchel', this)">Izchel</button>
-  </div>
-
-  <div class="section-label" style="margin-bottom:10px">Tipo de registro</div>
-  <div class="tipo-row">
-    <button class="tipo-btn entrada" onclick="selectTipo('entrada', this)">
-      <span style="font-size:26px">☀️</span>
-      Entrada
-    </button>
-    <button class="tipo-btn salida" onclick="selectTipo('salida', this)">
-      <span style="font-size:26px">🌙</span>
-      Salida
-    </button>
-  </div>
-
-  <div class="section-label foto-section" style="margin-bottom:10px">Evidencia fotográfica</div>
-  <div class="foto-section">
-    <div class="foto-preview" id="foto-preview" onclick="document.getElementById('foto-input').click()">
-      <div class="foto-icon">📷</div>
-      <div class="foto-label">Toca para tomar foto</div>
-    </div>
-    <input type="file" id="foto-input" accept="image/*" capture="user" onchange="procesarFoto(this)">
-  </div>
-
-  <button class="btn-registrar" id="btn-registrar" onclick="registrar()" disabled>Registrar asistencia</button>
+<div class="header">
+  <a class="back-btn" href="index.html">←</a>
+  <div class="logo">⚡ <span>Trueno</span></div>
 </div>
 
-<!-- HISTORIAL -->
-<div class="panel" id="panel-1">
-  <div id="hist-content"></div>
+<div id="qr-banner"></div>
+
+<div class="section-label">¿Quién eres?</div>
+<div class="persona-grid">
+  <button class="persona-btn" onclick="selPersona('Melanie',this)">Melanie</button>
+  <button class="persona-btn" onclick="selPersona('Daniela',this)">Daniela</button>
+  <button class="persona-btn" onclick="selPersona('Daniel',this)">Daniel</button>
+  <button class="persona-btn" onclick="selPersona('Izchel',this)">Izchel</button>
 </div>
 
-<div class="toast ok" id="toast"></div>
+<div class="pin-wrap">
+  <div class="section-label">Tu PIN</div>
+  <input class="pin-input" id="pin" type="password" inputmode="numeric"
+         maxlength="6" placeholder="••••" autocomplete="off" oninput="check()">
+</div>
 
-<canvas id="canvas" style="display:none"></canvas>
+<div class="section-label">Tipo de registro</div>
+<div class="event-grid">
+  <button class="event-btn" id="btn-in"  onclick="selEvent('check_in',this)">🟢 Entrada</button>
+  <button class="event-btn" id="btn-out" onclick="selEvent('check_out',this)">🔴 Salida</button>
+</div>
+
+<button class="submit-btn" id="submit" disabled onclick="registrar()">Registrar</button>
+
+<div class="result" id="result"></div>
+<button class="new-btn" id="new-btn" onclick="reset()">+ Registrar otro</button>
 
 <script>
-const K = 'tc_asistencia'
-let persona = null, tipo = null, fotoB64 = null
+  const SB_URL = 'https://axxbsjbywivolwluzvrd.supabase.co'
 
-function selectPersona(nombre, btn) {
-  persona = nombre
-  document.querySelectorAll('.persona-btn').forEach(b => b.classList.remove('active'))
-  btn.classList.add('active')
-  checkReady()
-}
+  var persona = null
+  var eventType = null
+  var qrToken = null
 
-function selectTipo(t, btn) {
-  tipo = t
-  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'))
-  btn.classList.add('active')
-  checkReady()
-}
+  // Leer token del QR escaneado
+  qrToken = new URLSearchParams(window.location.search).get('token')
 
-function checkReady() {
-  document.getElementById('btn-registrar').disabled = !(persona && tipo)
-}
-
-function procesarFoto(input) {
-  const file = input.files[0]
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = e => {
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById('canvas')
-      const MAX = 480
-      let w = img.width, h = img.height
-      if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX } }
-      else { if (h > MAX) { w = w * MAX / h; h = MAX } }
-      canvas.width = w; canvas.height = h
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h)
-      fotoB64 = canvas.toDataURL('image/jpeg', 0.7)
-      const preview = document.getElementById('foto-preview')
-      preview.innerHTML = `<img src="${fotoB64}" alt="foto"><div class="foto-overlay">Toca para cambiar foto</div>`
-      preview.onclick = () => document.getElementById('foto-input').click()
-    }
-    img.src = e.target.result
-  }
-  reader.readAsDataURL(file)
-}
-
-function registrar() {
-  if (!persona || !tipo) return
-  const now = new Date()
-  const registro = {
-    id: now.getTime().toString(),
-    nombre: persona,
-    tipo,
-    fecha: now.toLocaleDateString('es-MX'),
-    hora: now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
-    ts: now.toISOString(),
-    foto: fotoB64 || null
+  var banner = document.getElementById('qr-banner')
+  if (qrToken) {
+    banner.innerHTML = '<div class="banner ok">✅ QR escaneado — completa los datos para registrar</div>'
+  } else {
+    banner.innerHTML = '<div class="banner warn">⚠️ Sin QR — debes escanear el código del mostrador con tu cámara para poder registrar</div>'
   }
 
-  let hist = []
-  try { hist = JSON.parse(localStorage.getItem(K) || '[]') } catch {}
-  hist.unshift(registro)
-  // Keep max 200 records but trim foto from older ones to save space
-  if (hist.length > 200) hist = hist.slice(0, 200)
-  // Remove fotos from entries older than 30 to keep localStorage small
-  hist.forEach((r, i) => { if (i >= 30 && r.foto) r.foto = null })
-  localStorage.setItem(K, JSON.stringify(hist))
+  function selPersona(nombre, btn) {
+    persona = nombre
+    document.querySelectorAll('.persona-btn').forEach(function(b) { b.classList.remove('active') })
+    btn.classList.add('active')
+    check()
+  }
 
-  // Sync a Supabase
-  var _sbUrl = 'https://axxbsjbywivolwluzvrd.supabase.co'
-  var _sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
-  fetch(_sbUrl + '/rest/v1/trueno_registros', {
-    method: 'POST',
-    headers: { 'apikey': _sbKey, 'Authorization': 'Bearer ' + _sbKey, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify({
-      id: registro.id,
-      tipo: 'asistencia',
-      encargada: registro.nombre,
-      datos: { tipo_registro: registro.tipo, hora: registro.hora },
-      ts: registro.ts
-    })
-  }).catch(function(){})
+  function selEvent(type, btn) {
+    eventType = type
+    document.getElementById('btn-in').className = 'event-btn'
+    document.getElementById('btn-out').className = 'event-btn'
+    btn.className = 'event-btn ' + (type === 'check_in' ? 'sel-in' : 'sel-out')
+    check()
+  }
 
-  showToast(`✓ ${tipo === 'entrada' ? 'Entrada' : 'Salida'} registrada — ${persona}`)
+  function check() {
+    var pin = document.getElementById('pin').value
+    document.getElementById('submit').disabled = !(persona && pin.length >= 4 && eventType && qrToken)
+  }
 
-  // Reset form
-  persona = null; tipo = null; fotoB64 = null
-  document.querySelectorAll('.persona-btn, .tipo-btn').forEach(b => b.classList.remove('active'))
-  document.getElementById('foto-preview').innerHTML = `<div class="foto-icon">📷</div><div class="foto-label">Toca para tomar foto</div>`
-  document.getElementById('foto-preview').onclick = () => document.getElementById('foto-input').click()
-  document.getElementById('foto-input').value = ''
-  document.getElementById('btn-registrar').disabled = true
-}
+  async function registrar() {
+    var pin = document.getElementById('pin').value
+    var btn = document.getElementById('submit')
+    btn.disabled = true
+    btn.textContent = 'Registrando...'
 
-function renderHistorial() {
-  let hist = []
-  try { hist = JSON.parse(localStorage.getItem(K) || '[]') } catch {}
-  const el = document.getElementById('hist-content')
-  if (!hist.length) { el.innerHTML = '<div class="empty">Sin registros aún</div>'; return }
-
-  // Group by fecha
-  const grupos = {}
-  hist.forEach(r => {
-    if (!grupos[r.fecha]) grupos[r.fecha] = []
-    grupos[r.fecha].push(r)
-  })
-
-  let html = ''
-  Object.entries(grupos).forEach(([fecha, registros]) => {
-    html += `<div class="dia-label">${fecha}</div>`
-    registros.forEach(r => {
-      const esEntrada = r.tipo === 'entrada'
-      const fotoEl = r.foto
-        ? `<img class="asist-foto" src="${r.foto}" alt="foto">`
-        : `<div class="asist-foto-placeholder">${esEntrada ? '☀️' : '🌙'}</div>`
-      html += `<div class="asist-card">
-        ${fotoEl}
-        <div class="asist-info">
-          <div class="asist-nombre">${r.nombre}</div>
-          <div class="asist-hora">${r.hora}</div>
-        </div>
-        <div class="asist-tipo ${esEntrada ? 'tipo-entrada-tag' : 'tipo-salida-tag'}">${esEntrada ? '↑ Entrada' : '↓ Salida'}</div>
-      </div>`
-    })
-  })
-  el.innerHTML = html
-}
-
-function setTab(i) {
-  document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', i === j))
-  document.querySelectorAll('.panel').forEach((p, j) => p.classList.toggle('active', i === j))
-  if (i === 1) renderHistorial()
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast')
-  t.textContent = msg; t.classList.add('show')
-  setTimeout(() => t.classList.remove('show'), 3000)
-}
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-;(function(){
-  const { createClient } = supabase
-  const _sb = createClient(
-    'https://axxbsjbywivolwluzvrd.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
-  )
-  // Patch registrar to also push to Supabase after localStorage save
-  const _origRegistrar = registrar
-  window.registrar = function() {
-    _origRegistrar()
-    // Read the record that was just saved (first item in localStorage)
+    // GPS: best-effort, no bloquea si el usuario lo deniega
+    var device_lat = null, device_lng = null
     try {
-      const hist = JSON.parse(localStorage.getItem('tc_asistencia') || '[]')
-      const r = hist[0]
-      if (r) {
-        _sb.from('trueno_registros').insert({
-          tipo: 'asistencia',
-          encargada: r.nombre,
-          fecha: r.fecha,
-          datos: { tipo_registro: r.tipo, hora: r.hora, foto: null },
-          ts: r.ts
-        }).then().catch(() => {})
-
-        // Google Sheets
-        fetch('https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec', {
-          method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ tipo:'asistencia', row:[r.fecha, r.hora, r.nombre, r.tipo] })
-        }).catch(()=>{})
-
-        // Telegram
-        const _emoji = r.tipo === 'entrada' ? '☀️' : '🌙'
-        const _label = r.tipo === 'entrada' ? 'Entrada' : 'Salida'
-        fetch(`https://api.telegram.org/bot8765854864:AAEuMxt5p264TL3LPHbQI89S6uqqyIEnQd8/sendMessage`, {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ chat_id:'8309237078', parse_mode:'HTML',
-            text:`${_emoji} <b>${_label}</b> — ${r.nombre}\n🕐 ${r.hora} · ${r.fecha}`
-          })
-        }).catch(()=>{})
-      }
+      var pos = await new Promise(function(res, rej) {
+        navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000, maximumAge: 30000 })
+      })
+      device_lat = pos.coords.latitude
+      device_lng = pos.coords.longitude
     } catch(e) {}
+
+    try {
+      var r = await fetch(SB_URL + '/functions/v1/checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employee_name: persona,
+          pin: pin,
+          qr_token: qrToken,
+          device_lat: device_lat,
+          device_lng: device_lng,
+          event_type: eventType
+        })
+      })
+      var data = await r.json()
+      var res = document.getElementById('result')
+      res.style.display = 'block'
+
+      if (data.success) {
+        res.className = 'result ok'
+        var hora = new Date(data.server_time).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
+        res.innerHTML = data.message +
+          (data.flagged ? '<br><span style="color:#f5a842;font-size:13px">⚠️ Ubicación inusual anotada</span>' : '') +
+          '<small>Hora del servidor: ' + hora + '</small>'
+        btn.style.display = 'none'
+        document.getElementById('new-btn').style.display = 'block'
+      } else {
+        res.className = 'result err'
+        res.textContent = '❌ ' + (data.error || 'Error desconocido')
+        btn.disabled = false
+        btn.textContent = 'Registrar'
+      }
+    } catch(e) {
+      var res = document.getElementById('result')
+      res.style.display = 'block'
+      res.className = 'result err'
+      res.textContent = '❌ Sin conexión al servidor'
+      btn.disabled = false
+      btn.textContent = 'Registrar'
+    }
   }
-})()
+
+  function reset() {
+    persona = null; eventType = null
+    document.getElementById('pin').value = ''
+    document.querySelectorAll('.persona-btn').forEach(function(b) { b.classList.remove('active') })
+    document.getElementById('btn-in').className = 'event-btn'
+    document.getElementById('btn-out').className = 'event-btn'
+    document.getElementById('result').style.display = 'none'
+    document.getElementById('submit').style.display = 'block'
+    document.getElementById('new-btn').style.display = 'none'
+    check()
+  }
 </script>
 </body>
 </html>

@@ -681,26 +681,45 @@ function paresTurno(registros) {
 }
 
 async function renderAsistencia() {
-  // Intentar leer de Supabase primero; si falla usar localStorage
   let todos = []
+  // 1. Intentar nueva tabla attendance_records (sistema QR)
   try {
-    const { data, error } = await _sb.from('trueno_registros')
-      .select('encargada,datos,ts')
-      .eq('tipo', 'asistencia')
-      .order('ts', { ascending: false })
-      .limit(500)
-    if (!error && data && data.length) {
-      todos = data.map(r => ({
-        nombre: r.encargada,
-        tipo: r.datos?.tipo_registro || 'entrada',
-        hora: r.datos?.hora || new Date(r.ts).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
-        fecha: new Date(r.ts).toLocaleDateString('es-MX'),
-        ts: r.ts
-      }))
-    } else {
-      throw new Error('fallback')
+    var _h = { 'apikey': _adminSbKey, 'Authorization': 'Bearer ' + _adminSbKey }
+    var r = await fetch(_adminSbUrl + '/rest/v1/attendance_records?select=server_time,event_type,flagged,employee_id,employees(name)&order=server_time.desc&limit=500', { headers: _h })
+    var data = await r.json()
+    if (Array.isArray(data) && data.length) {
+      todos = data.map(function(rec) {
+        var ts = rec.server_time
+        return {
+          nombre: rec.employees?.name || '?',
+          tipo: rec.event_type === 'check_in' ? 'entrada' : 'salida',
+          hora: new Date(ts).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+          fecha: new Date(ts).toLocaleDateString('es-MX'),
+          ts: ts,
+          flagged: rec.flagged
+        }
+      })
     }
-  } catch {
+  } catch(e) {}
+  // 2. Si no hay registros nuevos, intentar tabla antigua trueno_registros
+  if (!todos.length) {
+    try {
+      const { data, error } = await _sb.from('trueno_registros')
+        .select('encargada,datos,ts').eq('tipo', 'asistencia')
+        .order('ts', { ascending: false }).limit(500)
+      if (!error && data && data.length) {
+        todos = data.map(r => ({
+          nombre: r.encargada,
+          tipo: r.datos?.tipo_registro || 'entrada',
+          hora: r.datos?.hora || new Date(r.ts).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
+          fecha: new Date(r.ts).toLocaleDateString('es-MX'),
+          ts: r.ts
+        }))
+      }
+    } catch {}
+  }
+  // 3. Fallback localStorage
+  if (!todos.length) {
     try { todos = JSON.parse(localStorage.getItem('tc_asistencia') || '[]') } catch {}
   }
   // Filtrar por período y por persona seleccionada

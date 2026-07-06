@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ Trueno — QR Asistencia</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0e0e0e; color: #f0ede8;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 32px; gap: 20px;
+    }
+    .logo { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+    .logo span { color: #f5c842; }
+    .subtitle { font-size: 13px; color: #444; margin-top: 4px; text-align: center; }
+    .qr-box {
+      background: #fff; border-radius: 24px; padding: 28px;
+      box-shadow: 0 0 80px rgba(245,200,66,0.12);
+    }
+    #qr-canvas { display: block; }
+    .timer-row { display: flex; align-items: center; gap: 12px; }
+    .timer { font-size: 36px; font-weight: 800; color: #f5c842; font-variant-numeric: tabular-nums; }
+    .timer.low { color: #cf6f6f; }
+    .timer-label { font-size: 12px; color: #444; }
+    .status-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #6fcf6f; flex-shrink: 0; animation: pulse 2s infinite; }
+    .dot.err { background: #cf6f6f; animation: none; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .instruction {
+      background: #141414; border: 1px solid #1e1e1e; border-radius: 16px;
+      padding: 16px 22px; max-width: 300px; text-align: center;
+    }
+    .instruction p { font-size: 14px; color: #888; line-height: 1.7; }
+    .instruction b { color: #f0ede8; }
+    .refresh-btn {
+      background: transparent; border: 1px solid #333; color: #555;
+      border-radius: 10px; padding: 8px 16px; font-size: 12px; cursor: pointer;
+    }
+    .refresh-btn:hover { border-color: #555; color: #888; }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="logo">⚡ <span>Trueno</span> Coffee House</div>
+    <div class="subtitle">Pantalla de asistencia — mostrador</div>
+  </div>
+
+  <div class="qr-box">
+    <canvas id="qr-canvas" width="260" height="260"></canvas>
+  </div>
+
+  <div class="timer-row">
+    <div>
+      <div class="timer-label">Expira en</div>
+      <div class="timer" id="timer">--:--</div>
+    </div>
+  </div>
+
+  <div class="status-row">
+    <div class="dot" id="dot"></div>
+    <span id="status-text">Cargando QR...</span>
+  </div>
+
+  <div class="instruction">
+    <p><b>📱 Escanea con la cámara de tu celular</b><br>para registrar tu entrada o salida</p>
+    <p style="margin-top:10px;font-size:12px;color:#444">El código se renueva automáticamente cada 12 min</p>
+  </div>
+
+  <button class="refresh-btn" onclick="loadQR()">↺ Refrescar QR</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script>
+    const SB_URL = 'https://axxbsjbywivolwluzvrd.supabase.co'
+    const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+    // URL que abre el empleado al escanear el QR
+    const CHECKIN_URL = 'https://izchel95.github.io/trueno-sistema-operativo/asistencia.html'
+
+    var expiresAt = null
+    var timerInterval = null
+
+    async function loadQR() {
+      setStatus('Actualizando QR...', false)
+      try {
+        var r = await fetch(SB_URL + '/functions/v1/current-qr', {
+          headers: { 'Authorization': 'Bearer ' + SB_ANON }
+        })
+        var data = await r.json()
+        if (data.error) throw new Error(data.error)
+
+        var url = CHECKIN_URL + '?token=' + encodeURIComponent(data.token)
+        var canvas = document.getElementById('qr-canvas')
+        await QRCode.toCanvas(canvas, url, {
+          width: 260, margin: 1,
+          color: { dark: '#111111', light: '#ffffff' }
+        })
+
+        expiresAt = new Date(data.expires_at)
+        setStatus('QR activo — escanea para registrar asistencia', false)
+
+        if (timerInterval) clearInterval(timerInterval)
+        timerInterval = setInterval(updateTimer, 1000)
+        updateTimer()
+      } catch (e) {
+        setStatus('Error: ' + e.message, true)
+      }
+    }
+
+    function updateTimer() {
+      if (!expiresAt) return
+      var diff = Math.max(0, expiresAt - new Date())
+      var min = Math.floor(diff / 60000)
+      var sec = Math.floor((diff % 60000) / 1000)
+      var el = document.getElementById('timer')
+      el.textContent = pad(min) + ':' + pad(sec)
+      el.className = 'timer' + (diff < 120000 ? ' low' : '')
+      if (diff === 0) loadQR()
+    }
+
+    function pad(n) { return String(n).padStart(2, '0') }
+
+    function setStatus(msg, isError) {
+      document.getElementById('status-text').textContent = msg
+      document.getElementById('dot').className = 'dot' + (isError ? ' err' : '')
+    }
+
+    loadQR()
+    // Backup refresh every 11 minutes
+    setInterval(loadQR, 11 * 60 * 1000)
+  </script>
+</body>
+</html>
