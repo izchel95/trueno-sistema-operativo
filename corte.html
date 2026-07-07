@@ -364,6 +364,33 @@
   }
 
   .neto-label { font-size: 13px; color: #555; }
+
+  .btn-pdf { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; padding: 12px 28px; background: transparent; border: 1px solid #2a2a2a; border-radius: 30px; color: #888; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-pdf:active { background: #141414; }
+
+  /* Print styles */
+  #print-area { display: none; }
+
+  @media print {
+    body * { visibility: hidden; }
+    #print-area, #print-area * { visibility: visible; }
+    #print-area {
+      display: block !important;
+      position: fixed; top: 0; left: 0;
+      width: 100%; padding: 20px;
+      font-family: monospace;
+      font-size: 13px;
+      color: #000;
+      background: #fff;
+    }
+    .pr-title { font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 4px; }
+    .pr-sub   { font-size: 12px; text-align: center; color: #555; margin-bottom: 12px; }
+    .pr-divider { border-top: 1px dashed #aaa; margin: 8px 0; }
+    .pr-row { display: flex; justify-content: space-between; padding: 3px 0; }
+    .pr-row.bold { font-weight: bold; font-size: 15px; }
+    .pr-row.indent { padding-left: 16px; font-size: 12px; color: #666; }
+    .pr-footer { text-align: center; font-size: 11px; color: #999; margin-top: 12px; }
+  }
 </style>
 </head>
 <body>
@@ -499,8 +526,13 @@
   <div class="neto-label">neto del día</div>
   <br><br>
   <div class="success-title">¡Corte registrado!</div>
-  <div class="success-sub">Ya quedó guardado en Notion.</div>
+  <div class="success-sub">Guardado en Sheets y Supabase.</div>
+  <button class="btn-pdf" onclick="imprimirCorte()">🖨️ Imprimir / Guardar PDF</button>
+  <a class="menu-btn" href="index.html" style="margin-top:16px;">← Menú principal</a>
 </div>
+
+<!-- Área de impresión oculta -->
+<div id="print-area"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -655,6 +687,18 @@
         })
       }).catch(()=>{})
 
+      // Guardar datos para PDF
+      window._corteData = {
+        fecha: hoy.toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long', year:'numeric'}),
+        encargada,
+        ventasEf: val('ventas-efectivo'), ventasTj: val('ventas-tarjeta'), ventas,
+        propinasEf: val('propinas-efectivo'), propinasTj: val('propinas-tarjeta'), propinas,
+        fondoInicial: val('fondo-inicial'), efectivoCierre: val('efectivo-cierre'), diff,
+        gastos: totalGastos, detalleGastos, neto,
+        notas: document.getElementById('notas').value || '',
+        hora: new Date().toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
+      };
+
       document.getElementById('neto-final').textContent = fmt(neto);
       document.getElementById('form-view').style.display = 'none';
       document.getElementById('success-screen').style.display = 'flex';
@@ -663,6 +707,35 @@
       btn.textContent = 'Registrar corte';
       alert('Error al enviar: ' + e.message);
     }
+  }
+
+  function imprimirCorte() {
+    const d = window._corteData;
+    if (!d) return;
+    const fmtN = n => '$' + (Number(n)||0).toLocaleString('es-MX', {minimumFractionDigits:0});
+    const gastoRows = d.detalleGastos.map(g => `<div class="pr-row indent"><span>${g.split(':')[0]||''}</span><span>${g.split(':')[1]||''}</span></div>`).join('');
+    document.getElementById('print-area').innerHTML = `
+      <div class="pr-title">⚡ TRUENO COFFEE HOUSE</div>
+      <div class="pr-sub">Corte de caja · ${d.fecha}</div>
+      <div class="pr-sub">${d.encargada} · ${d.hora}</div>
+      <div class="pr-divider"></div>
+      <div class="pr-row"><span>Ventas efectivo</span><span>${fmtN(d.ventasEf)}</span></div>
+      <div class="pr-row"><span>Ventas tarjeta</span><span>${fmtN(d.ventasTj)}</span></div>
+      <div class="pr-row bold"><span>Total ventas</span><span>${fmtN(d.ventas)}</span></div>
+      <div class="pr-divider"></div>
+      <div class="pr-row"><span>Propinas efectivo</span><span>${fmtN(d.propinasEf)}</span></div>
+      <div class="pr-row"><span>Propinas tarjeta</span><span>${fmtN(d.propinasTj)}</span></div>
+      <div class="pr-row bold"><span>Total propinas</span><span>${fmtN(d.propinas)}</span></div>
+      <div class="pr-divider"></div>
+      <div class="pr-row"><span>Fondo inicial</span><span>${fmtN(d.fondoInicial)}</span></div>
+      <div class="pr-row"><span>Efectivo al cierre</span><span>${fmtN(d.efectivoCierre)}</span></div>
+      <div class="pr-row"><span>Diferencia</span><span>${d.diff===0?'✅ Cuadra':'⚠️ '+fmtN(Math.abs(d.diff))}</span></div>
+      <div class="pr-divider"></div>
+      ${d.detalleGastos.length ? `<div class="pr-row bold"><span>Gastos</span><span>${fmtN(d.gastos)}</span></div>${gastoRows}<div class="pr-divider"></div>` : ''}
+      <div class="pr-row bold" style="font-size:18px;"><span>NETO DEL DÍA</span><span>${fmtN(d.neto)}</span></div>
+      ${d.notas ? `<div class="pr-divider"></div><div style="font-size:12px;"><b>Notas:</b> ${d.notas}</div>` : ''}
+      <div class="pr-footer">Trueno Coffee House · Cabo San Lucas</div>`;
+    window.print();
   }
 </script>
 </body>

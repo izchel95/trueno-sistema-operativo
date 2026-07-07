@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Reseña Google — Trueno ⚡</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+header { padding: 14px 20px; border-bottom: 1px solid #1e1e1e; display: flex; align-items: center; justify-content: space-between; }
+.menu-btn { display: inline-flex; align-items: center; padding: 8px 14px; background: #1a1600; border: 1px solid #f5c842; border-radius: 10px; color: #f5c842; font-size: 13px; font-weight: 700; text-decoration: none; }
+.logo { font-size: 18px; font-weight: 700; }
+.logo span { color: #f5c842; }
+.tabs { display: flex; border-bottom: 1px solid #1e1e1e; }
+.tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 600; color: #555; cursor: pointer; border-bottom: 2px solid transparent; }
+.tab.active { color: #f5c842; border-bottom-color: #f5c842; }
+.pane { display: none; }
+.pane.active { display: flex; flex-direction: column; align-items: center; padding: 32px 24px; min-height: calc(100vh - 120px); }
+
+/* Modo cliente */
+.stars { font-size: 44px; letter-spacing: 4px; margin-bottom: 16px; }
+.cliente-title { font-size: 26px; font-weight: 800; text-align: center; line-height: 1.2; margin-bottom: 8px; }
+.cliente-sub { font-size: 14px; color: #888; text-align: center; margin-bottom: 32px; }
+.qr-wrap { background: white; padding: 16px; border-radius: 16px; margin-bottom: 24px; display: inline-flex; }
+.qr-wrap img { display: block; border-radius: 4px; }
+.scan-hint { font-size: 13px; color: #555; text-align: center; margin-bottom: 20px; }
+.btn-abrir { display: block; width: 100%; max-width: 320px; padding: 16px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; text-align: center; text-decoration: none; margin: 0 auto; }
+.btn-abrir:active { opacity: 0.85; }
+.no-url-msg { text-align: center; padding: 40px 20px; color: #444; }
+.no-url-icon { font-size: 48px; margin-bottom: 12px; }
+.no-url-text { font-size: 14px; line-height: 1.6; }
+
+/* Modo barista */
+.barista-title { font-size: 18px; font-weight: 800; margin-bottom: 4px; align-self: flex-start; }
+.barista-sub { font-size: 12px; color: #555; margin-bottom: 18px; align-self: flex-start; }
+.script-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 16px; margin-bottom: 10px; width: 100%; }
+.sc-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 6px; }
+.sc-text { font-size: 14px; line-height: 1.6; color: #f0ede8; }
+.sc-text b { color: #f5c842; }
+.moment-badge { display: inline-flex; align-items: center; gap: 6px; background: #1a1600; border: 1px solid #f5c84255; border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #f5c842; margin-bottom: 16px; }
+.tips-list { width: 100%; }
+.tip-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1a1a1a; font-size: 13px; }
+.tip-item:last-child { border: none; }
+.tip-icon { flex-shrink: 0; }
+
+/* Config modal */
+.cfg-overlay { position: fixed; inset: 0; background: #000000cc; display: none; align-items: flex-end; justify-content: center; z-index: 100; }
+.cfg-overlay.open { display: flex; }
+.cfg-sheet { background: #141414; border-radius: 20px 20px 0 0; padding: 24px; width: 100%; max-width: 480px; }
+.cfg-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+.cfg-sub { font-size: 12px; color: #555; margin-bottom: 16px; }
+.cfg-input { width: 100%; background: #0e0e0e; border: 1px solid #2a2a2a; border-radius: 10px; color: #f0ede8; font-size: 13px; padding: 12px; outline: none; margin-bottom: 10px; }
+.cfg-input:focus { border-color: #f5c842; }
+.cfg-row { display: flex; gap: 8px; }
+.cfg-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; }
+.cfg-save { background: #f5c842; color: #0e0e0e; }
+.cfg-cancel { background: #222; color: #888; }
+.cfg-trigger { position: fixed; bottom: 20px; right: 20px; width: 44px; height: 44px; background: #141414; border: 1px solid #2a2a2a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; z-index: 50; color: #333; }
+.pwd-input { width: 100%; background: #0e0e0e; border: 1px solid #2a2a2a; border-radius: 10px; color: #f0ede8; font-size: 16px; padding: 12px 16px; text-align: center; letter-spacing: 4px; outline: none; margin-bottom: 10px; }
+.pwd-input:focus { border-color: #f5c842; }
+</style>
+</head>
+<body>
+<header>
+  <a class="menu-btn" href="index.html">← Menú</a>
+  <div class="logo">⚡ <span>Trueno</span></div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('cliente')">📱 Muéstrale al cliente</div>
+  <div class="tab" onclick="switchTab('barista')">🎤 Script barista</div>
+</div>
+
+<!-- QR CLIENTE -->
+<div class="pane active" id="pane-cliente">
+  <div id="cliente-content"></div>
+</div>
+
+<!-- SCRIPT BARISTA -->
+<div class="pane" id="pane-barista">
+  <div class="barista-title">🎤 Cómo pedir la reseña</div>
+  <div class="barista-sub">Úsalo natural, no robótico</div>
+
+  <div class="moment-badge">⏱️ Mejor momento: justo después de entregar la bebida</div>
+
+  <div class="script-card">
+    <div class="sc-label">Script principal — inglés / español</div>
+    <div class="sc-text">
+      "¿Todo está bien con tu bebida?... ¡Qué bueno! Si te gustó la experiencia, <b>nos ayudaría mucho una reseña en Google</b>, solo es un momento — ¿te muestro el código?"<br><br>
+      <span style="color:#888">EN: "Glad you're enjoying it! If you liked your experience, <b>a quick Google review would mean a lot to us</b> — want me to show you the QR?"</span>
+    </div>
+  </div>
+
+  <div class="script-card">
+    <div class="sc-label">Si dicen "luego lo hago"</div>
+    <div class="sc-text">"Claro, no hay problema — acá está el código por si quieres. <b>Nos ayuda muchísimo.</b>" <span style="color:#888">(muéstrale el QR igual)</span></div>
+  </div>
+
+  <div class="script-card">
+    <div class="sc-label">Si dicen que no tienen tiempo</div>
+    <div class="sc-text">"Literalmente son 30 segundos, en serio — <b>5 estrellas y listo</b>. 🙏"</div>
+  </div>
+
+  <div class="script-card" style="margin-top:8px;">
+    <div class="sc-label">Tips de timing</div>
+    <div class="tips-list">
+      <div class="tip-item"><span class="tip-icon">✅</span><span>Pídela cuando el cliente ya probó la bebida y se ve satisfecho</span></div>
+      <div class="tip-item"><span class="tip-icon">✅</span><span>Turistas son los más fáciles — a veces hasta hacen foto del café</span></div>
+      <div class="tip-item"><span class="tip-icon">✅</span><span>Si vino con amigos, pídela cuando hay energía positiva en la mesa</span></div>
+      <div class="tip-item"><span class="tip-icon">⚠️</span><span>No la pidas si el cliente se ve apurado o tuvo algún problema</span></div>
+      <div class="tip-item"><span class="tip-icon">⚠️</span><span>Un intento por visita — si ya dijo no, no insistas</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Config trigger (pequeño, discreto) -->
+<div class="cfg-trigger" onclick="openCfg()">⚙️</div>
+
+<!-- Config overlay -->
+<div class="cfg-overlay" id="cfg-overlay">
+  <div class="cfg-sheet">
+    <div class="cfg-title">Configurar link de reseña</div>
+    <div class="cfg-sub">Pega el link de tu perfil de Google Business</div>
+    <div id="cfg-auth">
+      <input class="pwd-input" type="password" id="cfg-pwd" placeholder="contraseña admin" onkeydown="if(event.key==='Enter')cfgAuth()">
+      <div class="cfg-row">
+        <button class="cfg-btn cfg-save" onclick="cfgAuth()">Continuar</button>
+        <button class="cfg-btn cfg-cancel" onclick="closeCfg()">Cancelar</button>
+      </div>
+    </div>
+    <div id="cfg-form" style="display:none">
+      <input class="cfg-input" id="cfg-url" type="url" placeholder="https://g.page/r/...">
+      <div style="font-size:11px;color:#555;margin-bottom:10px;">Ve a Google Maps → tu negocio → "Más reseñas" → copia el link</div>
+      <div class="cfg-row">
+        <button class="cfg-btn cfg-save" onclick="saveUrl()">Guardar</button>
+        <button class="cfg-btn cfg-cancel" onclick="closeCfg()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const K_URL = 'tc_resena_url'
+const PASS  = 'IZ9595iz'
+
+function getUrl() { return localStorage.getItem(K_URL) || '' }
+
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', (i===0)===(t==='cliente')))
+  document.getElementById('pane-cliente').classList.toggle('active', t==='cliente')
+  document.getElementById('pane-barista').classList.toggle('active', t==='barista')
+  if (t === 'cliente') renderCliente()
+}
+
+function renderCliente() {
+  const url = getUrl()
+  const el  = document.getElementById('cliente-content')
+  if (!url) {
+    el.innerHTML = `
+      <div class="no-url-msg">
+        <div class="no-url-icon">⚙️</div>
+        <div class="no-url-text">Link de Google no configurado aún.<br>Toca el ⚙️ abajo a la derecha<br>para agregar tu link.</div>
+      </div>`
+    return
+  }
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}&margin=0&color=000000&bgcolor=ffffff`
+  el.innerHTML = `
+    <div class="stars">⭐⭐⭐⭐⭐</div>
+    <div class="cliente-title">¿Te gustó Trueno?<br>¡Cuéntale al mundo!</div>
+    <div class="cliente-sub">Tu reseña nos ayuda muchísimo 🙏</div>
+    <div class="qr-wrap"><img src="${qrSrc}" width="220" height="220" alt="QR Google Reviews"></div>
+    <div class="scan-hint">Escanea el código o toca el botón 👇</div>
+    <a class="btn-abrir" href="${url}" target="_blank" rel="noopener">Abrir en Google Maps</a>`
+}
+
+function openCfg() {
+  document.getElementById('cfg-pwd').value = ''
+  document.getElementById('cfg-auth').style.display = 'block'
+  document.getElementById('cfg-form').style.display = 'none'
+  document.getElementById('cfg-overlay').classList.add('open')
+}
+
+function closeCfg() {
+  document.getElementById('cfg-overlay').classList.remove('open')
+}
+
+function cfgAuth() {
+  if (document.getElementById('cfg-pwd').value !== PASS) { alert('Contraseña incorrecta'); return }
+  document.getElementById('cfg-auth').style.display = 'none'
+  document.getElementById('cfg-url').value = getUrl()
+  document.getElementById('cfg-form').style.display = 'block'
+}
+
+function saveUrl() {
+  const url = document.getElementById('cfg-url').value.trim()
+  if (!url) { alert('Ingresa el link de Google'); return }
+  localStorage.setItem(K_URL, url)
+  closeCfg()
+  renderCliente()
+}
+
+// Close overlay on background click
+document.getElementById('cfg-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeCfg()
+})
+
+renderCliente()
+</script>
+</body>
+</html>

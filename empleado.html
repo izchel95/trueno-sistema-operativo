@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Mi Portal — Trueno ⚡</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 60px; }
+
+/* ── Login ── */
+.login-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
+.login-logo { font-size: 38px; font-weight: 800; margin-bottom: 6px; }
+.login-logo span { color: #f5c842; }
+.login-sub { font-size: 13px; color: #555; margin-bottom: 36px; }
+.login-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 360px; }
+.login-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.login-desc { font-size: 12px; color: #555; margin-bottom: 22px; }
+.field-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #555; display: block; margin-bottom: 6px; }
+.field-select, .field-input { width: 100%; background: #0e0e0e; border: 1px solid #222; border-radius: 10px; color: #f0ede8; font-size: 15px; padding: 13px 14px; outline: none; font-family: inherit; margin-bottom: 12px; appearance: none; }
+.field-select:focus, .field-input:focus { border-color: #f5c842; }
+.btn-login { width: 100%; padding: 16px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 6px; font-family: inherit; }
+.login-error { background: #2a1a1a; border: 1px solid #5a2d2d; color: #cf6f6f; border-radius: 10px; padding: 10px 12px; font-size: 13px; margin-top: 10px; display: none; text-align: center; }
+.login-error.show { display: block; }
+
+/* ── App ── */
+.app { display: none; }
+.app.visible { display: block; }
+
+header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #1e1e1e; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.logo { font-size: 18px; font-weight: 700; }
+.logo span { color: #f5c842; }
+.emp-badge { font-size: 12px; background: #1a1600; color: #f5c842; border: 1px solid #f5c842; padding: 3px 10px; border-radius: 20px; font-weight: 700; margin-left: 8px; }
+.logout-btn { padding: 7px 14px; background: transparent; border: 1px solid #333; border-radius: 10px; color: #555; font-size: 12px; cursor: pointer; font-family: inherit; }
+
+.tabs { display: flex; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: 1; padding: 10px 8px; font-size: 12px; color: #555; cursor: pointer; border-bottom: 2px solid transparent; text-align: center; white-space: nowrap; }
+.tab.active { color: #f5c842; border-bottom-color: #f5c842; font-weight: 600; }
+
+.panel { display: none; padding: 16px 16px 80px; }
+.panel.active { display: block; }
+
+/* ── Cards ── */
+.section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin: 16px 0 8px; }
+.card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 8px; }
+.empty { text-align: center; color: #444; padding: 40px 20px; font-size: 14px; }
+.kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.kpi-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 14px; text-align: center; }
+.kpi-val { font-size: 22px; font-weight: 800; color: #f5c842; }
+.kpi-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+/* ── Asistencia ── */
+.asis-day { margin-bottom: 10px; }
+.asis-day-header { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.3px; padding: 6px 0 4px; border-bottom: 1px solid #1a1a1a; margin-bottom: 6px; }
+.t-badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 8px; padding: 5px 10px; font-size: 13px; font-weight: 700; }
+.t-in { background: #0a1a0a; color: #6fcf6f; }
+.t-out { background: #1a0e0e; color: #cf6f6f; }
+.t-pending { background: #1e1a0a; color: #f5c842; }
+.asis-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; flex-wrap: wrap; }
+.asis-hrs { margin-left: auto; font-size: 13px; font-weight: 800; color: #6fcf6f; }
+
+/* ── Horario ── */
+.sched-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #1a1a1a; gap: 12px; }
+.sched-row:last-child { border: none; }
+.sched-date { width: 52px; flex-shrink: 0; }
+.sched-weekday { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.3px; }
+.sched-daynum { font-size: 20px; font-weight: 800; }
+.sched-daynum.today { color: #f5c842; }
+.sched-shift { flex: 1; }
+.shift-badge { display: inline-block; padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; }
+.shift-mañana { background: #1a1600; color: #f5c842; }
+.shift-tarde   { background: #0d0d2a; color: #8080ff; }
+.shift-descanso { background: #1a1a1a; color: #555; }
+.shift-empty   { color: #333; font-size: 12px; }
+.shift-time { font-size: 11px; color: #555; margin-top: 3px; }
+
+/* ── Solicitudes ── */
+.req-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 8px; }
+.req-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.req-type { font-size: 13px; font-weight: 700; }
+.req-date { font-size: 12px; color: #888; }
+.req-reason { font-size: 12px; color: #888; }
+.req-status { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; flex-shrink: 0; }
+.status-pendiente { background: #1e1a0a; color: #f5c842; }
+.status-aprobado  { background: #0a1a0a; color: #6fcf6f; }
+.status-rechazado { background: #2a1010; color: #cf6f6f; }
+.admin-note { font-size: 11px; color: #555; margin-top: 6px; padding-top: 6px; border-top: 1px solid #1a1a1a; }
+
+/* ── Formulario solicitud ── */
+.form-card { background: #141414; border: 1px solid #2a2400; border-radius: 16px; padding: 18px; margin-bottom: 12px; }
+.form-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+.form-row { margin-bottom: 12px; }
+.form-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; color: #555; display: block; margin-bottom: 5px; }
+.form-select, .form-input, .form-textarea { width: 100%; background: #0e0e0e; border: 1px solid #222; border-radius: 10px; color: #f0ede8; font-size: 14px; padding: 11px 13px; outline: none; font-family: inherit; }
+.form-select:focus, .form-input:focus, .form-textarea:focus { border-color: #f5c842; }
+.form-textarea { resize: none; min-height: 70px; }
+.btn-submit { width: 100%; padding: 14px; background: #f5c842; color: #0e0e0e; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 4px; }
+.btn-submit:disabled { opacity: 0.5; }
+
+.toast { position: fixed; bottom: 28px; left: 16px; right: 16px; background: #1a2a1a; border: 1px solid #2d5a2d; color: #6fcf6f; padding: 14px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; z-index: 500; text-align: center; }
+.toast.show { display: block; }
+.loading { text-align: center; color: #555; padding: 24px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen" class="login-screen">
+  <div>
+    <div class="login-logo">⚡ <span>Trueno</span></div>
+    <div class="login-sub">Portal de empleadas</div>
+  </div>
+  <div class="login-card">
+    <div class="login-title">Iniciar sesión</div>
+    <div class="login-desc">Ingresa con tu nombre y PIN</div>
+    <label class="field-label">Tu nombre</label>
+    <select class="field-select" id="sel-name">
+      <option value="">— Selecciona —</option>
+      <option value="Melanie">Melanie</option>
+      <option value="Daniela">Daniela</option>
+      <option value="Daniel">Daniel</option>
+      <option value="Izchel">Izchel</option>
+    </select>
+    <label class="field-label">PIN</label>
+    <input class="field-input" id="inp-pin" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')loginEmp()">
+    <button class="btn-login" onclick="loginEmp()">Entrar</button>
+    <div class="login-error" id="l-error">PIN incorrecto — intenta de nuevo</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app">
+  <header>
+    <div class="header-top">
+      <span class="logo">⚡ <span>Trueno</span><span class="emp-badge" id="emp-badge">—</span></span>
+      <button class="logout-btn" onclick="logout()">Salir</button>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="setTab(0)">🕐 Asistencia</div>
+      <div class="tab" onclick="setTab(1)">📅 Mi Horario</div>
+      <div class="tab" onclick="setTab(2)">📝 Solicitudes</div>
+      <div class="tab" onclick="setTab(3)">⚙️ Mi PIN</div>
+    </div>
+  </header>
+
+  <!-- ASISTENCIA -->
+  <div class="panel active" id="panel-0">
+    <div class="kpi-row" id="asis-kpi">
+      <div class="kpi-card"><div class="kpi-val" id="k-dias">—</div><div class="kpi-label">Días este mes</div></div>
+      <div class="kpi-card"><div class="kpi-val" id="k-hrs">—</div><div class="kpi-label">Horas este mes</div></div>
+    </div>
+    <div class="section-label">Últimos 30 días</div>
+    <div id="asis-content"><div class="loading">Cargando...</div></div>
+  </div>
+
+  <!-- HORARIO -->
+  <div class="panel" id="panel-1">
+    <div class="section-label">Próximas 3 semanas</div>
+    <div class="card" id="sched-content"><div class="loading">Cargando...</div></div>
+  </div>
+
+  <!-- SOLICITUDES -->
+  <div class="panel" id="panel-2">
+    <div class="form-card">
+      <div class="form-title">Nueva solicitud</div>
+      <div class="form-row">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" id="req-type">
+          <option value="permiso">Permiso (día libre puntual)</option>
+          <option value="vacacion">Vacaciones</option>
+          <option value="cambio_turno">Cambio de turno</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Fecha que solicitas</label>
+        <input class="form-input" type="date" id="req-date">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Motivo</label>
+        <textarea class="form-textarea" id="req-reason" placeholder="Explica brevemente tu solicitud..."></textarea>
+      </div>
+      <button class="btn-submit" id="btn-req" onclick="enviarSolicitud()">Enviar solicitud</button>
+    </div>
+    <div class="section-label">Mis solicitudes anteriores</div>
+    <div id="req-list"><div class="loading">Cargando...</div></div>
+  </div>
+</div>
+
+  <!-- MI PIN -->
+  <div class="panel" id="panel-3">
+    <div class="form-card" style="margin-top:8px">
+      <div class="form-title">Cambiar mi PIN</div>
+      <div class="form-row">
+        <label class="form-label">PIN actual</label>
+        <input class="form-input" type="password" inputmode="numeric" maxlength="8" id="pin-actual" placeholder="••••" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <label class="form-label">PIN nuevo</label>
+        <input class="form-input" type="password" inputmode="numeric" maxlength="8" id="pin-nuevo" placeholder="••••" autocomplete="new-password">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Confirmar PIN nuevo</label>
+        <input class="form-input" type="password" inputmode="numeric" maxlength="8" id="pin-confirm" placeholder="••••" autocomplete="new-password">
+      </div>
+      <div id="pin-error" class="login-error"></div>
+      <button class="btn-submit" id="btn-pin" onclick="cambiarPin()">Guardar nuevo PIN</button>
+    </div>
+    <div style="font-size:12px;color:#444;text-align:center;padding:12px">El PIN debe tener entre 4 y 8 dígitos</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL  = 'https://axxbsjbywivolwluzvrd.supabase.co'
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+const H = { 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'Content-Type': 'application/json' }
+
+const SHIFT_LABELS = { mañana: 'Mañana', tarde: 'Tarde', descanso: 'Descanso' }
+const SHIFT_HOURS  = { mañana: '6:30 – 14:30', tarde: '14:15 – 22:15', descanso: 'Día libre' }
+
+let currentEmp = null
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+async function loginEmp() {
+  const name = document.getElementById('sel-name').value
+  const pin  = document.getElementById('inp-pin').value.trim()
+  const errEl = document.getElementById('l-error')
+  errEl.classList.remove('show')
+  if (!name || !pin) { errEl.textContent = 'Selecciona tu nombre y escribe tu PIN'; errEl.classList.add('show'); return }
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/rpc/verify_employee_pin', {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ p_name: name, p_pin: pin })
+    })
+    const data = await r.json()
+    if (!Array.isArray(data) || !data.length) { errEl.textContent = 'PIN incorrecto'; errEl.classList.add('show'); return }
+    currentEmp = data[0]
+    sessionStorage.setItem('trueno_emp', JSON.stringify(currentEmp))
+    startApp()
+  } catch {
+    errEl.textContent = 'Error de conexión — revisa tu internet'; errEl.classList.add('show')
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('trueno_emp')
+  currentEmp = null
+  document.getElementById('app').className = 'app'
+  document.getElementById('login-screen').style.display = 'flex'
+  document.getElementById('inp-pin').value = ''
+}
+
+function startApp() {
+  document.getElementById('login-screen').style.display = 'none'
+  document.getElementById('app').className = 'app visible'
+  document.getElementById('emp-badge').textContent = currentEmp.name
+  // Set default date for request form to tomorrow
+  const tom = new Date(); tom.setDate(tom.getDate() + 1)
+  document.getElementById('req-date').value = tom.toISOString().slice(0, 10)
+  setTab(0)
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function setTab(i) {
+  document.querySelectorAll('.tab').forEach((t,j) => t.classList.toggle('active', i===j))
+  document.querySelectorAll('.panel').forEach((p,j) => p.classList.toggle('active', i===j))
+  if (i === 0) renderAsistencia()
+  if (i === 1) renderHorario()
+  if (i === 2) renderSolicitudes()
+}
+
+// ── Asistencia ────────────────────────────────────────────────────────────────
+async function renderAsistencia() {
+  const el = document.getElementById('asis-content')
+  el.innerHTML = '<div class="loading">Cargando...</div>'
+  try {
+    const since = new Date(); since.setDate(since.getDate() - 30)
+    const url = SB_URL + '/rest/v1/attendance_records?select=*&employee_id=eq.' + currentEmp.id
+      + '&server_time=gte.' + since.toISOString() + '&order=server_time.desc'
+    const r = await fetch(url, { headers: H })
+    const rows = await r.json()
+    if (!Array.isArray(rows) || !rows.length) { el.innerHTML = '<div class="empty">Sin registros en los últimos 30 días</div>'; return }
+
+    // Group by day
+    const byDay = {}
+    rows.forEach(r => {
+      const d = new Date(r.server_time)
+      const key = d.toLocaleDateString('es-MX', { year:'numeric', month:'long', day:'numeric', weekday:'long' })
+      if (!byDay[key]) byDay[key] = []
+      byDay[key].push(r)
+    })
+
+    // KPIs for current month
+    const now = new Date()
+    const mesRows = rows.filter(r => {
+      const d = new Date(r.server_time)
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+    })
+    let totalHrs = 0, diasTrabajados = new Set()
+    const byDayMes = {}
+    mesRows.forEach(r => {
+      const d = new Date(r.server_time)
+      const k = d.toDateString()
+      if (!byDayMes[k]) byDayMes[k] = []
+      byDayMes[k].push(r)
+    })
+    Object.values(byDayMes).forEach(regs => {
+      const sorted = [...regs].sort((a,b) => new Date(a.server_time)-new Date(b.server_time))
+      let entrada = null
+      sorted.forEach(r => {
+        if (r.event_type === 'check_in') { entrada = r.server_time; diasTrabajados.add(new Date(r.server_time).toDateString()) }
+        else if (r.event_type === 'check_out' && entrada) { totalHrs += (new Date(r.server_time)-new Date(entrada))/3600000; entrada=null }
+      })
+    })
+    document.getElementById('k-dias').textContent = diasTrabajados.size
+    document.getElementById('k-hrs').textContent = Math.floor(totalHrs) + 'h ' + Math.round((totalHrs%1)*60) + 'm'
+
+    // Render rows
+    el.innerHTML = Object.entries(byDay).map(([dia, regs]) => {
+      const sorted = [...regs].sort((a,b) => new Date(a.server_time)-new Date(b.server_time))
+      let html = '', entrada = null
+      sorted.forEach(r => {
+        const hora = new Date(r.server_time).toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' })
+        if (r.event_type === 'check_in') {
+          html += `<span class="t-badge t-in">▶ Entrada ${hora}</span> `
+          entrada = r.server_time
+        } else {
+          const hrs = entrada ? ((new Date(r.server_time)-new Date(entrada))/3600000) : null
+          const hrsStr = hrs ? ` · ${Math.floor(hrs)}h ${Math.round((hrs%1)*60)}m` : ''
+          html += `<span class="t-badge t-out">■ Salida ${hora}${hrsStr}</span> `
+          entrada = null
+        }
+      })
+      if (entrada) html += `<span class="t-badge t-pending">⏳ Sin salida aún</span>`
+      return `<div class="asis-day"><div class="asis-day-header">${dia}</div><div class="asis-row">${html}</div></div>`
+    }).join('')
+  } catch(e) {
+    el.innerHTML = '<div class="empty">Error al cargar asistencia</div>'
+  }
+}
+
+// ── Horario ───────────────────────────────────────────────────────────────────
+async function renderHorario() {
+  const el = document.getElementById('sched-content')
+  el.innerHTML = '<div class="loading">Cargando...</div>'
+  try {
+    const today = new Date()
+    const until = new Date(); until.setDate(until.getDate() + 20)
+    const url = SB_URL + '/rest/v1/schedules?select=*&employee_id=eq.' + currentEmp.id
+      + '&date=gte.' + today.toISOString().slice(0,10)
+      + '&date=lte.' + until.toISOString().slice(0,10) + '&order=date.asc'
+    const r = await fetch(url, { headers: H })
+    const rows = await r.json()
+
+    const schedMap = {}
+    if (Array.isArray(rows)) rows.forEach(r => { schedMap[r.date] = r })
+
+    // Render next 21 days
+    const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
+    let html = ''
+    for (let i = 0; i <= 20; i++) {
+      const d = new Date(today); d.setDate(today.getDate() + i)
+      const key = d.toISOString().slice(0, 10)
+      const s = schedMap[key]
+      const isToday = i === 0
+      const weekday = DIAS[d.getDay()]
+      const daynum = d.getDate()
+      let shiftHtml
+      if (s) {
+        const cls = 'shift-' + s.shift_type
+        shiftHtml = `<span class="shift-badge ${cls}">${SHIFT_LABELS[s.shift_type]}</span><div class="shift-time">${SHIFT_HOURS[s.shift_type]}</div>`
+      } else {
+        shiftHtml = `<span class="shift-empty">Sin asignar</span>`
+      }
+      html += `<div class="sched-row">
+        <div class="sched-date"><div class="sched-weekday">${weekday}</div><div class="sched-daynum${isToday?' today':''}">${daynum}</div></div>
+        <div class="sched-shift">${shiftHtml}</div>
+      </div>`
+    }
+    el.innerHTML = html
+  } catch {
+    el.innerHTML = '<div class="empty">Error al cargar horario</div>'
+  }
+}
+
+// ── Solicitudes ───────────────────────────────────────────────────────────────
+async function renderSolicitudes() {
+  const el = document.getElementById('req-list')
+  el.innerHTML = '<div class="loading">Cargando...</div>'
+  try {
+    const url = SB_URL + '/rest/v1/employee_requests?select=*&employee_id=eq.' + currentEmp.id + '&order=created_at.desc'
+    const r = await fetch(url, { headers: H })
+    const rows = await r.json()
+    if (!Array.isArray(rows) || !rows.length) { el.innerHTML = '<div class="empty">No tienes solicitudes anteriores</div>'; return }
+    const TYPE_LABEL = { permiso: 'Permiso', vacacion: 'Vacaciones', cambio_turno: 'Cambio de turno' }
+    el.innerHTML = rows.map(r => `
+      <div class="req-card">
+        <div class="req-head">
+          <div><div class="req-type">${TYPE_LABEL[r.type]||r.type}</div><div class="req-date">📅 ${r.date}</div></div>
+          <span class="req-status status-${r.status}">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span>
+        </div>
+        <div class="req-reason">${r.reason}</div>
+        ${r.admin_note ? `<div class="admin-note">Nota de Izchel: ${r.admin_note}</div>` : ''}
+      </div>`).join('')
+  } catch {
+    el.innerHTML = '<div class="empty">Error al cargar solicitudes</div>'
+  }
+}
+
+async function cambiarPin() {
+  const actual  = document.getElementById('pin-actual').value.trim()
+  const nuevo   = document.getElementById('pin-nuevo').value.trim()
+  const confirm = document.getElementById('pin-confirm').value.trim()
+  const errEl   = document.getElementById('pin-error')
+  errEl.classList.remove('show')
+
+  if (!actual || !nuevo || !confirm) { errEl.textContent = 'Llena los tres campos'; errEl.classList.add('show'); return }
+  if (nuevo.length < 4) { errEl.textContent = 'El PIN nuevo debe tener al menos 4 dígitos'; errEl.classList.add('show'); return }
+  if (nuevo !== confirm) { errEl.textContent = 'Los PINs nuevos no coinciden'; errEl.classList.add('show'); return }
+
+  const btn = document.getElementById('btn-pin')
+  btn.disabled = true; btn.textContent = 'Guardando...'
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/rpc/change_employee_pin', {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ p_name: currentEmp.name, p_old_pin: actual, p_new_pin: nuevo })
+    })
+    const ok = await r.json()
+    if (ok === true) {
+      document.getElementById('pin-actual').value = ''
+      document.getElementById('pin-nuevo').value = ''
+      document.getElementById('pin-confirm').value = ''
+      toast('✓ PIN actualizado — úsalo la próxima vez que entres')
+    } else {
+      errEl.textContent = 'PIN actual incorrecto'; errEl.classList.add('show')
+    }
+  } catch {
+    errEl.textContent = 'Error de conexión'; errEl.classList.add('show')
+  }
+  btn.disabled = false; btn.textContent = 'Guardar nuevo PIN'
+}
+
+async function enviarSolicitud() {
+  const type   = document.getElementById('req-type').value
+  const date   = document.getElementById('req-date').value
+  const reason = document.getElementById('req-reason').value.trim()
+  if (!date || !reason) { toast('Escribe la fecha y el motivo'); return }
+  const btn = document.getElementById('btn-req')
+  btn.disabled = true; btn.textContent = 'Enviando...'
+  try {
+    await fetch(SB_URL + '/rest/v1/employee_requests', {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ employee_id: currentEmp.id, type, date, reason })
+    })
+    document.getElementById('req-reason').value = ''
+    toast('✓ Solicitud enviada — Izchel la revisará pronto')
+    renderSolicitudes()
+  } catch {
+    toast('Error al enviar — intenta de nuevo')
+  }
+  btn.disabled = false; btn.textContent = 'Enviar solicitud'
+}
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast show'
+  setTimeout(() => t.classList.remove('show'), 3000)
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = sessionStorage.getItem('trueno_emp')
+  if (saved) { try { currentEmp = JSON.parse(saved); startApp() } catch {} }
+})
+</script>
+</body>
+</html>

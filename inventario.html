@@ -141,11 +141,37 @@ const K_INV = 'tc_inv_stock'
 const K_HIST = 'tc_inv_hist'
 let stock = {}, historial = []
 
+const TG_TOKEN = '8765854864:AAEuMxt5p264TL3LPHbQI89S6uqqyIEnQd8'
+const TG_CHAT  = '8309237078'
+const K_ALERT_TS = 'tc_inv_last_alert'
+
+function tgSend(text) {
+  fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ chat_id: TG_CHAT, text, parse_mode:'HTML' })
+  }).catch(()=>{})
+}
+
+function checkCriticalAlert() {
+  const last = parseInt(localStorage.getItem(K_ALERT_TS)||'0')
+  if (Date.now() - last < 4 * 3600 * 1000) return // max una alerta cada 4h
+  const agotados = INSUMOS.filter((ins,i) => Number(stock[i]) <= 0).map(i => i[0])
+  const bajos    = INSUMOS.filter((ins,i) => Number(stock[i]) > 0 && Number(stock[i]) <= ins[3]).map(i => i[0])
+  if (!agotados.length && !bajos.length) return
+  const lineas = [
+    agotados.length ? `🔴 <b>Agotados:</b>\n${agotados.join(', ')}` : '',
+    bajos.length    ? `🟡 <b>Bajos:</b>\n${bajos.join(', ')}`      : '',
+  ].filter(Boolean).join('\n\n')
+  tgSend(`📦 <b>Alerta de inventario — Trueno</b>\n\n${lineas}`)
+  localStorage.setItem(K_ALERT_TS, Date.now().toString())
+}
+
 function load() {
   try { stock = JSON.parse(localStorage.getItem(K_INV)||'{}') } catch { stock={} }
   try { historial = JSON.parse(localStorage.getItem(K_HIST)||'[]') } catch { historial=[] }
   INSUMOS.forEach((ins,i) => { if (stock[i]===undefined) stock[i]=ins[4] })
   save()
+  setTimeout(checkCriticalAlert, 2000) // checa 2s después de cargar
 }
 
 function save() {
