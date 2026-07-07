@@ -48,7 +48,7 @@
   </div>
 
   <div class="qr-box">
-    <canvas id="qr-canvas" width="260" height="260"></canvas>
+    <div id="qr-canvas"></div>
   </div>
 
   <div class="timer-row">
@@ -70,7 +70,7 @@
 
   <button class="refresh-btn" onclick="loadQR()">↺ Refrescar QR</button>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
     const SB_URL = 'https://axxbsjbywivolwluzvrd.supabase.co'
     const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
@@ -90,10 +90,12 @@
         if (data.error) throw new Error(data.error)
 
         var url = CHECKIN_URL + '?token=' + encodeURIComponent(data.token)
-        var canvas = document.getElementById('qr-canvas')
-        await QRCode.toCanvas(canvas, url, {
-          width: 260, margin: 1,
-          color: { dark: '#111111', light: '#ffffff' }
+        var container = document.getElementById('qr-canvas')
+        container.innerHTML = ''
+        new QRCode(container, {
+          text: url, width: 260, height: 260,
+          colorDark: '#111111', colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
         })
 
         expiresAt = new Date(data.expires_at)
