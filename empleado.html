@@ -32,6 +32,7 @@ header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-
 .logo { font-size: 18px; font-weight: 700; }
 .logo span { color: #f5c842; }
 .emp-badge { font-size: 12px; background: #1a1600; color: #f5c842; border: 1px solid #f5c842; padding: 3px 10px; border-radius: 20px; font-weight: 700; margin-left: 8px; }
+.menu-btn { display: inline-flex; align-items: center; padding: 7px 13px; background: #1a1600; border: 1px solid #f5c842; border-radius: 10px; color: #f5c842; font-size: 12px; font-weight: 700; text-decoration: none; flex-shrink: 0; }
 .logout-btn { padding: 7px 14px; background: transparent; border: 1px solid #333; border-radius: 10px; color: #555; font-size: 12px; cursor: pointer; font-family: inherit; }
 
 .tabs { display: flex; overflow-x: auto; scrollbar-width: none; }
@@ -134,6 +135,7 @@ header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-
 <div id="app" class="app">
   <header>
     <div class="header-top">
+      <a class="menu-btn" href="index.html">← Menú</a>
       <span class="logo">⚡ <span>Trueno</span><span class="emp-badge" id="emp-badge">—</span></span>
       <button class="logout-btn" onclick="logout()">Salir</button>
     </div>

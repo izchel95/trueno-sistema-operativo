@@ -496,11 +496,25 @@ const K_INV = 'tc_inv_stock'
 const K_HIST = 'tc_inv_hist'
 let stock = {}, historial = [], editIdx = null, editQtyTemp = 0
 
-function loadInv() {
+async function loadInv() {
   try { stock = JSON.parse(localStorage.getItem(K_INV)||'{}') } catch { stock={} }
   try { historial = JSON.parse(localStorage.getItem(K_HIST)||'[]') } catch { historial=[] }
   INSUMOS.forEach((ins,i) => { if (stock[i]===undefined) stock[i]=ins[4] })
+  try {
+    const _h2 = { 'apikey': _adminSbKey, 'Authorization': 'Bearer ' + _adminSbKey }
+    const r = await fetch(_adminSbUrl + '/rest/v1/inventario_stock?select=nombre,cantidad', { headers: _h2 })
+    const rows = await r.json()
+    if (Array.isArray(rows) && rows.length) {
+      rows.forEach(row => {
+        const idx = INSUMOS.findIndex(ins => ins[0] === row.nombre)
+        if (idx !== -1) stock[idx] = row.cantidad
+      })
+      localStorage.setItem(K_INV, JSON.stringify(stock))
+    }
+  } catch {}
   saveInv()
+  renderStock()
+  renderHistInv()
 }
 
 function saveInv() {

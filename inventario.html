@@ -141,6 +141,22 @@ const K_INV = 'tc_inv_stock'
 const K_HIST = 'tc_inv_hist'
 let stock = {}, historial = []
 
+const _SB_URL = 'https://axxbsjbywivolwluzvrd.supabase.co'
+const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+const _SB_H = { 'apikey': _SB_KEY, 'Authorization': 'Bearer ' + _SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' }
+
+async function pushStockToCloud() {
+  const rows = INSUMOS.map((ins, i) => ({ nombre: ins[0], cantidad: stock[i] ?? ins[4] }))
+  fetch(_SB_URL + '/rest/v1/inventario_stock', { method: 'POST', headers: _SB_H, body: JSON.stringify(rows) }).catch(() => {})
+}
+
+async function pushHistorialToCloud(entry) {
+  fetch(_SB_URL + '/rest/v1/inventario_historial', {
+    method: 'POST', headers: _SB_H,
+    body: JSON.stringify({ nombre: entry.nombre, unidad: entry.unit, delta: entry.delta, notas: entry.notas || '', fecha: entry.fecha })
+  }).catch(() => {})
+}
+
 const TG_TOKEN = '8765854864:AAEuMxt5p264TL3LPHbQI89S6uqqyIEnQd8'
 const TG_CHAT  = '8309237078'
 const K_ALERT_TS = 'tc_inv_last_alert'
@@ -166,17 +182,31 @@ function checkCriticalAlert() {
   localStorage.setItem(K_ALERT_TS, Date.now().toString())
 }
 
-function load() {
+async function load() {
   try { stock = JSON.parse(localStorage.getItem(K_INV)||'{}') } catch { stock={} }
   try { historial = JSON.parse(localStorage.getItem(K_HIST)||'[]') } catch { historial=[] }
   INSUMOS.forEach((ins,i) => { if (stock[i]===undefined) stock[i]=ins[4] })
+  // Cargar desde Supabase (prevalece sobre localStorage)
+  try {
+    const r = await fetch(_SB_URL + '/rest/v1/inventario_stock?select=nombre,cantidad', { headers: _SB_H })
+    const rows = await r.json()
+    if (Array.isArray(rows) && rows.length) {
+      rows.forEach(row => {
+        const idx = INSUMOS.findIndex(ins => ins[0] === row.nombre)
+        if (idx !== -1) stock[idx] = row.cantidad
+      })
+      localStorage.setItem(K_INV, JSON.stringify(stock))
+    }
+  } catch {}
   save()
-  setTimeout(checkCriticalAlert, 2000) // checa 2s después de cargar
+  setTimeout(checkCriticalAlert, 2000)
+  renderAlertas(); renderHistorial()
 }
 
 function save() {
   localStorage.setItem(K_INV, JSON.stringify(stock))
   localStorage.setItem(K_HIST, JSON.stringify(historial))
+  pushStockToCloud()
 }
 
 function sem(qty, min) {
@@ -252,8 +282,10 @@ function registrarEntrada() {
   stock[idx] = (stock[idx]||0) + qty
   const _fecha = new Date().toLocaleDateString('es-MX')
   const _hora  = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})
-  historial.push({ nombre:ins[0], unit:ins[2], delta:qty, notas, fecha: _fecha })
+  const entry = { nombre:ins[0], unit:ins[2], delta:qty, notas, fecha: _fecha }
+  historial.push(entry)
   save()
+  pushHistorialToCloud(entry)
 
   // Google Sheets
   fetch('https://script.google.com/macros/s/AKfycbwbGhSNVMONmBvZaaZB0sY6uPAEQpm4NKoOdGZCVGGIYxAdLuZTZpRux6WKySbcO14x/exec', {
