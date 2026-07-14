@@ -191,7 +191,8 @@
         var hora = new Date(data.server_time).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
         res.innerHTML = data.message +
           (data.flagged ? '<br><span style="color:#f5a842;font-size:13px">⚠️ Ubicación inusual anotada</span>' : '') +
-          '<small>Hora del servidor: ' + hora + '</small>'
+          '<small>Hora del servidor: ' + hora + '</small>' +
+          (data.event_type === 'check_in' ? '<div style="margin-top:14px;background:#1a1600;border:1px solid #f5c842;border-radius:12px;padding:12px 14px;font-size:14px;color:#f5c842;text-align:center">☕ Recuerda hacer tu <b>calibración</b> antes de empezar</div>' : '')
         btn.style.display = 'none'
         document.getElementById('new-btn').style.display = 'block'
       } else {
