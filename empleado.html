@@ -148,25 +148,14 @@ header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-
       <button class="logout-btn" onclick="logout()">Salir</button>
     </div>
     <div class="tabs">
-      <div class="tab active" onclick="setTab(0)">🕐 Asistencia</div>
-      <div class="tab" onclick="setTab(1)">📅 Mi Horario</div>
-      <div class="tab" onclick="setTab(2)">📝 Solicitudes</div>
-      <div class="tab" onclick="setTab(3)">⚙️ Mi PIN</div>
+      <div class="tab active" onclick="setTab(0)">📅 Mi Horario</div>
+      <div class="tab" onclick="setTab(1)">📝 Solicitudes</div>
+      <div class="tab" onclick="setTab(2)">⚙️ Mi PIN</div>
     </div>
   </header>
 
-  <!-- ASISTENCIA -->
-  <div class="panel active" id="panel-0">
-    <div class="kpi-row" id="asis-kpi">
-      <div class="kpi-card"><div class="kpi-val" id="k-dias">—</div><div class="kpi-label">Días este mes</div></div>
-      <div class="kpi-card"><div class="kpi-val" id="k-hrs">—</div><div class="kpi-label">Horas este mes</div></div>
-    </div>
-    <div class="section-label">Últimos 30 días</div>
-    <div id="asis-content"><div class="loading">Cargando...</div></div>
-  </div>
-
   <!-- HORARIO -->
-  <div class="panel" id="panel-1">
+  <div class="panel active" id="panel-0">
     <div class="hor-cal-nav">
       <button onclick="horCalDelta(-1)">‹</button>
       <span class="hor-cal-mes" id="hor-cal-mes"></span>
@@ -176,7 +165,7 @@ header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-
   </div>
 
   <!-- SOLICITUDES -->
-  <div class="panel" id="panel-2">
+  <div class="panel" id="panel-1">
     <div class="form-card">
       <div class="form-title">Nueva solicitud</div>
       <div class="form-row">
@@ -224,7 +213,7 @@ header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-
 </div>
 
   <!-- MI PIN -->
-  <div class="panel" id="panel-3">
+  <div class="panel" id="panel-2">
     <div class="form-card" style="margin-top:8px">
       <div class="form-title">Cambiar mi PIN</div>
       <div class="form-row">
@@ -305,9 +294,8 @@ function startApp() {
 function setTab(i) {
   document.querySelectorAll('.tab').forEach((t,j) => t.classList.toggle('active', i===j))
   document.querySelectorAll('.panel').forEach((p,j) => p.classList.toggle('active', i===j))
-  if (i === 0) renderAsistencia()
-  if (i === 1) renderHorario()
-  if (i === 2) renderSolicitudes()
+  if (i === 0) renderHorario()
+  if (i === 1) renderSolicitudes()
 }
 
 // ── Asistencia ────────────────────────────────────────────────────────────────
