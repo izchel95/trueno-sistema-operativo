@@ -67,18 +67,17 @@ header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-
 .hor-cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
 .hor-cal-nav button { background:#141414; border:1px solid #222; border-radius:8px; color:#f0ede8; font-size:18px; width:34px; height:34px; cursor:pointer; }
 .hor-cal-nav .hor-cal-mes { font-size:15px; font-weight:700; }
-.hor-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
-.hor-cal-dow { font-size:10px; color:#555; text-align:center; padding-bottom:4px; text-transform:uppercase; }
-.hor-cal-cell { border-radius:8px; padding:6px 4px 5px; min-height:54px; text-align:center; }
-.hor-cal-cell.empty { background:transparent; }
-.hor-cal-cell.filled { background:#141414; }
-.hor-cal-num { font-size:13px; font-weight:700; margin-bottom:3px; }
-.hor-cal-num.today { color:#f5c842; }
-.hor-cal-badge { font-size:9px; font-weight:700; padding:2px 5px; border-radius:5px; display:inline-block; }
-.cal-mañana   { background:#1a1600; color:#f5c842; }
-.cal-tarde    { background:#0d0d2a; color:#8080ff; }
-.cal-descanso { background:#1a1a1a; color:#555; }
-.cal-empty    { color:#333; font-size:9px; }
+.hor-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+.hor-head-cell { text-align:center; font-size:10px; color:#444; text-transform:uppercase; letter-spacing:0.5px; padding:4px 0; }
+.hor-cell { background:#141414; border:1px solid #1e1e1e; border-radius:8px; min-height:64px; padding:5px 4px; position:relative; }
+.hor-cell.other-month { opacity:0.15; }
+.hor-cell.today { border-color:#f5c842; }
+.hor-cell.today .hor-day-num { color:#f5c842; }
+.hor-day-num { font-size:11px; font-weight:700; margin-bottom:3px; color:#888; }
+.hor-emp-chip { font-size:9px; font-weight:700; border-radius:4px; padding:2px 4px; margin-bottom:2px; display:block; }
+.chip-mañana   { background:#2a2000; color:#f5c842; }
+.chip-tarde    { background:#0d0d2a; color:#8080ff; }
+.chip-descanso { background:#1a1a1a; color:#444; }
 .shift-badge { display: inline-block; padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; }
 .shift-mañana { background: #1a1600; color: #f5c842; }
 .shift-tarde   { background: #0d0d2a; color: #8080ff; }
@@ -168,14 +167,12 @@ header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-
 
   <!-- HORARIO -->
   <div class="panel" id="panel-1">
-    <div class="card">
-      <div class="hor-cal-nav">
-        <button onclick="horCalDelta(-1)">‹</button>
-        <span class="hor-cal-mes" id="hor-cal-mes"></span>
-        <button onclick="horCalDelta(1)">›</button>
-      </div>
-      <div class="hor-cal-grid" id="hor-cal-grid"><div class="loading">Cargando...</div></div>
+    <div class="hor-cal-nav">
+      <button onclick="horCalDelta(-1)">‹</button>
+      <span class="hor-cal-mes" id="hor-cal-mes"></span>
+      <button onclick="horCalDelta(1)">›</button>
     </div>
+    <div id="hor-cal-grid"></div>
   </div>
 
   <!-- SOLICITUDES -->
@@ -406,7 +403,7 @@ async function drawHorCal() {
   const mesEl = document.getElementById('hor-cal-mes')
   const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
   mesEl.textContent = MESES[horCalMonth] + ' ' + horCalYear
-  grid.innerHTML = '<div class="loading" style="grid-column:1/-1">Cargando...</div>'
+  grid.innerHTML = '<div style="color:#555;padding:20px;text-align:center">Cargando...</div>'
 
   const firstDay = new Date(horCalYear, horCalMonth, 1)
   const lastDay  = new Date(horCalYear, horCalMonth + 1, 0)
@@ -422,33 +419,26 @@ async function drawHorCal() {
     if (Array.isArray(rows)) rows.forEach(s => { map[s.date] = s })
 
     const todayStr = new Date().toISOString().slice(0,10)
-    const DOWS = ['D','L','M','X','J','V','S']
-    let html = DOWS.map(d => `<div class="hor-cal-dow">${d}</div>`).join('')
+    const DIAS_SEMANA = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
+    const LBL = { mañana:'Mañana', tarde:'Tarde', descanso:'Libre' }
+    let html = DIAS_SEMANA.map(d => `<div class="hor-head-cell">${d}</div>`).join('')
 
-    // blank cells before first day (0=Sun)
-    const startDow = firstDay.getDay()
-    for (let i = 0; i < startDow; i++) html += '<div class="hor-cal-cell empty"></div>'
+    for (let i = 0; i < firstDay.getDay(); i++) html += '<div class="hor-cell other-month"></div>'
 
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const key = `${horCalYear}-${String(horCalMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`
       const s = map[key]
       const isToday = key === todayStr
-      let badge = ''
-      if (s) {
-        const lbl = { mañana:'Mañ', tarde:'Tarde', descanso:'Libre' }
-        badge = `<div class="hor-cal-badge cal-${s.shift_type}">${lbl[s.shift_type]||s.shift_type}</div>`
-        if (s.notes) badge += `<div style="font-size:8px;color:#555;margin-top:2px;line-height:1.2">${s.notes.replace(' – ','–')}</div>`
-      } else {
-        badge = `<div class="cal-empty">—</div>`
-      }
-      html += `<div class="hor-cal-cell filled">
-        <div class="hor-cal-num${isToday?' today':''}">${day}</div>
-        ${badge}
+      const chip = s
+        ? `<span class="hor-emp-chip chip-${s.shift_type}">${LBL[s.shift_type]||s.shift_type}</span>${s.notes ? `<span style="font-size:8px;color:#555;display:block;margin-top:1px">${s.notes}</span>` : ''}`
+        : ''
+      html += `<div class="hor-cell${isToday?' today':''}">
+        <div class="hor-day-num">${day}</div>${chip}
       </div>`
     }
-    grid.innerHTML = html
+    grid.innerHTML = `<div class="hor-grid">${html}</div>`
   } catch {
-    grid.innerHTML = '<div style="grid-column:1/-1;color:#555;text-align:center;padding:20px">Error al cargar</div>'
+    grid.innerHTML = '<div style="color:#555;text-align:center;padding:20px">Error al cargar</div>'
   }
 }
 
