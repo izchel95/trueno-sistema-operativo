@@ -59,17 +59,26 @@ header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-
 .t-in { background: #0a1a0a; color: #6fcf6f; }
 .t-out { background: #1a0e0e; color: #cf6f6f; }
 .t-pending { background: #1e1a0a; color: #f5c842; }
+.t-auto { background: #2a0000; color: #ff4444; }
 .asis-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; flex-wrap: wrap; }
 .asis-hrs { margin-left: auto; font-size: 13px; font-weight: 800; color: #6fcf6f; }
 
 /* ── Horario ── */
-.sched-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #1a1a1a; gap: 12px; }
-.sched-row:last-child { border: none; }
-.sched-date { width: 52px; flex-shrink: 0; }
-.sched-weekday { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.3px; }
-.sched-daynum { font-size: 20px; font-weight: 800; }
-.sched-daynum.today { color: #f5c842; }
-.sched-shift { flex: 1; }
+.hor-cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.hor-cal-nav button { background:#141414; border:1px solid #222; border-radius:8px; color:#f0ede8; font-size:18px; width:34px; height:34px; cursor:pointer; }
+.hor-cal-nav .hor-cal-mes { font-size:15px; font-weight:700; }
+.hor-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.hor-cal-dow { font-size:10px; color:#555; text-align:center; padding-bottom:4px; text-transform:uppercase; }
+.hor-cal-cell { border-radius:8px; padding:6px 4px 5px; min-height:54px; text-align:center; }
+.hor-cal-cell.empty { background:transparent; }
+.hor-cal-cell.filled { background:#141414; }
+.hor-cal-num { font-size:13px; font-weight:700; margin-bottom:3px; }
+.hor-cal-num.today { color:#f5c842; }
+.hor-cal-badge { font-size:9px; font-weight:700; padding:2px 5px; border-radius:5px; display:inline-block; }
+.cal-mañana   { background:#1a1600; color:#f5c842; }
+.cal-tarde    { background:#0d0d2a; color:#8080ff; }
+.cal-descanso { background:#1a1a1a; color:#555; }
+.cal-empty    { color:#333; font-size:9px; }
 .shift-badge { display: inline-block; padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; }
 .shift-mañana { background: #1a1600; color: #f5c842; }
 .shift-tarde   { background: #0d0d2a; color: #8080ff; }
@@ -159,8 +168,14 @@ header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-
 
   <!-- HORARIO -->
   <div class="panel" id="panel-1">
-    <div class="section-label">Próximas 3 semanas</div>
-    <div class="card" id="sched-content"><div class="loading">Cargando...</div></div>
+    <div class="card">
+      <div class="hor-cal-nav">
+        <button onclick="horCalDelta(-1)">‹</button>
+        <span class="hor-cal-mes" id="hor-cal-mes"></span>
+        <button onclick="horCalDelta(1)">›</button>
+      </div>
+      <div class="hor-cal-grid" id="hor-cal-grid"><div class="loading">Cargando...</div></div>
+    </div>
   </div>
 
   <!-- SOLICITUDES -->
@@ -176,8 +191,29 @@ header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-
         </select>
       </div>
       <div class="form-row">
-        <label class="form-label">Fecha que solicitas</label>
+        <label class="form-label">¿Cuántos días?</label>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer">
+            <input type="radio" name="req-days" value="single" checked onchange="toggleDateMode(this.value)"> Un día
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer">
+            <input type="radio" name="req-days" value="range" onchange="toggleDateMode(this.value)"> Varios días
+          </label>
+        </div>
+      </div>
+      <div id="date-single" class="form-row">
+        <label class="form-label">Fecha</label>
         <input class="form-input" type="date" id="req-date">
+      </div>
+      <div id="date-range" style="display:none">
+        <div class="form-row">
+          <label class="form-label">Primer día</label>
+          <input class="form-input" type="date" id="req-date-start">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Último día</label>
+          <input class="form-input" type="date" id="req-date-end">
+        </div>
       </div>
       <div class="form-row">
         <label class="form-label">Motivo</label>
@@ -261,7 +297,10 @@ function startApp() {
   document.getElementById('emp-badge').textContent = currentEmp.name
   // Set default date for request form to tomorrow
   const tom = new Date(); tom.setDate(tom.getDate() + 1)
-  document.getElementById('req-date').value = tom.toISOString().slice(0, 10)
+  const tomStr = tom.toISOString().slice(0, 10)
+  document.getElementById('req-date').value = tomStr
+  document.getElementById('req-date-start').value = tomStr
+  document.getElementById('req-date-end').value = tomStr
   setTab(0)
 }
 
@@ -336,7 +375,17 @@ async function renderAsistencia() {
           entrada = null
         }
       })
-      if (entrada) html += `<span class="t-badge t-pending">⏳ Sin salida aún</span>`
+      if (entrada) {
+        const checkInTime = new Date(entrada)
+        const isMorning = checkInTime.getHours() < 12
+        const cutoff = new Date(checkInTime)
+        cutoff.setHours(isMorning ? 14 : 22, 30, 0, 0)
+        if (new Date() > cutoff) {
+          html += `<span class="t-badge t-auto">🔒 Salida automática ${isMorning ? '2:30 pm' : '10:30 pm'} — no registraste tu salida</span>`
+        } else {
+          html += `<span class="t-badge t-pending">⏳ Sin salida aún</span>`
+        }
+      }
       return `<div class="asis-day"><div class="asis-day-header">${dia}</div><div class="asis-row">${html}</div></div>`
     }).join('')
   } catch(e) {
@@ -345,46 +394,61 @@ async function renderAsistencia() {
 }
 
 // ── Horario ───────────────────────────────────────────────────────────────────
+let horCalYear, horCalMonth
 async function renderHorario() {
-  const el = document.getElementById('sched-content')
-  el.innerHTML = '<div class="loading">Cargando...</div>'
+  const now = new Date()
+  if (horCalYear === undefined) { horCalYear = now.getFullYear(); horCalMonth = now.getMonth() }
+  await drawHorCal()
+}
+function horCalDelta(d) { horCalMonth += d; if (horCalMonth > 11) { horCalMonth=0; horCalYear++ } if (horCalMonth < 0) { horCalMonth=11; horCalYear-- } drawHorCal() }
+async function drawHorCal() {
+  const grid = document.getElementById('hor-cal-grid')
+  const mesEl = document.getElementById('hor-cal-mes')
+  const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+  mesEl.textContent = MESES[horCalMonth] + ' ' + horCalYear
+  grid.innerHTML = '<div class="loading" style="grid-column:1/-1">Cargando...</div>'
+
+  const firstDay = new Date(horCalYear, horCalMonth, 1)
+  const lastDay  = new Date(horCalYear, horCalMonth + 1, 0)
+  const dateFrom = firstDay.toISOString().slice(0,10)
+  const dateTo   = lastDay.toISOString().slice(0,10)
+
   try {
-    const today = new Date()
-    const until = new Date(); until.setDate(until.getDate() + 20)
     const url = SB_URL + '/rest/v1/schedules?select=*&employee_id=eq.' + currentEmp.id
-      + '&date=gte.' + today.toISOString().slice(0,10)
-      + '&date=lte.' + until.toISOString().slice(0,10) + '&order=date.asc'
+      + '&date=gte.' + dateFrom + '&date=lte.' + dateTo + '&order=date.asc'
     const r = await fetch(url, { headers: H })
     const rows = await r.json()
+    const map = {}
+    if (Array.isArray(rows)) rows.forEach(s => { map[s.date] = s })
 
-    const schedMap = {}
-    if (Array.isArray(rows)) rows.forEach(r => { schedMap[r.date] = r })
+    const todayStr = new Date().toISOString().slice(0,10)
+    const DOWS = ['D','L','M','X','J','V','S']
+    let html = DOWS.map(d => `<div class="hor-cal-dow">${d}</div>`).join('')
 
-    // Render next 21 days
-    const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
-    let html = ''
-    for (let i = 0; i <= 20; i++) {
-      const d = new Date(today); d.setDate(today.getDate() + i)
-      const key = d.toISOString().slice(0, 10)
-      const s = schedMap[key]
-      const isToday = i === 0
-      const weekday = DIAS[d.getDay()]
-      const daynum = d.getDate()
-      let shiftHtml
+    // blank cells before first day (0=Sun)
+    const startDow = firstDay.getDay()
+    for (let i = 0; i < startDow; i++) html += '<div class="hor-cal-cell empty"></div>'
+
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      const key = `${horCalYear}-${String(horCalMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`
+      const s = map[key]
+      const isToday = key === todayStr
+      let badge = ''
       if (s) {
-        const cls = 'shift-' + s.shift_type
-        shiftHtml = `<span class="shift-badge ${cls}">${SHIFT_LABELS[s.shift_type]}</span><div class="shift-time">${SHIFT_HOURS[s.shift_type]}</div>`
+        const lbl = { mañana:'Mañ', tarde:'Tarde', descanso:'Libre' }
+        badge = `<div class="hor-cal-badge cal-${s.shift_type}">${lbl[s.shift_type]||s.shift_type}</div>`
+        if (s.notes) badge += `<div style="font-size:8px;color:#555;margin-top:2px;line-height:1.2">${s.notes.replace(' – ','–')}</div>`
       } else {
-        shiftHtml = `<span class="shift-empty">Sin asignar</span>`
+        badge = `<div class="cal-empty">—</div>`
       }
-      html += `<div class="sched-row">
-        <div class="sched-date"><div class="sched-weekday">${weekday}</div><div class="sched-daynum${isToday?' today':''}">${daynum}</div></div>
-        <div class="sched-shift">${shiftHtml}</div>
+      html += `<div class="hor-cal-cell filled">
+        <div class="hor-cal-num${isToday?' today':''}">${day}</div>
+        ${badge}
       </div>`
     }
-    el.innerHTML = html
+    grid.innerHTML = html
   } catch {
-    el.innerHTML = '<div class="empty">Error al cargar horario</div>'
+    grid.innerHTML = '<div style="grid-column:1/-1;color:#555;text-align:center;padding:20px">Error al cargar</div>'
   }
 }
 
@@ -401,7 +465,7 @@ async function renderSolicitudes() {
     el.innerHTML = rows.map(r => `
       <div class="req-card">
         <div class="req-head">
-          <div><div class="req-type">${TYPE_LABEL[r.type]||r.type}</div><div class="req-date">📅 ${r.date}</div></div>
+          <div><div class="req-type">${TYPE_LABEL[r.type]||r.type}</div><div class="req-date">📅 ${r.date_end ? `Del ${r.date} al ${r.date_end}` : r.date}</div></div>
           <span class="req-status status-${r.status}">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span>
         </div>
         <div class="req-reason">${r.reason}</div>
@@ -445,18 +509,32 @@ async function cambiarPin() {
   btn.disabled = false; btn.textContent = 'Guardar nuevo PIN'
 }
 
+function toggleDateMode(mode) {
+  document.getElementById('date-single').style.display = mode === 'single' ? '' : 'none'
+  document.getElementById('date-range').style.display  = mode === 'range'  ? '' : 'none'
+}
+
 async function enviarSolicitud() {
   const type   = document.getElementById('req-type').value
-  const date   = document.getElementById('req-date').value
   const reason = document.getElementById('req-reason').value.trim()
+  const isRange = document.querySelector('input[name="req-days"]:checked').value === 'range'
+  const date     = isRange ? document.getElementById('req-date-start').value : document.getElementById('req-date').value
+  const date_end = isRange ? document.getElementById('req-date-end').value   : null
   if (!date || !reason) { toast('Escribe la fecha y el motivo'); return }
+  if (isRange && date_end && date_end < date) { toast('El último día no puede ser antes del primero'); return }
   const btn = document.getElementById('btn-req')
   btn.disabled = true; btn.textContent = 'Enviando...'
   try {
-    await fetch(SB_URL + '/rest/v1/employee_requests', {
-      method: 'POST', headers: H,
-      body: JSON.stringify({ employee_id: currentEmp.id, type, date, reason })
-    })
+    const body = { employee_id: currentEmp.id, type, date, reason }
+    if (date_end) body.date_end = date_end
+    await fetch(SB_URL + '/rest/v1/employee_requests', { method: 'POST', headers: H, body: JSON.stringify(body) })
+    const TYPE_LABEL = { permiso:'Permiso', vacacion:'Vacaciones', cambio_turno:'Cambio de turno' }
+    const fechaTxt = date_end ? `Del ${date} al ${date_end}` : date
+    fetch('https://api.telegram.org/bot8765854864:AAEuMxt5p264TL3LPHbQI89S6uqqyIEnQd8/sendMessage', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: '8309237078', parse_mode: 'HTML',
+        text: `📝 <b>Nueva solicitud — ${currentEmp.name}</b>\n\n<b>Tipo:</b> ${TYPE_LABEL[type]||type}\n<b>Fecha:</b> ${fechaTxt}\n<b>Motivo:</b> ${reason}\n\n<i>Aprueba o rechaza en Admin → Horarios</i>` })
+    }).catch(() => {})
     document.getElementById('req-reason').value = ''
     toast('✓ Solicitud enviada — Izchel la revisará pronto')
     renderSolicitudes()

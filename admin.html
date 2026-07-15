@@ -131,6 +131,7 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
 .t-entrada { background: #0a1a0a; color: #6fcf6f; }
 .t-salida { background: #1a0e0e; color: #cf6f6f; }
 .t-sin-salida { background: #1e1a0a; color: #f5c842; }
+.t-auto-close { background: #2a0000; color: #ff4444; }
 .t-arrow { color: #333; font-size: 14px; }
 .t-horas { margin-left: auto; font-size: 14px; font-weight: 800; }
 .t-horas.ok { color: #6fcf6f; }
@@ -312,12 +313,22 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
     <div id="calib-content"><div class="empty">Cargando...</div></div>
   </div>
 
+  <!-- REPORTE SEMANAL -->
+  <div class="panel" id="panel-5">
+    <div class="section-label" style="margin-top:4px">Período</div>
+    <div class="filter-row" id="rep-sem-filtros"></div>
+    <div id="rep-sem-preview" style="margin-top:4px"></div>
+    <button id="btn-email-report" onclick="enviarReporteSemanal()" style="width:100%;padding:16px;background:#f5c842;color:#0e0e0e;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;margin-top:16px">📧 Enviar reporte por email</button>
+    <div style="font-size:11px;color:#444;text-align:center;margin-top:8px">Se envía a izchelac@hotmail.com</div>
+    <div id="rep-sem-status" style="margin-top:10px"></div>
+  </div>
+
   <!-- COSTOS DE RECETAS -->
   <div class="panel" id="panel-6">
     <div class="costos-subtabs">
       <div class="costos-stab active" onclick="setCostosTab('menu',this)">📋 Menú</div>
       <div class="costos-stab" onclick="setCostosTab('impacto',this)">📦 Últimas compras</div>
-      <div class="costos-stab" onclick="setCostosTab('editor',this)">✏️ Precios</div>
+      <div class="costos-stab" onclick="setCostosTab('editor',this)">✏️ Editar precios</div>
     </div>
     <div class="costos-pane active" id="cpane-menu">
       <div class="costos-sum-grid" id="costos-summary"></div>
@@ -351,16 +362,6 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
     <div id="hor-cal" style="margin-bottom:20px"></div>
     <div class="section-label" style="margin-top:8px">Solicitudes pendientes</div>
     <div id="hor-requests"></div>
-  </div>
-
-  <!-- REPORTE SEMANAL -->
-  <div class="panel" id="panel-5">
-    <div class="section-label" style="margin-top:4px">Período</div>
-    <div class="filter-row" id="rep-sem-filtros"></div>
-    <div id="rep-sem-preview" style="margin-top:4px"></div>
-    <button id="btn-email-report" onclick="enviarReporteSemanal()" style="width:100%;padding:16px;background:#f5c842;color:#0e0e0e;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;margin-top:16px">📧 Enviar reporte por email</button>
-    <div style="font-size:11px;color:#444;text-align:center;margin-top:8px">Se envía a izchelac@hotmail.com</div>
-    <div id="rep-sem-status" style="margin-top:10px"></div>
   </div>
 </div>
 
@@ -681,7 +682,7 @@ let asistFiltro = 'dia'
 let asistPersona = 'todos'
 
 const TURNO_MAÑANA_CORTE = 14 * 60 + 30
-const TURNO_TARDE_CORTE  = 22 * 60 + 20
+const TURNO_TARDE_CORTE  = 22 * 60 + 30
 
 function buildAsistFiltros() {
   const personas = [['todos','Todos'], ['Melanie','Melanie'], ['Daniela','Daniela'], ['Daniel','Daniel'], ['Izchel','Izchel']]
@@ -743,7 +744,36 @@ function turnoTag(salidaTs) {
   const d = new Date(salidaTs)
   const min = d.getHours() * 60 + d.getMinutes()
   if (min <= TURNO_MAÑANA_CORTE + 60) return 'Turno mañana · corte 2:30 pm'
-  return 'Turno tarde · corte 10:20 pm'
+  return 'Turno tarde · corte 10:30 pm'
+}
+
+async function autoCloseExpiredShifts(rawData) {
+  const now = new Date()
+  const byEmpDay = {}
+  rawData.forEach(rec => {
+    const dateKey = new Date(rec.server_time).toDateString()
+    const key = rec.employee_id + '_' + dateKey
+    if (!byEmpDay[key]) byEmpDay[key] = { empId: rec.employee_id, hasCheckOut: false, lastCheckIn: null }
+    if (rec.event_type === 'check_out') byEmpDay[key].hasCheckOut = true
+    if (rec.event_type === 'check_in') byEmpDay[key].lastCheckIn = rec
+  })
+  let didInsert = false
+  const _ah = { 'apikey': _adminSbKey, 'Authorization': 'Bearer ' + _adminSbKey, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }
+  for (const day of Object.values(byEmpDay)) {
+    if (day.hasCheckOut || !day.lastCheckIn) continue
+    const checkInTime = new Date(day.lastCheckIn.server_time)
+    const isMorning = checkInTime.getHours() < 12
+    const cutoff = new Date(checkInTime)
+    cutoff.setHours(isMorning ? 14 : 22, 30, 0, 0)
+    if (now > cutoff) {
+      await fetch(_adminSbUrl + '/rest/v1/attendance_records', {
+        method: 'POST', headers: _ah,
+        body: JSON.stringify({ employee_id: day.empId, event_type: 'check_out', server_time: cutoff.toISOString(), flagged: true })
+      }).catch(() => {})
+      didInsert = true
+    }
+  }
+  return didInsert
 }
 
 function paresTurno(registros) {
@@ -767,9 +797,12 @@ async function renderAsistencia() {
   // 1. Intentar nueva tabla attendance_records (sistema QR)
   try {
     var _h = { 'apikey': _adminSbKey, 'Authorization': 'Bearer ' + _adminSbKey }
-    var r = await fetch(_adminSbUrl + '/rest/v1/attendance_records?select=server_time,event_type,flagged,employee_id,employees(name)&order=server_time.desc&limit=500', { headers: _h })
+    const fetchAR = () => fetch(_adminSbUrl + '/rest/v1/attendance_records?select=server_time,event_type,flagged,employee_id,employees(name)&order=server_time.desc&limit=500', { headers: _h })
+    var r = await fetchAR()
     var data = await r.json()
     if (Array.isArray(data) && data.length) {
+      const inserted = await autoCloseExpiredShifts(data)
+      if (inserted) { const r2 = await fetchAR(); data = await r2.json() }
       todos = data.map(function(rec) {
         var ts = rec.server_time
         return {
@@ -877,15 +910,21 @@ async function renderAsistencia() {
       porFecha[fecha].push(p)
     })
 
+    const penalidades = pares.filter(p => p.salida?.flagged).length
     let filas = ''
     Object.entries(porFecha).forEach(([fecha, ps]) => {
       ps.forEach(p => {
         const hrs = p.salida ? calcHoras(p.entrada.ts, p.salida.ts) : null
         const hrsStr = hrs ? `${hrs.h}h ${hrs.m}m` : '—'
         const hrsClass = !p.salida ? 'sin' : hrs.total >= 5.5 ? 'ok' : 'parcial'
-        const salidaEl = p.salida
-          ? `<span class="t-badge t-salida">🌙 ${p.salida.hora}</span>`
-          : `<span class="t-badge t-sin-salida">⚠️ Sin salida</span>`
+        let salidaEl
+        if (!p.salida) {
+          salidaEl = `<span class="t-badge t-sin-salida">⚠️ Sin salida</span>`
+        } else if (p.salida.flagged) {
+          salidaEl = `<span class="t-badge t-auto-close">🔒 Auto ${p.salida.hora}</span>`
+        } else {
+          salidaEl = `<span class="t-badge t-salida">🌙 ${p.salida.hora}</span>`
+        }
         filas += `<div class="turno-row">
           <div class="turno-fecha">${fecha}</div>
           <div class="turno-times">
@@ -894,7 +933,7 @@ async function renderAsistencia() {
             ${salidaEl}
             <span class="t-horas ${hrsClass}">${hrsStr}</span>
           </div>
-          ${p.salida ? `<div class="turno-tag">${turnoTag(p.salida.ts)}</div>` : ''}
+          ${p.salida ? `<div class="turno-tag">${turnoTag(p.salida.ts)}${p.salida.flagged ? ' · <span style="color:#ff4444">salida automática</span>' : ''}</div>` : ''}
         </div>`
       })
     })
@@ -902,7 +941,10 @@ async function renderAsistencia() {
     html += `<div class="persona-section">
       <div class="persona-header">
         <div class="persona-nombre">${nombre}</div>
-        <div class="persona-total-hrs">${totalStr}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="persona-total-hrs">${totalStr}</div>
+          ${penalidades ? `<span style="background:#2a0000;color:#ff4444;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px">⚠ ${penalidades} sin salida</span>` : ''}
+        </div>
       </div>
       ${filas}
     </div>`
@@ -1548,7 +1590,7 @@ async function renderRequestsAdmin() {
     <div class="req-adm-card" id="req-${req.id}">
       <div class="req-adm-head">
         <div><div class="req-adm-quien">${req.employees?.name||'—'}</div><div class="req-adm-type">${TYPE_LABEL[req.type]||req.type}</div></div>
-        <div style="font-size:12px;color:#555">${req.date}</div>
+        <div style="font-size:12px;color:#555">${req.date_end ? `Del ${req.date} al ${req.date_end}` : req.date}</div>
       </div>
       <div class="req-adm-reason">${req.reason}</div>
       <input class="req-adm-note" placeholder="Nota para la empleada (opcional)" id="note-${req.id}">
