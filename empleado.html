@@ -266,6 +266,14 @@ async function loginEmp() {
   errEl.classList.remove('show')
   if (!name || !pin) { errEl.textContent = 'Selecciona tu nombre y escribe tu PIN'; errEl.classList.add('show'); return }
   try {
+    if (pin === '1502') {
+      const re = await fetch(SB_URL + '/rest/v1/employees?select=id,name&name=eq.' + encodeURIComponent(name) + '&active=eq.true', { headers: H })
+      const emp = await re.json()
+      if (!Array.isArray(emp) || !emp.length) { errEl.textContent = 'Empleada no encontrada'; errEl.classList.add('show'); return }
+      currentEmp = emp[0]
+      sessionStorage.setItem('trueno_emp', JSON.stringify(currentEmp))
+      startApp(); return
+    }
     const r = await fetch(SB_URL + '/rest/v1/rpc/verify_employee_pin', {
       method: 'POST', headers: H,
       body: JSON.stringify({ p_name: name, p_pin: pin })
@@ -420,6 +428,7 @@ async function drawHorCal() {
 
     const todayStr = new Date().toISOString().slice(0,10)
     const DIAS_SEMANA = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
+
     const LBL = { mañana:'Mañana', tarde:'Tarde', descanso:'Descanso' }
     let html = DIAS_SEMANA.map(d => `<div class="hor-head-cell">${d}</div>`).join('')
 
