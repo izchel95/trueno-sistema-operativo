@@ -420,7 +420,7 @@ async function drawHorCal() {
 
     const todayStr = new Date().toISOString().slice(0,10)
     const DIAS_SEMANA = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
-    const LBL = { mañana:'Mañana', tarde:'Tarde', descanso:'Libre' }
+    const LBL = { mañana:'Mañana', tarde:'Tarde', descanso:'Descanso' }
     let html = DIAS_SEMANA.map(d => `<div class="hor-head-cell">${d}</div>`).join('')
 
     for (let i = 0; i < firstDay.getDay(); i++) html += '<div class="hor-cell other-month"></div>'
