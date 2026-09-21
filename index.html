@@ -7,51 +7,50 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  :root {
+    --bg: #0e0e0e;
+    --surface: #161616;
+    --surface2: #1e1a18;
+    --border: #2a2420;
+    --text: #f0ede8;
+    --text-muted: #7a6f68;
+    --accent: #c0634a;
+    --accent-light: #d4896e;
+    --accent-dim: #2a1610;
+  }
+
   body {
-    background: #0e0e0e;
-    color: #f0ede8;
+    background: var(--bg);
+    color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     min-height: 100vh;
-    padding: 0 0 40px;
+    padding: 0 0 48px;
   }
 
   header {
-    padding: 32px 24px 24px;
-    border-bottom: 1px solid #1a1a1a;
+    padding: 36px 24px 28px;
+    border-bottom: 1px solid var(--border);
   }
 
-  .logo { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
-  .logo span { color: #f5c842; }
+  .logo { font-size: 27px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo span { color: var(--accent); }
 
   .header-row { display: flex; align-items: flex-start; justify-content: space-between; }
-  .admin-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; background: #141414; border: 1px solid #333; border-radius: 10px; color: #555; font-size: 12px; font-weight: 600; text-decoration: none; margin-top: 4px; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
-  .admin-btn:active { background: #1a1a1a; }
+  .admin-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text-muted); font-size: 12px; font-weight: 600; text-decoration: none; margin-top: 4px; flex-shrink: 0; -webkit-tap-highlight-color: transparent; transition: border-color 0.15s; }
+  .admin-btn:active { border-color: var(--accent); }
 
-  .fecha {
-    font-size: 13px;
-    color: #555;
-    margin-top: 4px;
-  }
+  .fecha { font-size: 13px; color: var(--text-muted); margin-top: 5px; }
 
-  .saludo {
-    margin-top: 20px;
-    font-size: 20px;
-    font-weight: 700;
-    color: #f0ede8;
-  }
+  .saludo { margin-top: 22px; font-size: 22px; font-weight: 700; }
 
-  .sub {
-    font-size: 13px;
-    color: #555;
-    margin-top: 4px;
-  }
+  .sub { font-size: 13px; color: var(--text-muted); margin-top: 5px; }
 
   .section-label {
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #444;
-    padding: 24px 24px 10px;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    padding: 28px 20px 10px;
   }
 
   .cards {
@@ -62,74 +61,45 @@
   }
 
   .card {
-    background: #141414;
-    border: 1px solid #1e1e1e;
-    border-radius: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
     padding: 20px 16px;
     text-decoration: none;
     color: inherit;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     cursor: pointer;
     transition: border-color 0.15s, background 0.15s;
     -webkit-tap-highlight-color: transparent;
   }
 
-  .card:active { background: #1a1a1a; }
+  .card:active { border-color: var(--accent); background: var(--surface2); }
 
   .card.highlight {
     grid-column: 1 / -1;
     flex-direction: row;
     align-items: center;
-    background: #1a1600;
-    border-color: #3a2e00;
+    background: var(--accent-dim);
+    border-color: #3d1f12;
   }
 
-  .card-icon {
-    font-size: 28px;
-    line-height: 1;
-  }
-
-  .card.highlight .card-icon { font-size: 36px; }
-
+  .card-icon { font-size: 26px; line-height: 1; }
+  .card.highlight .card-icon { font-size: 34px; }
   .card-info { flex: 1; }
 
-  .card-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: #f0ede8;
-  }
+  .card-title { font-size: 14px; font-weight: 700; }
+  .card.highlight .card-title { font-size: 16px; }
 
-  .card.highlight .card-title { font-size: 17px; }
+  .card-desc { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
 
-  .card-desc {
-    font-size: 12px;
-    color: #555;
-    margin-top: 4px;
-    line-height: 1.4;
-  }
+  .card-arrow { font-size: 18px; color: var(--border); align-self: center; }
+  .card.highlight .card-arrow { color: var(--accent-light); }
 
-  .card-arrow {
-    font-size: 18px;
-    color: #333;
-    align-self: center;
-  }
+  .divider { height: 1px; background: var(--border); margin: 24px 20px 0; }
 
-  .card.highlight .card-arrow { color: #f5c842; }
-
-  .divider {
-    height: 1px;
-    background: #1a1a1a;
-    margin: 24px 24px 0;
-  }
-
-  .footer {
-    padding: 24px 24px 0;
-    font-size: 11px;
-    color: #333;
-    text-align: center;
-  }
+  .footer { padding: 24px 24px 0; font-size: 11px; color: #2a2a2a; text-align: center; }
 </style>
 </head>
 <body>
@@ -154,7 +124,7 @@
       <div class="card-title">Guía de Turno</div>
       <div class="card-desc">Stock rápido, scripts de venta y flujo del día</div>
     </div>
-    <div class="card-arrow" style="color:#f5c842">›</div>
+    <div class="card-arrow" style="color:#8fbe6f">›</div>
   </a>
   <a class="card highlight" href="apertura.html">
     <div class="card-icon">☀️</div>
