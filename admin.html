@@ -10,8 +10,10 @@ body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMac
 
 /* ── Login screen ── */
 .login-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
-.login-logo { font-size: 40px; font-weight: 800; margin-bottom: 6px; }
-.login-logo span { color: #c0634a; }
+.login-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.login-logo .logo-mark { width: 48px; height: 48px; }
+.login-logo .logo-word { font-size: 26px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: #f0ede8; }
+.login-logo .logo-word em { color: #c0634a; font-style: normal; }
 .login-sub { font-size: 13px; color: #555; margin-bottom: 40px; }
 .login-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 360px; }
 .login-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
@@ -32,9 +34,11 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
 .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .menu-btn { display: inline-flex; align-items: center; padding: 8px 14px; background: #2a1610; border: 1px solid #c0634a; border-radius: 10px; color: #d4896e; font-size: 13px; font-weight: 700; text-decoration: none; flex-shrink: 0; }
 .logout-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; background: transparent; border: 1px solid #333; border-radius: 10px; color: #555; font-size: 12px; cursor: pointer; font-family: inherit; }
-.logo { font-size: 20px; font-weight: 700; }
-.logo span { color: #c0634a; }
-.logo-admin { font-size: 11px; background: #c0634a; color: #f0ede8; padding: 2px 8px; border-radius: 20px; font-weight: 700; margin-left: 6px; vertical-align: middle; }
+.logo { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: inherit; }
+.logo-mark { width: 32px; height: 32px; flex-shrink: 0; }
+.logo-word { font-size: 16px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #f0ede8; }
+.logo-word em { color: #c0634a; font-style: normal; }
+.logo-admin { font-size: 11px; background: #c0634a; color: #f0ede8; padding: 2px 8px; border-radius: 20px; font-weight: 700; margin-left: 4px; vertical-align: middle; }
 
 .tabs { display: flex; overflow-x: auto; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
@@ -244,7 +248,15 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
 
 <!-- LOGIN -->
 <div id="login-screen" class="login-screen">
-  <div class="login-logo">⚡ <span>Trueno</span></div>
+  <div class="login-logo">
+    <svg class="logo-mark" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="14" fill="#2a1610"/>
+      <path d="M29 7L14 25h10L20 41l20-20H28z" fill="#c0634a"/>
+      <path d="M29 7L14 25h10L20 41l20-20H28z" fill="url(#al)" opacity="0.5"/>
+      <defs><linearGradient id="al" x1="14" y1="7" x2="30" y2="41" gradientUnits="userSpaceOnUse"><stop stop-color="#f0ede8"/><stop offset="1" stop-color="#c0634a" stop-opacity="0"/></linearGradient></defs>
+    </svg>
+    <span class="logo-word">TRU<em>EN</em>O</span>
+  </div>
   <div class="login-sub">Sistema Operativo</div>
   <a class="btn-back" href="index.html">← Menú principal</a>
   <div class="login-card">
@@ -264,7 +276,15 @@ header { background: #0e0e0e; padding: 20px 20px 0; position: sticky; top: 0; z-
   <header>
     <div class="header-top">
       <a class="menu-btn" href="index.html">← Menú</a>
-      <a class="logo" href="index.html" style="text-decoration:none;color:inherit;">⚡ <span>Trueno</span><span class="logo-admin">Admin</span></a>
+      <a class="logo" href="index.html">
+        <svg class="logo-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="9" fill="#2a1610"/>
+          <path d="M19 5L10 17.5h6.5L13 27l12-13.5H19z" fill="#c0634a"/>
+          <path d="M19 5L10 17.5h6.5L13 27l12-13.5H19z" fill="url(#ab)" opacity="0.5"/>
+          <defs><linearGradient id="ab" x1="10" y1="5" x2="21" y2="27" gradientUnits="userSpaceOnUse"><stop stop-color="#f0ede8"/><stop offset="1" stop-color="#c0634a" stop-opacity="0"/></linearGradient></defs>
+        </svg>
+        <span class="logo-word">TRU<em>EN</em>O</span><span class="logo-admin">Admin</span>
+      </a>
       <button class="logout-btn" onclick="cerrarSesion()">🔒 Salir</button>
     </div>
     <div class="tabs">

@@ -32,8 +32,10 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .logo { font-size: 27px; font-weight: 800; letter-spacing: -0.5px; }
-  .logo span { color: var(--accent); }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-mark { width: 38px; height: 38px; flex-shrink: 0; }
+  .logo-word { font-size: 20px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text); }
+  .logo-word em { color: var(--accent); font-style: normal; }
 
   .header-row { display: flex; align-items: flex-start; justify-content: space-between; }
   .admin-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text-muted); font-size: 12px; font-weight: 600; text-decoration: none; margin-top: 4px; flex-shrink: 0; -webkit-tap-highlight-color: transparent; transition: border-color 0.15s; }
@@ -85,8 +87,18 @@
     border-color: #3d1f12;
   }
 
-  .card-icon { font-size: 26px; line-height: 1; }
-  .card.highlight .card-icon { font-size: 34px; }
+  .card-icon {
+    width: 48px; height: 48px; flex-shrink: 0;
+    background: #1c1816; border: 1px solid var(--border);
+    border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; line-height: 1;
+  }
+  .card.highlight .card-icon {
+    width: 54px; height: 54px; font-size: 26px;
+    background: rgba(192,99,74,0.12); border-color: rgba(192,99,74,0.25);
+    border-radius: 15px;
+  }
   .card-info { flex: 1; }
 
   .card-title { font-size: 14px; font-weight: 700; }
@@ -107,7 +119,25 @@
 <header>
   <div class="header-row">
     <div>
-      <div class="logo">⚡ <span>Trueno</span></div>
+      <div class="logo">
+        <svg class="logo-mark" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="38" height="38" rx="11" fill="#2a1610"/>
+          <rect width="38" height="38" rx="11" fill="url(#lg)" opacity="0.3"/>
+          <path d="M22 7L12 20.5h7.5L16 31l14-15.5H22.5z" fill="#c0634a"/>
+          <path d="M22 7L12 20.5h7.5L16 31l14-15.5H22.5z" fill="url(#bolt)" opacity="0.6"/>
+          <defs>
+            <linearGradient id="lg" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#c0634a" stop-opacity="0.4"/>
+              <stop offset="1" stop-color="#2a1610" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="bolt" x1="12" y1="7" x2="26" y2="31" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#f0ede8"/>
+              <stop offset="1" stop-color="#c0634a" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span class="logo-word">TRU<em>EN</em>O</span>
+      </div>
       <div class="fecha" id="fecha"></div>
     </div>
     <a class="admin-btn" href="admin.html">🔐 Administración</a>

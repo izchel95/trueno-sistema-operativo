@@ -10,8 +10,10 @@ body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMac
 
 /* ── Login ── */
 .login-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
-.login-logo { font-size: 38px; font-weight: 800; margin-bottom: 6px; }
-.login-logo span { color: #c0634a; }
+.login-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.login-logo .logo-mark { width: 46px; height: 46px; }
+.login-logo .logo-word { font-size: 24px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: #f0ede8; }
+.login-logo .logo-word em { color: #c0634a; font-style: normal; }
 .login-sub { font-size: 13px; color: #555; margin-bottom: 36px; }
 .login-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 360px; }
 .login-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
@@ -29,8 +31,10 @@ body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMac
 
 header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #1e1e1e; }
 .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.logo { font-size: 18px; font-weight: 700; }
-.logo span { color: #c0634a; }
+.logo { display: inline-flex; align-items: center; gap: 8px; }
+.logo-mark { width: 30px; height: 30px; flex-shrink: 0; }
+.logo-word { font-size: 15px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #f0ede8; }
+.logo-word em { color: #c0634a; font-style: normal; }
 .emp-badge { font-size: 12px; background: #2a1610; color: #d4896e; border: 1px solid #c0634a; padding: 3px 10px; border-radius: 20px; font-weight: 700; margin-left: 8px; }
 .menu-btn { display: inline-flex; align-items: center; padding: 7px 13px; background: #2a1610; border: 1px solid #c0634a; border-radius: 10px; color: #d4896e; font-size: 12px; font-weight: 700; text-decoration: none; flex-shrink: 0; }
 .logout-btn { padding: 7px 14px; background: transparent; border: 1px solid #333; border-radius: 10px; color: #555; font-size: 12px; cursor: pointer; font-family: inherit; }
@@ -118,7 +122,15 @@ header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-
 <!-- LOGIN -->
 <div id="login-screen" class="login-screen">
   <div>
-    <div class="login-logo">⚡ <span>Trueno</span></div>
+    <div class="login-logo">
+      <svg class="logo-mark" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="46" height="46" rx="13" fill="#2a1610"/>
+        <path d="M28 6L13 24h10L19 40l20-19H27z" fill="#c0634a"/>
+        <path d="M28 6L13 24h10L19 40l20-19H27z" fill="url(#el)" opacity="0.5"/>
+        <defs><linearGradient id="el" x1="13" y1="6" x2="29" y2="40" gradientUnits="userSpaceOnUse"><stop stop-color="#f0ede8"/><stop offset="1" stop-color="#c0634a" stop-opacity="0"/></linearGradient></defs>
+      </svg>
+      <span class="logo-word">TRU<em>EN</em>O</span>
+    </div>
     <div class="login-sub">Portal de empleadas</div>
   </div>
   <div class="login-card">
@@ -144,7 +156,15 @@ header { background: #0e0e0e; padding: 18px 20px 0; position: sticky; top: 0; z-
   <header>
     <div class="header-top">
       <a class="menu-btn" href="index.html">← Menú</a>
-      <span class="logo">⚡ <span>Trueno</span><span class="emp-badge" id="emp-badge">—</span></span>
+      <span class="logo">
+        <svg class="logo-mark" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="30" height="30" rx="8" fill="#2a1610"/>
+          <path d="M18 4L9 16.5h6L12 26l11-12.5H17z" fill="#c0634a"/>
+          <path d="M18 4L9 16.5h6L12 26l11-12.5H17z" fill="url(#eb)" opacity="0.5"/>
+          <defs><linearGradient id="eb" x1="9" y1="4" x2="20" y2="26" gradientUnits="userSpaceOnUse"><stop stop-color="#f0ede8"/><stop offset="1" stop-color="#c0634a" stop-opacity="0"/></linearGradient></defs>
+        </svg>
+        <span class="logo-word">TRU<em>EN</em>O</span>
+      </span><span class="emp-badge" id="emp-badge">—</span>
       <button class="logout-btn" onclick="logout()">Salir</button>
     </div>
     <div class="tabs">
