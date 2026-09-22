@@ -15,9 +15,7 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
 .menu-btn { display:inline-flex; align-items:center; padding:8px 14px; background:#2a1208; border:1px solid #c0634a; border-radius:10px; color:#d4896e; font-size:13px; font-weight:700; text-decoration:none; flex-shrink:0; -webkit-tap-highlight-color:transparent; }
 .menu-btn:active { opacity:0.7; }
 .logo { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: inherit; }
-.logo-mark { width: 32px; height: 32px; flex-shrink: 0; }
-.logo-word { font-size: 16px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #f0ede8; }
-.logo-word em { color: #c0634a; font-style: normal; }
+.logo-img { height: 28px; width: auto; filter: invert(1); display: block; }
 
 /* Category home */
 #cat-home { padding: 16px; }
@@ -315,13 +313,7 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
   <div class="header-top">
     <a class="menu-btn" id="menu-btn" href="#" onclick="handleMenuBtn(event)">← Menú</a>
     <a class="logo" href="index.html">
-      <svg class="logo-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="32" height="32" rx="9" fill="#2a1610"/>
-        <path d="M19 5L10 17.5h6.5L13 27l12-13.5H19z" fill="#c0634a"/>
-        <path d="M19 5L10 17.5h6.5L13 27l12-13.5H19z" fill="url(#cb)" opacity="0.5"/>
-        <defs><linearGradient id="cb" x1="10" y1="5" x2="21" y2="27" gradientUnits="userSpaceOnUse"><stop stop-color="#f0ede8"/><stop offset="1" stop-color="#c0634a" stop-opacity="0"/></linearGradient></defs>
-      </svg>
-      <span class="logo-word">TRU<em>EN</em>O</span>
+      <img class="logo-img" src="logo-negro.png" alt="Trueno">
     </a>
     <button onclick="openAdminLogin()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#444;flex-shrink:0" title="Admin">🔐</button>
   </div>
@@ -479,13 +471,7 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1a1a1a; background: #0e
   <div class="admin-header">
     <div class="admin-header-top">
       <div class="logo">
-        <svg class="logo-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="32" height="32" rx="9" fill="#2a1610"/>
-          <path d="M19 5L10 17.5h6.5L13 27l12-13.5H19z" fill="#c0634a"/>
-          <path d="M19 5L10 17.5h6.5L13 27l12-13.5H19z" fill="url(#cb2)" opacity="0.5"/>
-          <defs><linearGradient id="cb2" x1="10" y1="5" x2="21" y2="27" gradientUnits="userSpaceOnUse"><stop stop-color="#f0ede8"/><stop offset="1" stop-color="#c0634a" stop-opacity="0"/></linearGradient></defs>
-        </svg>
-        <span class="logo-word">TRU<em>EN</em>O</span>
+        <img class="logo-img" src="logo-negro.png" alt="Trueno">
       </div> <span class="admin-badge">ADMIN</span>
       <div style="display:flex;gap:8px;align-items:center">
         <a id="admin-back-btn" href="admin.html" style="display:none;align-items:center;padding:7px 12px;background:#2a1208;border:1px solid #c0634a;border-radius:10px;color:#d4896e;font-size:12px;font-weight:700;text-decoration:none">← Admin</a>
