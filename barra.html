@@ -9,7 +9,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
 
-/* Login */
+/* ── Login ── */
 .login-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
 .login-logo-img { height: 52px; width: auto; filter: invert(1); display: block; margin: 0 auto 8px; }
 .login-sub { font-size: 13px; color: #555; margin-bottom: 40px; text-align: center; }
@@ -17,75 +17,84 @@ body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMac
 .login-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
 .login-desc { font-size: 12px; color: #555; margin-bottom: 22px; }
 .field-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #555; display: block; margin-bottom: 6px; }
-.field-input { width: 100%; background: #0e0e0e; border: 1px solid #222; border-radius: 10px; color: #f0ede8; font-size: 15px; padding: 13px 14px; outline: none; font-family: inherit; margin-bottom: 12px; }
+.field-input { width: 100%; background: #0e0e0e; border: 1px solid #222; border-radius: 10px; color: #f0ede8; font-size: 15px; padding: 13px 14px; outline: none; font-family: inherit; margin-bottom: 14px; }
 .field-input:focus { border-color: #c0634a; }
-.btn-primary { width: 100%; padding: 16px; background: #c0634a; color: #f0ede8; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 6px; font-family: inherit; }
+.btn-primary { width: 100%; padding: 16px; background: #c0634a; color: #f0ede8; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
 .login-error { background: #2a1a1a; border: 1px solid #5a2d2d; color: #cf6f6f; border-radius: 10px; padding: 10px 12px; font-size: 13px; margin-top: 10px; display: none; text-align: center; }
 .login-error.show { display: block; }
 
-/* App */
-.app { display: none; padding-bottom: 60px; }
+/* ── App ── */
+.app { display: none; padding-bottom: 80px; }
 .app.visible { display: block; }
 
-header { padding: 20px 20px 0; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; background: #0e0e0e; z-index: 10; }
-.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.logo-img-h { height: 26px; width: auto; filter: invert(1); display: block; }
+/* ── Header ── */
+header { padding: 16px 20px 14px; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; background: #0e0e0e; z-index: 10; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.logo-img-h { height: 24px; width: auto; filter: invert(1); display: block; }
 .header-right { display: flex; align-items: center; gap: 8px; }
-.user-name { font-size: 12px; color: #555; }
+.user-chip { font-size: 12px; color: #555; }
 .logout-btn { background: transparent; border: 1px solid #2a2420; border-radius: 8px; color: #555; font-size: 12px; padding: 6px 10px; cursor: pointer; font-family: inherit; }
+.date-row { display: flex; align-items: center; justify-content: space-between; }
+.date-label { font-size: 19px; font-weight: 700; }
+.shift-badge { font-size: 12px; border-radius: 20px; padding: 3px 10px; font-weight: 700; }
+.badge-manana { background: #1a1a0a; color: #c8a84b; border: 1px solid #3a3210; }
+.badge-tarde  { background: #0a0a1a; color: #7090cf; border: 1px solid #101032; }
 
-.date-label { font-size: 22px; font-weight: 700; margin-bottom: 14px; }
-
-/* Turno badge */
-.shift-badge { font-size: 12px; background: #2a1610; color: #c0634a; border-radius: 20px; padding: 3px 10px; font-weight: 700; }
-
-/* Main content */
-.content { padding: 16px; }
-
-/* Nota del turno anterior */
-.prev-note { background: #1a1a12; border: 1px solid #2a2a18; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; line-height: 1.5; }
-.prev-note-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 4px; }
-
-/* Progreso */
-.progress-bar-wrap { margin-bottom: 20px; }
-.progress-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.progress-count { font-size: 13px; color: #555; }
-.progress-pct { font-size: 13px; font-weight: 700; color: #c0634a; }
+/* ── Progreso global ── */
+.progress-wrap { padding: 12px 20px 0; }
+.progress-info { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.progress-count { font-size: 12px; color: #555; }
+.progress-pct { font-size: 12px; font-weight: 700; color: #c0634a; }
 .progress-bar { height: 4px; background: #1e1e1e; border-radius: 2px; overflow: hidden; }
 .progress-fill { height: 100%; background: #c0634a; border-radius: 2px; transition: width 0.3s; }
 
-/* Grupo de categoría */
-.cat-group { margin-bottom: 20px; }
-.cat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #555; margin-bottom: 8px; }
+/* ── Nota turno anterior ── */
+.prev-note { margin: 12px 16px 0; background: #1a1a0e; border: 1px solid #2a2a18; border-radius: 12px; padding: 11px 14px; font-size: 13px; line-height: 1.5; }
+.prev-note-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 3px; }
 
-/* Tarea */
-.task-item { display: flex; align-items: center; gap: 12px; padding: 14px; background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; margin-bottom: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background 0.15s; }
-.task-item.done { background: #0f1a0f; border-color: #1a2e1a; }
-.task-item:active { background: #1a1a1a; }
-.task-check { width: 24px; height: 24px; border-radius: 8px; border: 2px solid #333; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-.task-item.done .task-check { background: #4a8f4a; border-color: #4a8f4a; }
-.task-check-icon { display: none; color: #fff; font-size: 14px; font-weight: 700; }
-.task-item.done .task-check-icon { display: block; }
+/* ── Secciones ── */
+.section { margin: 16px 0 0; }
+.section-header { display: flex; align-items: center; gap: 8px; padding: 0 16px 8px; }
+.section-icon { font-size: 16px; }
+.section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #555; font-weight: 700; }
+.section-pct { font-size: 11px; color: #444; margin-left: auto; }
+
+/* ── Tareas ── */
+.tasks { padding: 0 16px; }
+.task-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px; background: #141414; border: 1px solid #1e1e1e;
+  border-radius: 14px; margin-bottom: 8px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background 0.1s;
+}
+.task-item.done { background: #0d1a0d; border-color: #1a2e1a; }
+.task-item.locked { cursor: default; }
+.task-check {
+  width: 26px; height: 26px; border-radius: 8px; border: 2px solid #2a2a2a;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; font-size: 14px; font-weight: 800; color: transparent;
+}
+.task-item.done .task-check { background: #3a8f3a; border-color: #3a8f3a; color: #fff; }
 .task-text { font-size: 14px; line-height: 1.4; flex: 1; }
-.task-item.done .task-text { color: #555; text-decoration: line-through; }
-.task-by { font-size: 11px; color: #444; margin-top: 2px; }
+.task-item.done .task-text { color: #444; text-decoration: line-through; }
+.task-meta { font-size: 11px; color: #3a3a3a; margin-top: 2px; }
 
-/* Turno cerrado */
-.closed-banner { background: #0f1a0f; border: 1px solid #2a4a2a; border-radius: 14px; padding: 14px 16px; margin-bottom: 16px; }
-.closed-banner-title { font-size: 14px; font-weight: 700; color: #6fcf6f; margin-bottom: 2px; }
-.closed-banner-sub { font-size: 12px; color: #555; }
+/* ── Turno cerrado ── */
+.closed-banner { margin: 12px 16px 0; background: #0d1a0d; border: 1px solid #2a4a2a; border-radius: 14px; padding: 14px 16px; }
+.closed-title { font-size: 14px; font-weight: 700; color: #6fcf6f; }
+.closed-sub { font-size: 12px; color: #555; margin-top: 2px; }
 .btn-reopen { margin-top: 10px; background: transparent; border: 1px solid #333; border-radius: 10px; color: #555; font-size: 13px; padding: 8px 14px; cursor: pointer; font-family: inherit; }
 
-/* Cerrar turno */
-.close-section { margin-top: 8px; }
+/* ── Cerrar turno ── */
+.close-section { margin: 20px 16px 0; }
 .note-label { font-size: 12px; color: #555; margin-bottom: 6px; display: block; }
-.note-input { width: 100%; background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; color: #f0ede8; font-size: 14px; padding: 12px 14px; outline: none; font-family: inherit; resize: none; min-height: 80px; }
+.note-input { width: 100%; background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; color: #f0ede8; font-size: 14px; padding: 12px 14px; outline: none; font-family: inherit; resize: none; min-height: 76px; }
 .note-input:focus { border-color: #c0634a; }
-.note-hint { font-size: 11px; color: #444; margin-top: 4px; margin-bottom: 14px; }
-.btn-close-shift { width: 100%; padding: 16px; background: #f0ede8; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 8px; }
-.btn-close-shift:active { opacity: 0.85; }
+.note-hint { font-size: 11px; color: #333; margin: 5px 0 12px; }
+.btn-close { width: 100%; padding: 17px; background: #f0ede8; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; font-family: inherit; letter-spacing: 0.3px; }
+.btn-close:active { opacity: 0.85; }
 
-.empty-state { text-align: center; color: #444; font-size: 14px; padding: 40px 0; }
 .loading { text-align: center; color: #444; font-size: 14px; padding: 60px 0; }
 </style>
 </head>
@@ -116,19 +125,25 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1e1e1e; position: stick
     <div class="header-top">
       <img class="logo-img-h" src="logo-negro.png" alt="Trueno">
       <div class="header-right">
-        <span class="user-name" id="user-name-display"></span>
+        <span class="user-chip" id="user-chip"></span>
         <button class="logout-btn" id="btn-logout">Salir</button>
       </div>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <div class="date-label" id="date-label" style="margin-bottom:0"></div>
+    <div class="date-row">
+      <div class="date-label" id="date-label"></div>
       <span class="shift-badge" id="shift-badge"></span>
     </div>
   </header>
 
-  <div class="content" id="main-content">
-    <div class="loading">Cargando...</div>
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span class="progress-count" id="prog-count"></span>
+      <span class="progress-pct" id="prog-pct"></span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
   </div>
+
+  <div id="main-content"><div class="loading">Cargando...</div></div>
 </div>
 
 <script>
@@ -139,211 +154,179 @@ const sb = createClient(
 );
 
 const DAYS = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
-const CAT_LABELS = { diario: 'Diario', limpieza: 'Limpieza', produccion: 'Producción', inventario: 'Inventario' };
-const CAT_ORDER = ['diario','limpieza','produccion','inventario'];
 
-let userName = '';
-let currentShift = 'manana';
-let todayStr = '';
-let report = null;
-let entries = [];
-let tasks = [];
+const CAT_ORDER = ['apertura','diario','limpieza','produccion','inventario','cierre'];
+const CAT_META = {
+  apertura:   { label: 'Apertura',          icon: '☀️' },
+  diario:     { label: 'Diario',            icon: '🔁' },
+  limpieza:   { label: 'Limpieza',          icon: '🧹' },
+  produccion: { label: 'Producción',        icon: '🍞' },
+  inventario: { label: 'Inventario',        icon: '📦' },
+  cierre:     { label: 'Cierre',            icon: '🌙' },
+};
 
+let userName = '', currentShift = '', todayStr = '', report = null, entries = [], tasks = [];
+
+// ── Helpers ──
 function getToday() {
-  // Hora de Cabo San Lucas (UTC-7, sin DST)
-  const now = new Date();
-  const cabo = new Date(now.toLocaleString('en-US', { timeZone: 'America/Mazatlan' }));
-  const y = cabo.getFullYear();
-  const m = String(cabo.getMonth() + 1).padStart(2, '0');
-  const d = String(cabo.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  const cabo = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Mazatlan' }));
+  return `${cabo.getFullYear()}-${String(cabo.getMonth()+1).padStart(2,'0')}-${String(cabo.getDate()).padStart(2,'0')}`;
 }
-
-function formatDateLabel(str) {
-  const [y, m, d] = str.split('-').map(Number);
-  const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
-}
-
 function getDayName(str) {
-  const [y, m, d] = str.split('-').map(Number);
-  return DAYS[new Date(y, m - 1, d).getDay()];
+  const [y,m,d] = str.split('-').map(Number);
+  return DAYS[new Date(y,m-1,d).getDay()];
+}
+function fmtDate(str) {
+  const [y,m,d] = str.split('-').map(Number);
+  return new Date(y,m-1,d).toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'}).replace(/^\w/,c=>c.toUpperCase());
+}
+function fmtTime(iso) {
+  return new Date(iso).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',timeZone:'America/Mazatlan'});
+}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function prevDay(str) {
+  const [y,m,d] = str.split('-').map(Number);
+  const dt = new Date(y,m-1,d-1);
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
 }
 
-// Login
-document.getElementById('btn-enter').onclick = () => {
+// ── Login ──
+document.getElementById('btn-enter').onclick = enter;
+document.getElementById('login-name').addEventListener('keydown', e => { if (e.key==='Enter') enter(); });
+function enter() {
   const name = document.getElementById('login-name').value.trim();
   if (!name) { document.getElementById('login-error').classList.add('show'); return; }
-  const shift = document.getElementById('login-shift').value;
   userName = name;
-  currentShift = shift;
+  currentShift = document.getElementById('login-shift').value;
   localStorage.setItem('barra_user', name);
-  localStorage.setItem('barra_shift', shift);
+  localStorage.setItem('barra_shift', currentShift);
   showApp();
-};
-document.getElementById('login-name').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-enter').click(); });
+}
 document.getElementById('btn-logout').onclick = () => {
   localStorage.removeItem('barra_user');
   localStorage.removeItem('barra_shift');
   location.reload();
 };
 
+// ── App ──
 async function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
-  document.getElementById('user-name-display').textContent = userName;
-  document.getElementById('shift-badge').textContent = currentShift === 'manana' ? '☀️ Mañana' : '🌙 Tarde';
+  document.getElementById('user-chip').textContent = userName;
+  const badge = document.getElementById('shift-badge');
+  if (currentShift === 'manana') { badge.textContent = '☀️ Mañana'; badge.className = 'shift-badge badge-manana'; }
+  else { badge.textContent = '🌙 Tarde'; badge.className = 'shift-badge badge-tarde'; }
   todayStr = getToday();
-  document.getElementById('date-label').textContent = formatDateLabel(todayStr)
-    .replace(/^\w/, c => c.toUpperCase());
-  await loadShift();
+  document.getElementById('date-label').textContent = fmtDate(todayStr);
+  await load();
 }
 
-async function loadShift() {
+async function load() {
   document.getElementById('main-content').innerHTML = '<div class="loading">Cargando...</div>';
-
   const dayName = getDayName(todayStr);
 
-  // Cargar tareas de la rotación para este turno y día
-  const { data: taskData } = await sb
-    .from('shift_tasks')
-    .select('*')
-    .eq('active', true)
-    .eq('shift', currentShift)
-    .in('day_of_week', ['todos', dayName]);
+  const [{ data: tkData }, { data: repData }] = await Promise.all([
+    sb.from('shift_tasks').select('*').eq('active', true).eq('shift', currentShift).in('day_of_week', ['todos', dayName]),
+    sb.from('shift_reports').select('*').eq('date', todayStr).eq('shift', currentShift).maybeSingle()
+  ]);
 
-  tasks = taskData || [];
+  tasks = tkData || [];
+  report = repData;
+  entries = [];
 
-  // Cargar o crear reporte del día
-  const { data: reportData } = await sb
-    .from('shift_reports')
-    .select('*')
-    .eq('date', todayStr)
-    .eq('shift', currentShift)
-    .maybeSingle();
-
-  report = reportData;
-
-  // Cargar entradas si hay reporte
   if (report) {
-    const { data: entryData } = await sb
-      .from('shift_entries')
-      .select('*')
-      .eq('report_id', report.id);
-    entries = entryData || [];
-  } else {
-    entries = [];
+    const { data: entData } = await sb.from('shift_entries').select('*').eq('report_id', report.id);
+    entries = entData || [];
   }
 
-  // Cargar nota del turno anterior
+  // Nota turno anterior
   let prevNote = null;
   const prevShift = currentShift === 'tarde' ? 'manana' : 'tarde';
-  const prevDate = currentShift === 'manana' ? getPrevDay(todayStr) : todayStr;
-  const { data: prevReport } = await sb
-    .from('shift_reports')
-    .select('note, closed_by, closed_at')
-    .eq('date', prevDate)
-    .eq('shift', prevShift)
-    .maybeSingle();
-  if (prevReport?.note) prevNote = prevReport;
+  const prevDate  = currentShift === 'manana' ? prevDay(todayStr) : todayStr;
+  const { data: pr } = await sb.from('shift_reports').select('note,closed_by').eq('date', prevDate).eq('shift', prevShift).maybeSingle();
+  if (pr?.note) prevNote = pr;
 
-  renderShift(prevNote);
+  render(prevNote);
 }
 
-function getPrevDay(str) {
-  const [y, m, d] = str.split('-').map(Number);
-  const date = new Date(y, m - 1, d - 1);
-  const y2 = date.getFullYear();
-  const m2 = String(date.getMonth() + 1).padStart(2, '0');
-  const d2 = String(date.getDate()).padStart(2, '0');
-  return `${y2}-${m2}-${d2}`;
+function updateProgress() {
+  const done  = entries.filter(e => e.done).length;
+  const total = tasks.length;
+  const pct   = total ? Math.round(done/total*100) : 0;
+  document.getElementById('prog-count').textContent = `${done} de ${total} tareas`;
+  document.getElementById('prog-pct').textContent   = `${pct}%`;
+  document.getElementById('prog-fill').style.width  = pct + '%';
 }
 
-function renderShift(prevNote) {
+function render(prevNote) {
   const isClosed = !!report?.closed_at;
   let html = '';
 
-  // Nota del turno anterior
+  // Nota turno anterior
   if (prevNote) {
     html += `<div class="prev-note">
-      <div class="prev-note-label">Nota del turno anterior · ${prevNote.closed_by || ''}</div>
-      ${escHtml(prevNote.note)}
+      <div class="prev-note-label">Nota del turno anterior · ${esc(prevNote.closed_by||'')}</div>
+      ${esc(prevNote.note)}
     </div>`;
   }
 
-  if (tasks.length === 0) {
-    html += '<div class="empty-state">No hay tareas para este turno.</div>';
-    document.getElementById('main-content').innerHTML = html;
-    return;
-  }
-
-  // Progreso
-  const done = entries.filter(e => e.done).length;
-  const total = tasks.length;
-  const pct = total ? Math.round((done / total) * 100) : 0;
-  html += `<div class="progress-bar-wrap">
-    <div class="progress-info">
-      <span class="progress-count">${done} de ${total} tareas</span>
-      <span class="progress-pct">${pct}%</span>
-    </div>
-    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-  </div>`;
-
-  // Banner cerrado
+  // Turno cerrado banner
   if (isClosed) {
-    const hora = new Date(report.closed_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Mazatlan' });
     html += `<div class="closed-banner">
-      <div class="closed-banner-title">Turno cerrado a las ${hora} por ${escHtml(report.closed_by || '')}.</div>
-      ${report.note ? `<div class="closed-banner-sub">Nota: ${escHtml(report.note)}</div>` : ''}
+      <div class="closed-title">Turno cerrado a las ${fmtTime(report.closed_at)} por ${esc(report.closed_by||'')}.</div>
+      ${report.note ? `<div class="closed-sub">Nota: ${esc(report.note)}</div>` : ''}
       <button class="btn-reopen" id="btn-reopen">Reabrir turno</button>
     </div>`;
   }
 
-  // Tareas por categoría
-  const byCategory = {};
+  // Secciones por categoría
   for (const cat of CAT_ORDER) {
     const catTasks = tasks.filter(t => t.category === cat);
     if (!catTasks.length) continue;
-    byCategory[cat] = catTasks;
-  }
-
-  for (const cat of CAT_ORDER) {
-    if (!byCategory[cat]) continue;
-    html += `<div class="cat-group"><div class="cat-label">${CAT_LABELS[cat]}</div>`;
-    for (const task of byCategory[cat]) {
-      const entry = entries.find(e => e.task_id === task.id);
-      const isDone = entry?.done;
-      const doneBy = entry?.done_by || '';
-      const doneAt = entry?.done_at ? new Date(entry.done_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Mazatlan' }) : '';
-      html += `<div class="task-item${isDone ? ' done' : ''}${isClosed ? '' : ' tappable'}" data-task-id="${task.id}" data-entry-id="${entry?.id || ''}">
-        <div class="task-check"><span class="task-check-icon">✓</span></div>
+    const meta = CAT_META[cat];
+    const catDone = catTasks.filter(t => entries.find(e => e.task_id===t.id && e.done)).length;
+    html += `<div class="section">
+      <div class="section-header">
+        <span class="section-icon">${meta.icon}</span>
+        <span class="section-title">${meta.label}</span>
+        <span class="section-pct">${catDone}/${catTasks.length}</span>
+      </div>
+      <div class="tasks">`;
+    for (const task of catTasks) {
+      const entry  = entries.find(e => e.task_id === task.id);
+      const isDone = !!entry?.done;
+      html += `<div class="task-item${isDone?' done':''}${isClosed?' locked':''}" data-tid="${task.id}">
+        <div class="task-check">${isDone?'✓':''}</div>
         <div style="flex:1">
-          <div class="task-text">${escHtml(task.title)}</div>
-          ${isDone && doneBy ? `<div class="task-by">${escHtml(doneBy)}${doneAt ? ' · ' + doneAt : ''}</div>` : ''}
+          <div class="task-text">${esc(task.title)}</div>
+          ${isDone && entry.done_by ? `<div class="task-meta">${esc(entry.done_by)} · ${fmtTime(entry.done_at)}</div>` : ''}
         </div>
       </div>`;
     }
-    html += '</div>';
+    html += `</div></div>`;
   }
 
-  // Cerrar turno (solo si no está cerrado)
-  if (!isClosed) {
+  // Cerrar turno
+  if (!isClosed && tasks.length) {
+    const pending = tasks.length - entries.filter(e=>e.done).length;
     html += `<div class="close-section">
       <label class="note-label">Nota para el siguiente turno (opcional)</label>
-      <textarea class="note-input" id="shift-note" placeholder="Ej. queda medio litro de cold brew, faltó leche de avena…"></textarea>
-      <div class="note-hint">Quedan ${total - done} tareas pendientes; se reportarán como no hechas.</div>
-      <button class="btn-close-shift" id="btn-close-shift">Cerrar turno</button>
+      <textarea class="note-input" id="shift-note" placeholder="Ej. queda medio litro de cold brew…"></textarea>
+      ${pending > 0 ? `<div class="note-hint">${pending} tarea${pending>1?'s':''} sin palomear se marcarán como no hechas.</div>` : ''}
+      <button class="btn-close" id="btn-close">Cerrar turno</button>
     </div>`;
   }
 
   document.getElementById('main-content').innerHTML = html;
+  updateProgress();
 
   // Eventos
   if (!isClosed) {
-    document.querySelectorAll('.task-item.tappable').forEach(el => {
-      el.onclick = () => toggleTask(el.dataset.taskId, el.dataset.entryId);
+    document.querySelectorAll('.task-item:not(.locked)').forEach(el => {
+      el.onclick = () => toggleTask(el.dataset.tid);
     });
-    document.getElementById('btn-close-shift').onclick = closeShift;
+    const closeBtn = document.getElementById('btn-close');
+    if (closeBtn) closeBtn.onclick = closeShift;
   } else {
     const reopenBtn = document.getElementById('btn-reopen');
     if (reopenBtn) reopenBtn.onclick = reopenShift;
@@ -351,104 +334,99 @@ function renderShift(prevNote) {
 }
 
 async function ensureReport() {
-  if (report) return report;
-  const { data, error } = await sb.from('shift_reports').insert({
-    date: todayStr,
-    shift: currentShift
-  }).select().single();
+  if (report) return;
+  const { data, error } = await sb.from('shift_reports').insert({ date: todayStr, shift: currentShift }).select().single();
   if (error) {
-    // Puede que ya exista por race condition
-    const { data: existing } = await sb.from('shift_reports').select('*').eq('date', todayStr).eq('shift', currentShift).single();
-    report = existing;
+    const { data: ex } = await sb.from('shift_reports').select('*').eq('date', todayStr).eq('shift', currentShift).single();
+    report = ex;
   } else {
     report = data;
   }
-
-  // Crear entradas para todas las tareas
-  const toInsert = tasks.map(t => ({
-    report_id: report.id,
-    task_id: t.id,
-    task_title: t.title,
-    task_category: t.category,
-    done: false
-  }));
-  const { data: entryData } = await sb.from('shift_entries').insert(toInsert).select();
-  entries = entryData || [];
-  return report;
+  // Crear entradas vacías para todas las tareas
+  const { data: inserted } = await sb.from('shift_entries').insert(
+    tasks.map(t => ({ report_id: report.id, task_id: t.id, task_title: t.title, task_category: t.category, done: false }))
+  ).select();
+  entries = inserted || [];
 }
 
-async function toggleTask(taskId, entryId) {
+async function toggleTask(taskId) {
   await ensureReport();
   let entry = entries.find(e => e.task_id === taskId);
-
   if (!entry) {
-    // Crear entrada
     const task = tasks.find(t => t.id === taskId);
     const { data } = await sb.from('shift_entries').insert({
-      report_id: report.id,
-      task_id: taskId,
-      task_title: task.title,
-      task_category: task.category,
-      done: true,
-      done_by: userName,
-      done_at: new Date().toISOString()
+      report_id: report.id, task_id: taskId,
+      task_title: task.title, task_category: task.category,
+      done: true, done_by: userName, done_at: new Date().toISOString()
     }).select().single();
     entries.push(data);
   } else {
     const newDone = !entry.done;
-    const update = newDone
+    const upd = newDone
       ? { done: true, done_by: userName, done_at: new Date().toISOString() }
       : { done: false, done_by: null, done_at: null };
-    await sb.from('shift_entries').update(update).eq('id', entry.id);
-    Object.assign(entry, update);
+    await sb.from('shift_entries').update(upd).eq('id', entry.id);
+    Object.assign(entry, upd);
   }
-
-  renderShift(null); // re-render rápido sin recargar nota
+  // Re-render solo el ítem tocado para velocidad
+  const el = document.querySelector(`[data-tid="${taskId}"]`);
+  const entry2 = entries.find(e => e.task_id === taskId);
+  if (el && entry2) {
+    el.classList.toggle('done', entry2.done);
+    el.querySelector('.task-check').textContent = entry2.done ? '✓' : '';
+    const meta = el.querySelector('.task-meta');
+    if (entry2.done) {
+      const metaHtml = `<div class="task-meta">${esc(entry2.done_by)} · ${fmtTime(entry2.done_at)}</div>`;
+      if (meta) meta.outerHTML = metaHtml;
+      else el.querySelector('.task-text').insertAdjacentHTML('afterend', metaHtml);
+      el.querySelector('.task-text').style.color = '';
+      el.querySelector('.task-text').style.textDecoration = '';
+    } else {
+      if (meta) meta.remove();
+    }
+  }
+  updateProgress();
+  // Actualizar contadores de sección
+  for (const cat of CAT_ORDER) {
+    const catTasks = tasks.filter(t => t.category === cat);
+    if (!catTasks.length) continue;
+    const catDone = catTasks.filter(t => entries.find(e => e.task_id===t.id && e.done)).length;
+    const headers = document.querySelectorAll('.section-header');
+    headers.forEach(h => {
+      const title = h.querySelector('.section-title');
+      if (title && title.textContent === CAT_META[cat].label) {
+        h.querySelector('.section-pct').textContent = `${catDone}/${catTasks.length}`;
+      }
+    });
+  }
 }
 
 async function closeShift() {
   await ensureReport();
   const note = (document.getElementById('shift-note')?.value || '').trim();
-
-  // Crear entradas para tareas sin entry aún
-  const missingTasks = tasks.filter(t => !entries.find(e => e.task_id === t.id));
-  if (missingTasks.length) {
-    const toInsert = missingTasks.map(t => ({
-      report_id: report.id, task_id: t.id,
-      task_title: t.title, task_category: t.category, done: false
-    }));
-    const { data } = await sb.from('shift_entries').insert(toInsert).select();
-    entries.push(...(data || []));
+  // Marcar entradas faltantes como no hechas
+  const missing = tasks.filter(t => !entries.find(e => e.task_id === t.id));
+  if (missing.length) {
+    const { data } = await sb.from('shift_entries').insert(
+      missing.map(t => ({ report_id: report.id, task_id: t.id, task_title: t.title, task_category: t.category, done: false }))
+    ).select();
+    entries.push(...(data||[]));
   }
-
-  await sb.from('shift_reports').update({
-    closed_at: new Date().toISOString(),
-    closed_by: userName,
-    note: note || null
-  }).eq('id', report.id);
-
-  report.closed_at = new Date().toISOString();
-  report.closed_by = userName;
-  report.note = note || null;
-
-  renderShift(null);
+  await sb.from('shift_reports').update({ closed_at: new Date().toISOString(), closed_by: userName, note: note||null }).eq('id', report.id);
+  Object.assign(report, { closed_at: new Date().toISOString(), closed_by: userName, note: note||null });
+  render(null);
 }
 
 async function reopenShift() {
   await sb.from('shift_reports').update({ closed_at: null, closed_by: null }).eq('id', report.id);
-  report.closed_at = null;
-  report.closed_by = null;
-  renderShift(null);
+  Object.assign(report, { closed_at: null, closed_by: null });
+  render(null);
 }
 
-function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// Init
-const saved = localStorage.getItem('barra_user');
-const savedShift = localStorage.getItem('barra_shift');
-if (saved && savedShift) { userName = saved; currentShift = savedShift; showApp(); }
+// ── Init ──
+const su = localStorage.getItem('barra_user');
+const ss = localStorage.getItem('barra_shift');
+if (su && ss) { userName = su; currentShift = ss; showApp(); }
 </script>
 </body>
 </html>
