@@ -36,10 +36,8 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1e1e1e; position: stick
 
 .date-label { font-size: 22px; font-weight: 700; margin-bottom: 14px; }
 
-/* Turno tabs */
-.shift-tabs { display: flex; gap: 0; margin-bottom: 0; }
-.shift-tab { flex: 1; padding: 10px; text-align: center; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; color: #555; transition: all 0.15s; }
-.shift-tab.active { color: #f0ede8; border-bottom-color: #c0634a; }
+/* Turno badge */
+.shift-badge { font-size: 12px; background: #2a1610; color: #c0634a; border-radius: 20px; padding: 3px 10px; font-weight: 700; }
 
 /* Main content */
 .content { padding: 16px; }
@@ -99,9 +97,14 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1e1e1e; position: stick
   <div class="login-sub">Operación de Barra</div>
   <div class="login-card">
     <div class="login-title">Hola</div>
-    <div class="login-desc">¿Cómo te llamas?</div>
+    <div class="login-desc">¿Cómo te llamas y cuál es tu turno?</div>
     <label class="field-label">Tu nombre</label>
     <input class="field-input" id="login-name" type="text" placeholder="Ej. Melanie" autocomplete="off">
+    <label class="field-label">Tu turno</label>
+    <select class="field-input" id="login-shift" style="cursor:pointer">
+      <option value="manana">☀️ Turno mañana</option>
+      <option value="tarde">🌙 Turno tarde</option>
+    </select>
     <button class="btn-primary" id="btn-enter">Entrar</button>
     <div class="login-error" id="login-error">Escribe tu nombre para continuar.</div>
   </div>
@@ -117,10 +120,9 @@ header { padding: 20px 20px 0; border-bottom: 1px solid #1e1e1e; position: stick
         <button class="logout-btn" id="btn-logout">Salir</button>
       </div>
     </div>
-    <div class="date-label" id="date-label"></div>
-    <div class="shift-tabs">
-      <div class="shift-tab active" data-shift="manana" id="tab-manana">Turno mañana</div>
-      <div class="shift-tab" data-shift="tarde" id="tab-tarde">Turno tarde</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="date-label" id="date-label" style="margin-bottom:0"></div>
+      <span class="shift-badge" id="shift-badge"></span>
     </div>
   </header>
 
@@ -172,26 +174,25 @@ function getDayName(str) {
 document.getElementById('btn-enter').onclick = () => {
   const name = document.getElementById('login-name').value.trim();
   if (!name) { document.getElementById('login-error').classList.add('show'); return; }
+  const shift = document.getElementById('login-shift').value;
   userName = name;
+  currentShift = shift;
   localStorage.setItem('barra_user', name);
+  localStorage.setItem('barra_shift', shift);
   showApp();
 };
 document.getElementById('login-name').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-enter').click(); });
-document.getElementById('btn-logout').onclick = () => { localStorage.removeItem('barra_user'); location.reload(); };
-
-document.querySelectorAll('.shift-tab').forEach(tab => {
-  tab.onclick = () => {
-    document.querySelectorAll('.shift-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    currentShift = tab.dataset.shift;
-    loadShift();
-  };
-});
+document.getElementById('btn-logout').onclick = () => {
+  localStorage.removeItem('barra_user');
+  localStorage.removeItem('barra_shift');
+  location.reload();
+};
 
 async function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
   document.getElementById('user-name-display').textContent = userName;
+  document.getElementById('shift-badge').textContent = currentShift === 'manana' ? '☀️ Mañana' : '🌙 Tarde';
   todayStr = getToday();
   document.getElementById('date-label').textContent = formatDateLabel(todayStr)
     .replace(/^\w/, c => c.toUpperCase());
@@ -446,7 +447,8 @@ function escHtml(str) {
 
 // Init
 const saved = localStorage.getItem('barra_user');
-if (saved) { userName = saved; showApp(); }
+const savedShift = localStorage.getItem('barra_shift');
+if (saved && savedShift) { userName = saved; currentShift = savedShift; showApp(); }
 </script>
 </body>
 </html>
