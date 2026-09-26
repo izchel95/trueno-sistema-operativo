@@ -95,6 +95,7 @@ header { padding: 16px 20px 14px; border-bottom: 1px solid #1e1e1e; position: st
 .btn-close { width: 100%; padding: 17px; background: #f0ede8; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; font-family: inherit; letter-spacing: 0.3px; }
 .btn-close:active { opacity: 0.85; }
 
+.block-header { margin: 20px 16px 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #c0634a; font-weight: 700; padding-bottom: 8px; border-bottom: 1px solid #2a2420; }
 .loading { text-align: center; color: #444; font-size: 14px; padding: 60px 0; }
 </style>
 </head>
@@ -249,6 +250,31 @@ async function load() {
   render(prevNote);
 }
 
+function renderCat(cat, catTasks, isClosed) {
+  const meta = CAT_META[cat];
+  const catDone = catTasks.filter(t => entries.find(e => e.task_id===t.id && e.done)).length;
+  let h = `<div class="section">
+    <div class="section-header">
+      <span class="section-icon">${meta.icon}</span>
+      <span class="section-title">${meta.label}</span>
+      <span class="section-pct">${catDone}/${catTasks.length}</span>
+    </div>
+    <div class="tasks">`;
+  for (const task of catTasks) {
+    const entry = entries.find(e => e.task_id === task.id);
+    const isDone = !!entry?.done;
+    h += `<div class="task-item${isDone?' done':''}${isClosed?' locked':''}" data-tid="${task.id}">
+      <div class="task-check">${isDone?'✓':''}</div>
+      <div style="flex:1">
+        <div class="task-text">${esc(task.title)}</div>
+        ${isDone && entry.done_by ? `<div class="task-meta">${esc(entry.done_by)} · ${fmtTime(entry.done_at)}</div>` : ''}
+      </div>
+    </div>`;
+  }
+  h += `</div></div>`;
+  return h;
+}
+
 function updateProgress() {
   const done  = entries.filter(e => e.done).length;
   const total = tasks.length;
@@ -279,31 +305,30 @@ function render(prevNote) {
     </div>`;
   }
 
-  // Secciones por categoría
-  for (const cat of CAT_ORDER) {
-    const catTasks = tasks.filter(t => t.category === cat);
-    if (!catTasks.length) continue;
-    const meta = CAT_META[cat];
-    const catDone = catTasks.filter(t => entries.find(e => e.task_id===t.id && e.done)).length;
-    html += `<div class="section">
-      <div class="section-header">
-        <span class="section-icon">${meta.icon}</span>
-        <span class="section-title">${meta.label}</span>
-        <span class="section-pct">${catDone}/${catTasks.length}</span>
-      </div>
-      <div class="tasks">`;
-    for (const task of catTasks) {
-      const entry  = entries.find(e => e.task_id === task.id);
-      const isDone = !!entry?.done;
-      html += `<div class="task-item${isDone?' done':''}${isClosed?' locked':''}" data-tid="${task.id}">
-        <div class="task-check">${isDone?'✓':''}</div>
-        <div style="flex:1">
-          <div class="task-text">${esc(task.title)}</div>
-          ${isDone && entry.done_by ? `<div class="task-meta">${esc(entry.done_by)} · ${fmtTime(entry.done_at)}</div>` : ''}
-        </div>
-      </div>`;
+  // Secciones fijas (siempre igual)
+  const FIJAS = ['apertura','diario','cierre'];
+  const ROTATIVAS = ['limpieza','produccion','inventario'];
+
+  const hayFijas    = FIJAS.some(c => tasks.find(t => t.category===c));
+  const hayRotativas = ROTATIVAS.some(c => tasks.find(t => t.category===c));
+
+  if (hayFijas) {
+    html += `<div class="block-header">Siempre</div>`;
+    for (const cat of FIJAS) {
+      const catTasks = tasks.filter(t => t.category === cat);
+      if (!catTasks.length) continue;
+      html += renderCat(cat, catTasks, isClosed);
     }
-    html += `</div></div>`;
+  }
+
+  if (hayRotativas) {
+    const dayLabel = getDayName(todayStr).charAt(0).toUpperCase() + getDayName(todayStr).slice(1);
+    html += `<div class="block-header">Lo de hoy · ${dayLabel}</div>`;
+    for (const cat of ROTATIVAS) {
+      const catTasks = tasks.filter(t => t.category === cat);
+      if (!catTasks.length) continue;
+      html += renderCat(cat, catTasks, isClosed);
+    }
   }
 
   // Cerrar turno
