@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Rotación de Tareas — Trueno</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 80px; }
+
+header { padding: 20px; border-bottom: 1px solid #1e1e1e; display: flex; align-items: center; gap: 12px; }
+.logo-img-h { height: 26px; width: auto; filter: invert(1); display: block; }
+.back-btn { display: inline-flex; align-items: center; gap: 4px; padding: 7px 12px; background: transparent; border: 1px solid #2a2420; border-radius: 8px; color: #555; font-size: 12px; text-decoration: none; }
+.page-title { font-size: 18px; font-weight: 700; padding: 20px 20px 4px; }
+.page-sub { font-size: 12px; color: #555; padding: 0 20px 20px; }
+
+/* Agregar tarea */
+.add-form { background: #141414; border: 1px solid #1e1e1e; border-radius: 16px; margin: 0 16px 20px; padding: 16px; }
+.add-form-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+.add-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.task-input { flex: 1; min-width: 160px; background: #0e0e0e; border: 1px solid #222; border-radius: 10px; color: #f0ede8; font-size: 14px; padding: 11px 12px; outline: none; font-family: inherit; }
+.task-input:focus { border-color: #c0634a; }
+select.field-sel { background: #0e0e0e; border: 1px solid #222; border-radius: 10px; color: #f0ede8; font-size: 13px; padding: 11px 10px; outline: none; font-family: inherit; }
+select.field-sel:focus { border-color: #c0634a; }
+.btn-add { padding: 11px 18px; background: #c0634a; color: #f0ede8; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
+
+/* Tabla */
+.day-block { margin: 0 16px 24px; }
+.day-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; padding-top: 8px; }
+.shifts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .shifts-row { grid-template-columns: 1fr; } }
+.shift-col { }
+.shift-col-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 6px; }
+.task-chip { display: flex; align-items: center; gap: 8px; background: #141414; border: 1px solid #1e1e1e; border-radius: 10px; padding: 9px 10px; margin-bottom: 6px; }
+.chip-cat { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #444; background: #1e1e1e; border-radius: 4px; padding: 2px 6px; flex-shrink: 0; }
+.chip-text { flex: 1; font-size: 13px; line-height: 1.3; }
+.chip-del { background: transparent; border: none; color: #444; font-size: 16px; cursor: pointer; padding: 0 2px; flex-shrink: 0; font-family: inherit; }
+.chip-del:hover { color: #cf6f6f; }
+.empty-col { font-size: 12px; color: #333; padding: 8px 0; }
+.loading { text-align: center; color: #444; font-size: 14px; padding: 60px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <img class="logo-img-h" src="logo-negro.png" alt="Trueno">
+  <a class="back-btn" href="operacion.html">← Operación</a>
+</header>
+
+<div class="page-title">Rotación de tareas</div>
+<div class="page-sub">Lo que aparece en el checklist de cada turno. Los cambios aplican desde el siguiente reporte; lo ya cerrado no cambia.</div>
+
+<div class="add-form">
+  <div class="add-form-title">Agregar tarea</div>
+  <div class="add-row">
+    <input class="task-input" id="new-title" type="text" placeholder="Descripción de la tarea">
+    <select class="field-sel" id="new-cat">
+      <option value="diario">Diario</option>
+      <option value="limpieza" selected>Limpieza</option>
+      <option value="produccion">Producción</option>
+      <option value="inventario">Inventario</option>
+    </select>
+    <select class="field-sel" id="new-day">
+      <option value="todos">Todos los días</option>
+      <option value="lunes">Lunes</option>
+      <option value="martes">Martes</option>
+      <option value="miercoles">Miércoles</option>
+      <option value="jueves">Jueves</option>
+      <option value="viernes">Viernes</option>
+      <option value="sabado">Sábado</option>
+      <option value="domingo">Domingo</option>
+    </select>
+    <select class="field-sel" id="new-shift">
+      <option value="manana">Mañana</option>
+      <option value="tarde">Tarde</option>
+    </select>
+    <button class="btn-add" id="btn-add">Agregar</button>
+  </div>
+</div>
+
+<div id="tasks-container"><div class="loading">Cargando...</div></div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient(
+  'https://axxbsjbywivolwluzvrd.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+);
+
+const DAYS_ORDER = ['todos','lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+const DAY_LABELS = { todos:'Todos los días', lunes:'Lunes', martes:'Martes', miercoles:'Miércoles', jueves:'Jueves', viernes:'Viernes', sabado:'Sábado', domingo:'Domingo' };
+const CAT_LABELS = { diario:'DIARIO', limpieza:'LIMPIEZA', produccion:'PRODUCCIÓN', inventario:'INVENTARIO' };
+
+let allTasks = [];
+
+async function load() {
+  const { data } = await sb.from('shift_tasks').select('*').eq('active', true).order('created_at');
+  allTasks = data || [];
+  render();
+}
+
+function render() {
+  const container = document.getElementById('tasks-container');
+  let html = '';
+
+  for (const day of DAYS_ORDER) {
+    const manana = allTasks.filter(t => t.day_of_week === day && t.shift === 'manana');
+    const tarde = allTasks.filter(t => t.day_of_week === day && t.shift === 'tarde');
+    if (!manana.length && !tarde.length) continue;
+
+    html += `<div class="day-block">
+      <div class="day-title">${DAY_LABELS[day]}</div>
+      <div class="shifts-row">
+        <div class="shift-col">
+          <div class="shift-col-label">Turno mañana</div>
+          ${manana.length ? manana.map(chipHtml).join('') : '<div class="empty-col">—</div>'}
+        </div>
+        <div class="shift-col">
+          <div class="shift-col-label">Turno tarde</div>
+          ${tarde.length ? tarde.map(chipHtml).join('') : '<div class="empty-col">—</div>'}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  container.innerHTML = html || '<div class="loading" style="padding:40px">No hay tareas aún.</div>';
+
+  container.querySelectorAll('.chip-del').forEach(btn => {
+    btn.onclick = () => deleteTask(btn.dataset.id);
+  });
+}
+
+function chipHtml(t) {
+  return `<div class="task-chip">
+    <span class="chip-cat">${CAT_LABELS[t.category] || t.category}</span>
+    <span class="chip-text">${escHtml(t.title)}</span>
+    <button class="chip-del" data-id="${t.id}" title="Eliminar">×</button>
+  </div>`;
+}
+
+document.getElementById('btn-add').onclick = async () => {
+  const title = document.getElementById('new-title').value.trim();
+  if (!title) { document.getElementById('new-title').focus(); return; }
+  const cat = document.getElementById('new-cat').value;
+  const day = document.getElementById('new-day').value;
+  const shift = document.getElementById('new-shift').value;
+
+  const { data, error } = await sb.from('shift_tasks').insert({ title, category: cat, day_of_week: day, shift }).select().single();
+  if (!error && data) {
+    allTasks.push(data);
+    allTasks.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    document.getElementById('new-title').value = '';
+    render();
+  }
+};
+
+document.getElementById('new-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-add').click(); });
+
+async function deleteTask(id) {
+  if (!confirm('¿Eliminar esta tarea de la rotación?')) return;
+  await sb.from('shift_tasks').update({ active: false }).eq('id', id);
+  allTasks = allTasks.filter(t => t.id !== id);
+  render();
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+load();
+</script>
+</body>
+</html>

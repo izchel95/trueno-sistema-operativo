@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Barra — Trueno</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+/* Login */
+.login-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
+.login-logo-img { height: 52px; width: auto; filter: invert(1); display: block; margin: 0 auto 8px; }
+.login-sub { font-size: 13px; color: #555; margin-bottom: 40px; text-align: center; }
+.login-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 360px; }
+.login-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.login-desc { font-size: 12px; color: #555; margin-bottom: 22px; }
+.field-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #555; display: block; margin-bottom: 6px; }
+.field-input { width: 100%; background: #0e0e0e; border: 1px solid #222; border-radius: 10px; color: #f0ede8; font-size: 15px; padding: 13px 14px; outline: none; font-family: inherit; margin-bottom: 12px; }
+.field-input:focus { border-color: #c0634a; }
+.btn-primary { width: 100%; padding: 16px; background: #c0634a; color: #f0ede8; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 6px; font-family: inherit; }
+.login-error { background: #2a1a1a; border: 1px solid #5a2d2d; color: #cf6f6f; border-radius: 10px; padding: 10px 12px; font-size: 13px; margin-top: 10px; display: none; text-align: center; }
+.login-error.show { display: block; }
+
+/* App */
+.app { display: none; padding-bottom: 60px; }
+.app.visible { display: block; }
+
+header { padding: 20px 20px 0; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; background: #0e0e0e; z-index: 10; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.logo-img-h { height: 26px; width: auto; filter: invert(1); display: block; }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.user-name { font-size: 12px; color: #555; }
+.logout-btn { background: transparent; border: 1px solid #2a2420; border-radius: 8px; color: #555; font-size: 12px; padding: 6px 10px; cursor: pointer; font-family: inherit; }
+
+.date-label { font-size: 22px; font-weight: 700; margin-bottom: 14px; }
+
+/* Turno tabs */
+.shift-tabs { display: flex; gap: 0; margin-bottom: 0; }
+.shift-tab { flex: 1; padding: 10px; text-align: center; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; color: #555; transition: all 0.15s; }
+.shift-tab.active { color: #f0ede8; border-bottom-color: #c0634a; }
+
+/* Main content */
+.content { padding: 16px; }
+
+/* Nota del turno anterior */
+.prev-note { background: #1a1a12; border: 1px solid #2a2a18; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; line-height: 1.5; }
+.prev-note-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 4px; }
+
+/* Progreso */
+.progress-bar-wrap { margin-bottom: 20px; }
+.progress-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.progress-count { font-size: 13px; color: #555; }
+.progress-pct { font-size: 13px; font-weight: 700; color: #c0634a; }
+.progress-bar { height: 4px; background: #1e1e1e; border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: #c0634a; border-radius: 2px; transition: width 0.3s; }
+
+/* Grupo de categoría */
+.cat-group { margin-bottom: 20px; }
+.cat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #555; margin-bottom: 8px; }
+
+/* Tarea */
+.task-item { display: flex; align-items: center; gap: 12px; padding: 14px; background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; margin-bottom: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background 0.15s; }
+.task-item.done { background: #0f1a0f; border-color: #1a2e1a; }
+.task-item:active { background: #1a1a1a; }
+.task-check { width: 24px; height: 24px; border-radius: 8px; border: 2px solid #333; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.task-item.done .task-check { background: #4a8f4a; border-color: #4a8f4a; }
+.task-check-icon { display: none; color: #fff; font-size: 14px; font-weight: 700; }
+.task-item.done .task-check-icon { display: block; }
+.task-text { font-size: 14px; line-height: 1.4; flex: 1; }
+.task-item.done .task-text { color: #555; text-decoration: line-through; }
+.task-by { font-size: 11px; color: #444; margin-top: 2px; }
+
+/* Turno cerrado */
+.closed-banner { background: #0f1a0f; border: 1px solid #2a4a2a; border-radius: 14px; padding: 14px 16px; margin-bottom: 16px; }
+.closed-banner-title { font-size: 14px; font-weight: 700; color: #6fcf6f; margin-bottom: 2px; }
+.closed-banner-sub { font-size: 12px; color: #555; }
+.btn-reopen { margin-top: 10px; background: transparent; border: 1px solid #333; border-radius: 10px; color: #555; font-size: 13px; padding: 8px 14px; cursor: pointer; font-family: inherit; }
+
+/* Cerrar turno */
+.close-section { margin-top: 8px; }
+.note-label { font-size: 12px; color: #555; margin-bottom: 6px; display: block; }
+.note-input { width: 100%; background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; color: #f0ede8; font-size: 14px; padding: 12px 14px; outline: none; font-family: inherit; resize: none; min-height: 80px; }
+.note-input:focus { border-color: #c0634a; }
+.note-hint { font-size: 11px; color: #444; margin-top: 4px; margin-bottom: 14px; }
+.btn-close-shift { width: 100%; padding: 16px; background: #f0ede8; color: #0e0e0e; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 8px; }
+.btn-close-shift:active { opacity: 0.85; }
+
+.empty-state { text-align: center; color: #444; font-size: 14px; padding: 40px 0; }
+.loading { text-align: center; color: #444; font-size: 14px; padding: 60px 0; }
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-screen" id="login-screen">
+  <img class="login-logo-img" src="logo-negro.png" alt="Trueno">
+  <div class="login-sub">Operación de Barra</div>
+  <div class="login-card">
+    <div class="login-title">Hola</div>
+    <div class="login-desc">¿Cómo te llamas?</div>
+    <label class="field-label">Tu nombre</label>
+    <input class="field-input" id="login-name" type="text" placeholder="Ej. Melanie" autocomplete="off">
+    <button class="btn-primary" id="btn-enter">Entrar</button>
+    <div class="login-error" id="login-error">Escribe tu nombre para continuar.</div>
+  </div>
+</div>
+
+<!-- App -->
+<div class="app" id="app">
+  <header>
+    <div class="header-top">
+      <img class="logo-img-h" src="logo-negro.png" alt="Trueno">
+      <div class="header-right">
+        <span class="user-name" id="user-name-display"></span>
+        <button class="logout-btn" id="btn-logout">Salir</button>
+      </div>
+    </div>
+    <div class="date-label" id="date-label"></div>
+    <div class="shift-tabs">
+      <div class="shift-tab active" data-shift="manana" id="tab-manana">Turno mañana</div>
+      <div class="shift-tab" data-shift="tarde" id="tab-tarde">Turno tarde</div>
+    </div>
+  </header>
+
+  <div class="content" id="main-content">
+    <div class="loading">Cargando...</div>
+  </div>
+</div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient(
+  'https://axxbsjbywivolwluzvrd.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+);
+
+const DAYS = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+const CAT_LABELS = { diario: 'Diario', limpieza: 'Limpieza', produccion: 'Producción', inventario: 'Inventario' };
+const CAT_ORDER = ['diario','limpieza','produccion','inventario'];
+
+let userName = '';
+let currentShift = 'manana';
+let todayStr = '';
+let report = null;
+let entries = [];
+let tasks = [];
+
+function getToday() {
+  // Hora de Cabo San Lucas (UTC-7, sin DST)
+  const now = new Date();
+  const cabo = new Date(now.toLocaleString('en-US', { timeZone: 'America/Mazatlan' }));
+  const y = cabo.getFullYear();
+  const m = String(cabo.getMonth() + 1).padStart(2, '0');
+  const d = String(cabo.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function formatDateLabel(str) {
+  const [y, m, d] = str.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+function getDayName(str) {
+  const [y, m, d] = str.split('-').map(Number);
+  return DAYS[new Date(y, m - 1, d).getDay()];
+}
+
+// Login
+document.getElementById('btn-enter').onclick = () => {
+  const name = document.getElementById('login-name').value.trim();
+  if (!name) { document.getElementById('login-error').classList.add('show'); return; }
+  userName = name;
+  localStorage.setItem('barra_user', name);
+  showApp();
+};
+document.getElementById('login-name').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-enter').click(); });
+document.getElementById('btn-logout').onclick = () => { localStorage.removeItem('barra_user'); location.reload(); };
+
+document.querySelectorAll('.shift-tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.shift-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentShift = tab.dataset.shift;
+    loadShift();
+  };
+});
+
+async function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('user-name-display').textContent = userName;
+  todayStr = getToday();
+  document.getElementById('date-label').textContent = formatDateLabel(todayStr)
+    .replace(/^\w/, c => c.toUpperCase());
+  await loadShift();
+}
+
+async function loadShift() {
+  document.getElementById('main-content').innerHTML = '<div class="loading">Cargando...</div>';
+
+  const dayName = getDayName(todayStr);
+
+  // Cargar tareas de la rotación para este turno y día
+  const { data: taskData } = await sb
+    .from('shift_tasks')
+    .select('*')
+    .eq('active', true)
+    .eq('shift', currentShift)
+    .in('day_of_week', ['todos', dayName]);
+
+  tasks = taskData || [];
+
+  // Cargar o crear reporte del día
+  const { data: reportData } = await sb
+    .from('shift_reports')
+    .select('*')
+    .eq('date', todayStr)
+    .eq('shift', currentShift)
+    .maybeSingle();
+
+  report = reportData;
+
+  // Cargar entradas si hay reporte
+  if (report) {
+    const { data: entryData } = await sb
+      .from('shift_entries')
+      .select('*')
+      .eq('report_id', report.id);
+    entries = entryData || [];
+  } else {
+    entries = [];
+  }
+
+  // Cargar nota del turno anterior
+  let prevNote = null;
+  const prevShift = currentShift === 'tarde' ? 'manana' : 'tarde';
+  const prevDate = currentShift === 'manana' ? getPrevDay(todayStr) : todayStr;
+  const { data: prevReport } = await sb
+    .from('shift_reports')
+    .select('note, closed_by, closed_at')
+    .eq('date', prevDate)
+    .eq('shift', prevShift)
+    .maybeSingle();
+  if (prevReport?.note) prevNote = prevReport;
+
+  renderShift(prevNote);
+}
+
+function getPrevDay(str) {
+  const [y, m, d] = str.split('-').map(Number);
+  const date = new Date(y, m - 1, d - 1);
+  const y2 = date.getFullYear();
+  const m2 = String(date.getMonth() + 1).padStart(2, '0');
+  const d2 = String(date.getDate()).padStart(2, '0');
+  return `${y2}-${m2}-${d2}`;
+}
+
+function renderShift(prevNote) {
+  const isClosed = !!report?.closed_at;
+  let html = '';
+
+  // Nota del turno anterior
+  if (prevNote) {
+    html += `<div class="prev-note">
+      <div class="prev-note-label">Nota del turno anterior · ${prevNote.closed_by || ''}</div>
+      ${escHtml(prevNote.note)}
+    </div>`;
+  }
+
+  if (tasks.length === 0) {
+    html += '<div class="empty-state">No hay tareas para este turno.</div>';
+    document.getElementById('main-content').innerHTML = html;
+    return;
+  }
+
+  // Progreso
+  const done = entries.filter(e => e.done).length;
+  const total = tasks.length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  html += `<div class="progress-bar-wrap">
+    <div class="progress-info">
+      <span class="progress-count">${done} de ${total} tareas</span>
+      <span class="progress-pct">${pct}%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+  </div>`;
+
+  // Banner cerrado
+  if (isClosed) {
+    const hora = new Date(report.closed_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Mazatlan' });
+    html += `<div class="closed-banner">
+      <div class="closed-banner-title">Turno cerrado a las ${hora} por ${escHtml(report.closed_by || '')}.</div>
+      ${report.note ? `<div class="closed-banner-sub">Nota: ${escHtml(report.note)}</div>` : ''}
+      <button class="btn-reopen" id="btn-reopen">Reabrir turno</button>
+    </div>`;
+  }
+
+  // Tareas por categoría
+  const byCategory = {};
+  for (const cat of CAT_ORDER) {
+    const catTasks = tasks.filter(t => t.category === cat);
+    if (!catTasks.length) continue;
+    byCategory[cat] = catTasks;
+  }
+
+  for (const cat of CAT_ORDER) {
+    if (!byCategory[cat]) continue;
+    html += `<div class="cat-group"><div class="cat-label">${CAT_LABELS[cat]}</div>`;
+    for (const task of byCategory[cat]) {
+      const entry = entries.find(e => e.task_id === task.id);
+      const isDone = entry?.done;
+      const doneBy = entry?.done_by || '';
+      const doneAt = entry?.done_at ? new Date(entry.done_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Mazatlan' }) : '';
+      html += `<div class="task-item${isDone ? ' done' : ''}${isClosed ? '' : ' tappable'}" data-task-id="${task.id}" data-entry-id="${entry?.id || ''}">
+        <div class="task-check"><span class="task-check-icon">✓</span></div>
+        <div style="flex:1">
+          <div class="task-text">${escHtml(task.title)}</div>
+          ${isDone && doneBy ? `<div class="task-by">${escHtml(doneBy)}${doneAt ? ' · ' + doneAt : ''}</div>` : ''}
+        </div>
+      </div>`;
+    }
+    html += '</div>';
+  }
+
+  // Cerrar turno (solo si no está cerrado)
+  if (!isClosed) {
+    html += `<div class="close-section">
+      <label class="note-label">Nota para el siguiente turno (opcional)</label>
+      <textarea class="note-input" id="shift-note" placeholder="Ej. queda medio litro de cold brew, faltó leche de avena…"></textarea>
+      <div class="note-hint">Quedan ${total - done} tareas pendientes; se reportarán como no hechas.</div>
+      <button class="btn-close-shift" id="btn-close-shift">Cerrar turno</button>
+    </div>`;
+  }
+
+  document.getElementById('main-content').innerHTML = html;
+
+  // Eventos
+  if (!isClosed) {
+    document.querySelectorAll('.task-item.tappable').forEach(el => {
+      el.onclick = () => toggleTask(el.dataset.taskId, el.dataset.entryId);
+    });
+    document.getElementById('btn-close-shift').onclick = closeShift;
+  } else {
+    const reopenBtn = document.getElementById('btn-reopen');
+    if (reopenBtn) reopenBtn.onclick = reopenShift;
+  }
+}
+
+async function ensureReport() {
+  if (report) return report;
+  const { data, error } = await sb.from('shift_reports').insert({
+    date: todayStr,
+    shift: currentShift
+  }).select().single();
+  if (error) {
+    // Puede que ya exista por race condition
+    const { data: existing } = await sb.from('shift_reports').select('*').eq('date', todayStr).eq('shift', currentShift).single();
+    report = existing;
+  } else {
+    report = data;
+  }
+
+  // Crear entradas para todas las tareas
+  const toInsert = tasks.map(t => ({
+    report_id: report.id,
+    task_id: t.id,
+    task_title: t.title,
+    task_category: t.category,
+    done: false
+  }));
+  const { data: entryData } = await sb.from('shift_entries').insert(toInsert).select();
+  entries = entryData || [];
+  return report;
+}
+
+async function toggleTask(taskId, entryId) {
+  await ensureReport();
+  let entry = entries.find(e => e.task_id === taskId);
+
+  if (!entry) {
+    // Crear entrada
+    const task = tasks.find(t => t.id === taskId);
+    const { data } = await sb.from('shift_entries').insert({
+      report_id: report.id,
+      task_id: taskId,
+      task_title: task.title,
+      task_category: task.category,
+      done: true,
+      done_by: userName,
+      done_at: new Date().toISOString()
+    }).select().single();
+    entries.push(data);
+  } else {
+    const newDone = !entry.done;
+    const update = newDone
+      ? { done: true, done_by: userName, done_at: new Date().toISOString() }
+      : { done: false, done_by: null, done_at: null };
+    await sb.from('shift_entries').update(update).eq('id', entry.id);
+    Object.assign(entry, update);
+  }
+
+  renderShift(null); // re-render rápido sin recargar nota
+}
+
+async function closeShift() {
+  await ensureReport();
+  const note = (document.getElementById('shift-note')?.value || '').trim();
+
+  // Crear entradas para tareas sin entry aún
+  const missingTasks = tasks.filter(t => !entries.find(e => e.task_id === t.id));
+  if (missingTasks.length) {
+    const toInsert = missingTasks.map(t => ({
+      report_id: report.id, task_id: t.id,
+      task_title: t.title, task_category: t.category, done: false
+    }));
+    const { data } = await sb.from('shift_entries').insert(toInsert).select();
+    entries.push(...(data || []));
+  }
+
+  await sb.from('shift_reports').update({
+    closed_at: new Date().toISOString(),
+    closed_by: userName,
+    note: note || null
+  }).eq('id', report.id);
+
+  report.closed_at = new Date().toISOString();
+  report.closed_by = userName;
+  report.note = note || null;
+
+  renderShift(null);
+}
+
+async function reopenShift() {
+  await sb.from('shift_reports').update({ closed_at: null, closed_by: null }).eq('id', report.id);
+  report.closed_at = null;
+  report.closed_by = null;
+  renderShift(null);
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Init
+const saved = localStorage.getItem('barra_user');
+if (saved) { userName = saved; showApp(); }
+</script>
+</body>
+</html>

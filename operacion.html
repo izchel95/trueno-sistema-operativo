@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Operación de Barra — Trueno</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e0e; color: #f0ede8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 60px; }
+
+/* Header */
+header { padding: 20px 20px 14px; border-bottom: 1px solid #1e1e1e; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.logo-img-h { height: 26px; width: auto; filter: invert(1); display: block; }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.back-btn { display: inline-flex; align-items: center; gap: 4px; padding: 7px 12px; background: transparent; border: 1px solid #2a2420; border-radius: 8px; color: #555; font-size: 12px; text-decoration: none; }
+.tareas-btn { display: inline-flex; align-items: center; gap: 4px; padding: 7px 12px; background: #2a1610; border: 1px solid #c0634a; border-radius: 8px; color: #d4896e; font-size: 12px; text-decoration: none; font-weight: 600; }
+
+/* Navegación de fecha */
+.date-nav { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 16px 20px; border-bottom: 1px solid #1e1e1e; }
+.date-nav-btn { background: transparent; border: 1px solid #2a2420; border-radius: 8px; color: #555; font-size: 18px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: inherit; }
+.date-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.date-label { font-size: 16px; font-weight: 700; min-width: 200px; text-align: center; }
+.today-chip { font-size: 11px; background: #2a1610; color: #c0634a; border-radius: 20px; padding: 2px 8px; font-weight: 600; }
+
+/* Turnos */
+.shifts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px; }
+@media (max-width: 640px) { .shifts-grid { grid-template-columns: 1fr; } }
+
+.shift-card { background: #141414; border: 1px solid #1e1e1e; border-radius: 16px; overflow: hidden; }
+.shift-card-header { padding: 14px 16px 10px; border-bottom: 1px solid #1e1e1e; }
+.shift-card-title { font-size: 15px; font-weight: 700; }
+.shift-card-meta { font-size: 12px; color: #555; margin-top: 2px; }
+.shift-pct { font-size: 22px; font-weight: 800; color: #c0634a; }
+.shift-pct.ok { color: #6fcf6f; }
+.shift-progress { height: 3px; background: #1e1e1e; margin-top: 8px; border-radius: 2px; overflow: hidden; }
+.shift-progress-fill { height: 100%; background: #c0634a; border-radius: 2px; transition: width 0.3s; }
+.shift-progress-fill.ok { background: #6fcf6f; }
+
+.shift-entries { padding: 10px 16px 14px; }
+.entry-row { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; border-bottom: 1px solid #111; }
+.entry-row:last-child { border-bottom: none; }
+.entry-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+.entry-text { flex: 1; font-size: 13px; line-height: 1.4; }
+.entry-done { color: #f0ede8; }
+.entry-miss { color: #555; text-decoration: line-through; }
+.entry-who { font-size: 11px; color: #444; }
+
+.shift-note { margin: 8px 16px 14px; background: #1a1a12; border: 1px solid #2a2a18; border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.4; }
+.shift-note-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 3px; }
+
+.no-report { padding: 20px 16px; font-size: 13px; color: #444; text-align: center; }
+
+/* Historial */
+.history-section { padding: 0 16px; margin-top: 8px; }
+.section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #444; margin-bottom: 10px; padding-top: 16px; }
+.history-table { width: 100%; border-collapse: collapse; }
+.history-table th { text-align: left; font-size: 11px; color: #444; font-weight: 600; padding: 6px 0; border-bottom: 1px solid #1e1e1e; }
+.history-table td { padding: 9px 0; border-bottom: 1px solid #111; font-size: 13px; }
+.history-table td:not(:first-child) { text-align: right; }
+.pct-ok { color: #6fcf6f; font-weight: 700; }
+.pct-mid { color: #c0634a; font-weight: 700; }
+.pct-bad { color: #555; }
+.no-close { color: #444; font-size: 12px; }
+
+.loading { text-align: center; color: #444; font-size: 14px; padding: 60px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <img class="logo-img-h" src="logo-negro.png" alt="Trueno">
+  <div class="header-right">
+    <a class="back-btn" href="index.html">← Inicio</a>
+    <a class="tareas-btn" href="operacion-tareas.html">Editar rotación</a>
+  </div>
+</header>
+
+<div class="date-nav">
+  <button class="date-nav-btn" id="btn-prev">‹</button>
+  <div>
+    <div class="date-label" id="date-label">—</div>
+    <div style="text-align:center;margin-top:4px"><span class="today-chip" id="today-chip" style="display:none">hoy</span></div>
+  </div>
+  <button class="date-nav-btn" id="btn-next" disabled>›</button>
+</div>
+
+<div id="day-content"><div class="loading">Cargando...</div></div>
+
+<div class="history-section">
+  <div class="section-label">Últimos 14 días</div>
+  <table class="history-table">
+    <thead>
+      <tr>
+        <th>Día</th>
+        <th>Turno mañana</th>
+        <th>Turno tarde</th>
+      </tr>
+    </thead>
+    <tbody id="history-body"></tbody>
+  </table>
+</div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient(
+  'https://axxbsjbywivolwluzvrd.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4eGJzamJ5d2l2b2x3bHV6dnJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzYyMzAsImV4cCI6MjA5NzMxMjIzMH0.p5q_hMukrWhsVQDBVaMlFboGcD9WmIWo2gudgK0-Mfk'
+);
+
+const DAYS_ES = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+
+function getToday() {
+  const now = new Date();
+  const cabo = new Date(now.toLocaleString('en-US', { timeZone: 'America/Mazatlan' }));
+  return fmtDate(cabo);
+}
+
+function fmtDate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function addDays(str, n) {
+  const [y, m, d] = str.split('-').map(Number);
+  const date = new Date(y, m - 1, d + n);
+  return fmtDate(date);
+}
+
+function labelDate(str) {
+  const [y, m, d] = str.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  const label = date.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+  return label.replace(/^\w/, c => c.toUpperCase());
+}
+
+function shortLabel(str) {
+  const [y, m, d] = str.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  const day = DAYS_ES[date.getDay()];
+  return `${day.charAt(0).toUpperCase()}${day.slice(1)} ${d} ${date.toLocaleDateString('es-MX',{month:'short'})}`;
+}
+
+let currentDate = getToday();
+const todayStr = getToday();
+
+document.getElementById('btn-prev').onclick = () => { currentDate = addDays(currentDate, -1); renderNav(); loadDay(); };
+document.getElementById('btn-next').onclick = () => { if (currentDate < todayStr) { currentDate = addDays(currentDate, 1); renderNav(); loadDay(); } };
+
+function renderNav() {
+  document.getElementById('date-label').textContent = labelDate(currentDate);
+  document.getElementById('btn-next').disabled = currentDate >= todayStr;
+  document.getElementById('today-chip').style.display = currentDate === todayStr ? 'inline' : 'none';
+}
+
+async function loadDay() {
+  document.getElementById('day-content').innerHTML = '<div class="loading">Cargando...</div>';
+
+  const [reports, entries, tasks] = await Promise.all([
+    sb.from('shift_reports').select('*').eq('date', currentDate),
+    sb.from('shift_entries').select('*').in('report_id',
+      (await sb.from('shift_reports').select('id').eq('date', currentDate)).data?.map(r => r.id) || ['00000000-0000-0000-0000-000000000000']
+    ),
+    sb.from('shift_tasks').select('*').eq('active', true)
+  ]);
+
+  const reps = reports.data || [];
+  const ents = entries.data || [];
+  const tks = tasks.data || [];
+
+  const dayIdx = (() => { const [y,m,d] = currentDate.split('-').map(Number); return new Date(y,m-1,d).getDay(); })();
+  const dayName = DAYS_ES[dayIdx].normalize('NFD').replace(/[̀-ͯ]/g,'');
+
+  function buildShiftHtml(shift, shiftLabel) {
+    const rep = reps.find(r => r.shift === shift);
+    const shiftTasks = tks.filter(t => t.shift === shift && (t.day_of_week === 'todos' || t.day_of_week === dayName));
+
+    if (!rep && shiftTasks.length === 0) {
+      return `<div class="shift-card"><div class="shift-card-header">
+        <div class="shift-card-title">${shiftLabel}</div>
+        <div class="no-report">Sin tareas</div>
+      </div></div>`;
+    }
+    if (!rep) {
+      return `<div class="shift-card"><div class="shift-card-header">
+        <div class="shift-card-title">${shiftLabel}</div>
+        <div class="no-report">No reportado</div>
+      </div></div>`;
+    }
+
+    const repEntries = ents.filter(e => e.report_id === rep.id);
+    const done = repEntries.filter(e => e.done).length;
+    const total = repEntries.length || shiftTasks.length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    const isOk = pct >= 80;
+
+    let html = `<div class="shift-card">
+      <div class="shift-card-header">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="shift-card-title">${shiftLabel}</div>
+            <div class="shift-card-meta">${rep.closed_at
+              ? `Cerrado ${new Date(rep.closed_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',timeZone:'America/Mazatlan'})} · ${escHtml(rep.closed_by||'')}`
+              : 'Sin cerrar'}</div>
+          </div>
+          <div class="shift-pct${isOk?' ok':''}">${pct}%</div>
+        </div>
+        <div class="shift-progress"><div class="shift-progress-fill${isOk?' ok':''}" style="width:${pct}%"></div></div>
+      </div>`;
+
+    if (repEntries.length) {
+      html += '<div class="shift-entries">';
+      for (const e of repEntries) {
+        const who = e.done && e.done_by ? `${escHtml(e.done_by)} · ${new Date(e.done_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',timeZone:'America/Mazatlan'})}` : '';
+        html += `<div class="entry-row">
+          <span class="entry-icon">${e.done ? '✓' : '✗'}</span>
+          <div class="entry-text ${e.done?'entry-done':'entry-miss'}">
+            ${escHtml(e.task_title)}
+            ${who ? `<div class="entry-who">${who}</div>` : ''}
+          </div>
+        </div>`;
+      }
+      html += '</div>';
+    }
+
+    if (rep.note) {
+      html += `<div class="shift-note"><div class="shift-note-label">Nota de cierre</div>${escHtml(rep.note)}</div>`;
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  document.getElementById('day-content').innerHTML = `<div class="shifts-grid">
+    ${buildShiftHtml('manana','Turno mañana')}
+    ${buildShiftHtml('tarde','Turno tarde')}
+  </div>`;
+}
+
+async function loadHistory() {
+  const dates = [];
+  for (let i = 0; i < 14; i++) dates.push(addDays(todayStr, -i));
+
+  const { data: reps } = await sb.from('shift_reports').select('*').in('date', dates);
+  const tbody = document.getElementById('history-body');
+  tbody.innerHTML = '';
+  for (const date of dates) {
+    const manana = reps?.find(r => r.date === date && r.shift === 'manana');
+    const tarde = reps?.find(r => r.date === date && r.shift === 'tarde');
+    tbody.innerHTML += `<tr>
+      <td>${shortLabel(date)}${date === todayStr ? ' <span style="font-size:10px;color:#c0634a">· hoy</span>' : ''}</td>
+      <td>${repCell(manana)}</td>
+      <td>${repCell(tarde)}</td>
+    </tr>`;
+  }
+}
+
+function repCell(rep) {
+  if (!rep) return '<span class="no-close">0% · sin cerrar</span>';
+  // pct stored in pending titles approach — we just show closed status
+  const closed = rep.closed_at ? `<span class="no-close">Cerrado</span>` : `<span class="no-close">sin cerrar</span>`;
+  return closed;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+renderNav();
+loadDay();
+loadHistory();
+</script>
+</body>
+</html>
